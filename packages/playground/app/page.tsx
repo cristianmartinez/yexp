@@ -10,6 +10,7 @@ import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 import { PageHeader } from '@/components/page-header';
 import { ExamplesPanel } from '@/components/examples-panel';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { examples, type Example } from '@/lib/examples';
 import Split from 'react-split';
 
@@ -71,9 +72,9 @@ export default function PlaygroundPage() {
       const ast = parse(tokens);
       const program = compile(ast);
       const value = evaluate(program, context);
-      return { value, error: null, bytecode: program };
+      return { value, error: null, bytecode: program, ast, tokens };
     } catch (e: any) {
-      return { value: null, error: e.message, bytecode: null };
+      return { value: null, error: e.message, bytecode: null, ast: null, tokens: null };
     }
   }, [expression, parsedContext]);
 
@@ -184,10 +185,12 @@ export default function PlaygroundPage() {
                     <div className="px-4 py-2 border-b bg-muted/50">
                       <div className="flex items-center gap-2 text-sm font-medium">
                         <Binary className="w-4 h-4" />
-                        Bytecode
+                        Bytecode & AST
                       </div>
                     </div>
-                    <div className="flex-1 overflow-auto p-4 space-y-4">
+                    <div className="flex-1 flex overflow-hidden">
+                      {/* Left: Bytecode Instructions */}
+                      <div className="flex-1 overflow-auto p-4 space-y-4 border-r">
                       {/* Main Program */}
                       <div className="space-y-2">
                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -253,6 +256,35 @@ export default function PlaygroundPage() {
                           </div>
                         </div>
                       )}
+                      </div>
+
+                      {/* Right: AST & JSON Tabs */}
+                      <div className="w-[400px] flex flex-col overflow-hidden">
+                        <Tabs defaultValue="ast" className="flex flex-col h-full">
+                          <div className="px-4 py-2 border-b bg-muted/30">
+                            <TabsList className="grid w-full grid-cols-2 h-8">
+                              <TabsTrigger value="ast" className="text-xs">
+                                AST
+                              </TabsTrigger>
+                              <TabsTrigger value="json" className="text-xs">
+                                Compiled JSON
+                              </TabsTrigger>
+                            </TabsList>
+                          </div>
+
+                          <TabsContent value="ast" className="flex-1 overflow-hidden m-0 p-4">
+                            <div className="h-full border rounded overflow-hidden">
+                              <JsonViewer value={result.ast} height="100%" />
+                            </div>
+                          </TabsContent>
+
+                          <TabsContent value="json" className="flex-1 overflow-hidden m-0 p-4">
+                            <div className="h-full border rounded overflow-hidden">
+                              <JsonViewer value={result.bytecode} height="100%" />
+                            </div>
+                          </TabsContent>
+                        </Tabs>
+                      </div>
                     </div>
                   </div>
                 )}
