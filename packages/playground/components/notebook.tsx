@@ -5,16 +5,10 @@ import { tokenize, parse, compile, evaluate } from '@expr/core';
 import type { ExecutionContext, BytecodeProgram } from '@expr/core';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import {
-  Play,
-  Plus,
-  Trash2,
-  ChevronDown,
-  ChevronRight,
-  AlertCircle,
-} from 'lucide-react';
+import { Play, Plus, Trash2, ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
+import { ExprEditor } from './expr-editor';
+import { JsonViewer } from './json-viewer';
 
 interface Cell {
   id: string;
@@ -92,11 +86,7 @@ export function Notebook({ initialContext }: NotebookProps) {
   const executedCells = executeAllCells;
 
   const updateCell = (id: string, expression: string) => {
-    setCells((prev) =>
-      prev.map((cell) =>
-        cell.id === id ? { ...cell, expression } : cell
-      )
-    );
+    setCells((prev) => prev.map((cell) => (cell.id === id ? { ...cell, expression } : cell)));
   };
 
   const addCell = (afterId?: string) => {
@@ -116,11 +106,7 @@ export function Notebook({ initialContext }: NotebookProps) {
 
     setCells((prev) => {
       const index = prev.findIndex((c) => c.id === afterId);
-      return [
-        ...prev.slice(0, index + 1),
-        newCell,
-        ...prev.slice(index + 1),
-      ];
+      return [...prev.slice(0, index + 1), newCell, ...prev.slice(index + 1)];
     });
   };
 
@@ -131,11 +117,7 @@ export function Notebook({ initialContext }: NotebookProps) {
 
   const toggleBytecode = (id: string) => {
     setCells((prev) =>
-      prev.map((cell) =>
-        cell.id === id
-          ? { ...cell, showBytecode: !cell.showBytecode }
-          : cell
-      )
+      prev.map((cell) => (cell.id === id ? { ...cell, showBytecode: !cell.showBytecode } : cell)),
     );
   };
 
@@ -145,13 +127,9 @@ export function Notebook({ initialContext }: NotebookProps) {
         <div>
           <p className="text-sm text-muted-foreground">
             Each cell can reference the previous cell's result using{' '}
-            <code className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">
-              $
-            </code>{' '}
-            or all previous results using{' '}
-            <code className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">
-              $$
-            </code>
+            <code className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">$</code> or all
+            previous results using{' '}
+            <code className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">$$</code>
           </p>
         </div>
         <Button onClick={() => addCell()} size="sm">
@@ -167,9 +145,7 @@ export function Notebook({ initialContext }: NotebookProps) {
               {/* Cell Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-muted-foreground">
-                    [{index}]
-                  </span>
+                  <span className="text-xs font-mono text-muted-foreground">[{index}]</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -207,16 +183,12 @@ export function Notebook({ initialContext }: NotebookProps) {
               </div>
 
               {/* Expression Input */}
-              <div className="space-y-2">
-                <Textarea
+              <div className="rounded-md overflow-hidden border border-border">
+                <ExprEditor
                   value={cell.expression}
-                  onChange={(e) => updateCell(cell.id, e.target.value)}
-                  className="min-h-[60px] font-mono text-sm resize-none"
-                  placeholder={
-                    index === 0
-                      ? 'Enter expression...'
-                      : 'Use $ for previous result, $$ for all results'
-                  }
+                  onChange={(expr) => updateCell(cell.id, expr)}
+                  context={initialContext}
+                  height="80px"
                 />
               </div>
 
@@ -235,13 +207,11 @@ export function Notebook({ initialContext }: NotebookProps) {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Play className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          Output
-                        </span>
+                        <span className="text-xs text-muted-foreground">Output</span>
                       </div>
-                      <pre className="text-sm font-mono whitespace-pre-wrap p-3 bg-muted rounded-md">
-                        {JSON.stringify(cell.result, null, 2)}
-                      </pre>
+                      <div className="rounded-md overflow-hidden border border-border">
+                        <JsonViewer value={cell.result} height="120px" />
+                      </div>
                     </div>
                   )}
                 </>
@@ -252,15 +222,11 @@ export function Notebook({ initialContext }: NotebookProps) {
                 <>
                   <Separator />
                   <div className="space-y-2">
-                    <div className="text-xs font-semibold text-muted-foreground">
-                      Instructions
-                    </div>
+                    <div className="text-xs font-semibold text-muted-foreground">Instructions</div>
                     <div className="font-mono text-xs space-y-0.5 max-h-[200px] overflow-y-auto p-2 bg-muted/50 rounded-md">
                       {cell.bytecode.code.map((inst, i) => (
                         <div key={i} className="flex gap-2">
-                          <span className="text-muted-foreground w-6 text-right">
-                            {i}:
-                          </span>
+                          <span className="text-muted-foreground w-6 text-right">{i}:</span>
                           <span className="text-primary">{inst.join(' ')}</span>
                         </div>
                       ))}
