@@ -1,17 +1,15 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { tokenize, parse, compile, evaluate } from '@vlot/core';
 import type { ExecutionContext } from '@vlot/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Code2, PlayCircle, Database, Binary, AlertCircle, BookOpen, Zap } from 'lucide-react';
+import { Code2, PlayCircle, Database, Binary, AlertCircle } from 'lucide-react';
 import { ExprEditor } from '@/components/expr-editor';
 import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
+import { PageHeader } from '@/components/page-header';
 
 export default function PlaygroundPage() {
   const [expression, setExpression] = useState('data.items[0].name');
@@ -50,24 +48,7 @@ export default function PlaygroundPage() {
   return (
     <div className="min-h-screen p-6 md:p-8">
       <div className="max-w-[1800px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image src="/vlot-logo.svg" alt="Vlot" width={40} height={40} className="dark:invert" />
-            <h1 className="text-sm font-bold text-primary">VLOT</h1>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="default" className="gap-2">
-              <Zap className="w-4 h-4" />
-              Playground
-            </Button>
-            <Button variant="outline" asChild className="gap-2">
-              <Link href="/notebook">
-                <BookOpen className="w-4 h-4" />
-                Notebook
-              </Link>
-            </Button>
-          </div>
-        </div>
+        <PageHeader currentPage="playground" />
         <Separator />
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

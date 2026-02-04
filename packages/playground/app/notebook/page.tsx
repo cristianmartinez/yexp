@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Code2, Database, BookOpen, Zap, PanelLeft, PanelLeftClose } from 'lucide-react';
+import { Database, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { Notebook } from '@/components/notebook';
 import { ContextEditor } from '@/components/context-editor';
+import { PageHeader } from '@/components/page-header';
 
 export default function NotebookPage() {
   const [showContext, setShowContext] = useState(true);
@@ -35,28 +34,7 @@ export default function NotebookPage() {
   return (
     <div className="min-h-screen p-6 md:p-8">
       <div className="max-w-[1800px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image src="/vlot-logo.svg" alt="Vlot" width={40} height={40} className="dark:invert" />
-            <h1 className="text-4xl font-bold">Vlot Playground</h1>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild className="gap-2">
-              <Link href="/">
-                <Zap className="w-4 h-4" />
-                Playground
-              </Link>
-            </Button>
-            <Button variant="default" className="gap-2">
-              <BookOpen className="w-4 h-4" />
-              Notebook
-            </Button>
-          </div>
-        </div>
-        <p className="text-muted-foreground">
-          Execute expressions sequentially with results flowing down to subsequent cells
-        </p>
-
+        <PageHeader currentPage="notebook" />
         <Separator />
 
         <div className="flex gap-4">
