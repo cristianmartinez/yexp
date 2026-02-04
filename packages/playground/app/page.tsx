@@ -2,14 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { tokenize, parse, compile, evaluate } from '@expr/core';
-import type { ExecutionContext } from '@expr/core';
+import Image from 'next/image';
+import { tokenize, parse, compile, evaluate } from '@vlot/core';
+import type { ExecutionContext } from '@vlot/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Code2, PlayCircle, Database, Binary, AlertCircle, BookOpen, Zap } from 'lucide-react';
 import { ExprEditor } from '@/components/expr-editor';
+import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 
 export default function PlaygroundPage() {
@@ -51,8 +52,8 @@ export default function PlaygroundPage() {
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Code2 className="w-8 h-8" />
-            <h1 className="text-4xl font-bold">Expr Playground</h1>
+            <Image src="/vlot-logo.svg" alt="Vlot" width={40} height={40} className="dark:invert" />
+            <h1 className="text-4xl font-bold">Vlot Playground</h1>
           </div>
           <div className="flex gap-2">
             <Button variant="default" className="gap-2">
@@ -68,7 +69,7 @@ export default function PlaygroundPage() {
           </div>
         </div>
         <p className="text-muted-foreground">
-          Explore and test Expr expressions with real-time evaluation and bytecode inspection
+          Explore and test Vlot expressions with real-time evaluation and bytecode inspection
         </p>
 
         <Separator />
@@ -82,7 +83,7 @@ export default function PlaygroundPage() {
                   <Code2 className="w-5 h-5" />
                   Expression
                 </CardTitle>
-                <CardDescription>Write your Expr expression to evaluate</CardDescription>
+                <CardDescription>Write your Vlot expression to evaluate</CardDescription>
               </CardHeader>
               <CardContent className="p-0 overflow-hidden">
                 <ExprEditor
@@ -102,13 +103,8 @@ export default function PlaygroundPage() {
                 </CardTitle>
                 <CardDescription>JSON data available to your expression</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Textarea
-                  value={contextJSON}
-                  onChange={(e) => setContextJSON(e.target.value)}
-                  className="min-h-[300px] font-mono text-xs"
-                  placeholder="Enter context JSON..."
-                />
+              <CardContent className="p-0 overflow-hidden">
+                <JsonEditor value={contextJSON} onChange={setContextJSON} height="300px" />
               </CardContent>
             </Card>
           </div>

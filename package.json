@@ -1,5 +1,5 @@
 {
-  "name": "expr",
+  "name": "vlot",
   "private": true,
   "packageManager": "bun@1.3.6",
   "workspaces": ["packages/*"],
@@ -11,8 +11,8 @@
     "check": "turbo check",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "playground": "turbo dev --filter=@expr/playground",
-    "playground:build": "turbo build --filter=@expr/playground"
+    "playground": "turbo dev --filter=@vlot/playground",
+    "playground:build": "turbo build --filter=@vlot/playground"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",

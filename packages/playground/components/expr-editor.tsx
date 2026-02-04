@@ -17,16 +17,16 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
     editorRef.current = editor;
 
-    // Register Expr language if not already registered
+    // Register Vlot language if not already registered
     if (
       !monaco.languages
         .getLanguages()
-        .some((lang: languages.ILanguageExtensionPoint) => lang.id === 'expr')
+        .some((lang: languages.ILanguageExtensionPoint) => lang.id === 'vlot')
     ) {
-      monaco.languages.register({ id: 'expr' });
+      monaco.languages.register({ id: 'vlot' });
 
       // Set language configuration
-      monaco.languages.setLanguageConfiguration('expr', {
+      monaco.languages.setLanguageConfiguration('vlot', {
         brackets: [
           ['[', ']'],
           ['(', ')'],
@@ -42,7 +42,7 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
       });
 
       // Set tokenizer for syntax highlighting
-      monaco.languages.setMonarchTokensProvider('expr', {
+      monaco.languages.setMonarchTokensProvider('vlot', {
         keywords: [
           'true',
           'false',
@@ -164,8 +164,8 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
         },
       });
 
-      // Define custom theme for Expr
-      monaco.editor.defineTheme('expr-dark', {
+      // Define custom theme for Vlot
+      monaco.editor.defineTheme('vlot-dark', {
         base: 'vs-dark',
         inherit: true,
         rules: [
@@ -182,7 +182,7 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
       });
 
       // Register completion provider for autocompletion
-      monaco.languages.registerCompletionItemProvider('expr', {
+      monaco.languages.registerCompletionItemProvider('vlot', {
         provideCompletionItems: (model: editor.ITextModel, position: IPosition) => {
           const word = model.getWordUntilPosition(position);
           const range = {
@@ -236,11 +236,11 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
   return (
     <Editor
       height={height}
-      language="expr"
+      language="vlot"
       value={value}
       onChange={(val) => onChange(val || '')}
       onMount={handleEditorDidMount}
-      theme="expr-dark"
+      theme="vlot-dark"
       options={{
         minimap: { enabled: false },
         fontSize: 14,

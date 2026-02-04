@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { tokenize, parse, compile, evaluate } from '@expr/core';
-import type { ExecutionContext, BytecodeProgram } from '@expr/core';
+import { tokenize, parse, compile, evaluate } from '@vlot/core';
+import type { ExecutionContext, BytecodeProgram } from '@vlot/core';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
