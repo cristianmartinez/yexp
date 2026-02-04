@@ -337,28 +337,9 @@ export function compile(ast: ASTNode): BytecodeProgram {
     property: string;
     optional?: boolean;
   }): void {
-    // Compile object once and duplicate for null check
+    // Compile object and emit specialized optional chain opcode
     compileNode(node.object);
-    emit(Opcode.DUP); // Duplicate object value on stack
-
-    // Check if duplicated value is null/undefined
-    emit(Opcode.CONST, addConstant(null));
-    emit(Opcode.EQ);
-    const jumpIfNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
-
-    // Not null - do optional access using original value (still on stack)
-    emit(Opcode.CONST, addConstant(node.property));
-    emit(Opcode.OPTIONAL_INDEX, -1); // dynamic index
-    const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
-
-    // Null branch - pop the null value and push null result
-    const nullLabel = code.length;
-    emit(Opcode.CONST, addConstant(null));
-
-    // Patch jumps
-    const endLabel = code.length;
-    code[jumpIfNull] = [Opcode.JUMP_IF_TRUE, nullLabel];
-    code[jumpToEnd] = [Opcode.JUMP, endLabel];
+    emit(Opcode.OPTIONAL_CHAIN_GET, node.property);
   }
 
   function compileOptionalIndexAccess(node: {
@@ -366,32 +347,16 @@ export function compile(ast: ASTNode): BytecodeProgram {
     index: ASTNode;
     optional?: boolean;
   }): void {
-    // Compile object once and duplicate for null check
+    // Compile object and emit specialized optional chain opcode
     compileNode(node.object);
-    emit(Opcode.DUP); // Duplicate object value on stack
 
-    // Check if duplicated value is null/undefined
-    emit(Opcode.CONST, addConstant(null));
-    emit(Opcode.EQ);
-    const jumpIfNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
-
-    // Not null - do optional index access using original value (still on stack)
+    // Handle static vs dynamic index
     if (node.index.type === 'Literal' && typeof node.index.value === 'number') {
-      emit(Opcode.OPTIONAL_INDEX, node.index.value);
+      emit(Opcode.OPTIONAL_CHAIN_INDEX, node.index.value);
     } else {
       compileNode(node.index);
-      emit(Opcode.OPTIONAL_INDEX, -1); // dynamic index
+      emit(Opcode.OPTIONAL_CHAIN_INDEX, -1); // dynamic index
     }
-    const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
-
-    // Null branch - pop the null value and push null result
-    const nullLabel = code.length;
-    emit(Opcode.CONST, addConstant(null));
-
-    // Patch jumps
-    const endLabel = code.length;
-    code[jumpIfNull] = [Opcode.JUMP_IF_TRUE, nullLabel];
-    code[jumpToEnd] = [Opcode.JUMP, endLabel];
   }
 
   function compileArrayLiteral(elements: ASTNode[]): void {

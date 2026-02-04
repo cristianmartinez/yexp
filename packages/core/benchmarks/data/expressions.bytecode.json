@@ -633,75 +633,19 @@
       "slots": [
         "state.user"
       ],
-      "constants": [
-        null,
-        "profile",
-        "avatar"
-      ],
+      "constants": [],
       "code": [
         [
           "LOAD",
           0
         ],
         [
-          "DUP"
+          "OPTIONAL_CHAIN_GET",
+          "profile"
         ],
         [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          8
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          9
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "DUP"
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          16
-        ],
-        [
-          "CONST",
-          2
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          17
-        ],
-        [
-          "CONST",
-          0
+          "OPTIONAL_CHAIN_GET",
+          "avatar"
         ],
         [
           "RETURN"
@@ -2715,9 +2659,6 @@
       ],
       "constants": [
         null,
-        "profile",
-        "settings",
-        "theme",
         "default"
       ],
       "code": [
@@ -2726,94 +2667,16 @@
           0
         ],
         [
-          "DUP"
+          "OPTIONAL_CHAIN_GET",
+          "profile"
         ],
         [
-          "CONST",
-          0
+          "OPTIONAL_CHAIN_GET",
+          "settings"
         ],
         [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          8
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          9
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "DUP"
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          16
-        ],
-        [
-          "CONST",
-          2
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          17
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "DUP"
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          24
-        ],
-        [
-          "CONST",
-          3
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          25
-        ],
-        [
-          "CONST",
-          0
+          "OPTIONAL_CHAIN_GET",
+          "theme"
         ],
         [
           "CONST",
@@ -2824,109 +2687,31 @@
         ],
         [
           "JUMP_IF_TRUE",
-          30
-        ],
-        [
-          "CONST",
-          4
-        ],
-        [
-          "JUMP",
-          55
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "DUP"
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          38
+          9
         ],
         [
           "CONST",
           1
         ],
         [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
           "JUMP",
-          39
+          13
         ],
         [
-          "CONST",
+          "LOAD",
           0
         ],
         [
-          "DUP"
+          "OPTIONAL_CHAIN_GET",
+          "profile"
         ],
         [
-          "CONST",
-          0
+          "OPTIONAL_CHAIN_GET",
+          "settings"
         ],
         [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          46
-        ],
-        [
-          "CONST",
-          2
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          47
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "DUP"
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          54
-        ],
-        [
-          "CONST",
-          3
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          55
-        ],
-        [
-          "CONST",
-          0
+          "OPTIONAL_CHAIN_GET",
+          "theme"
         ],
         [
           "RETURN"

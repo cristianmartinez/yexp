@@ -1489,6 +1489,78 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         break;
       }
 
+      case Opcode.OPTIONAL_CHAIN_GET: {
+        const property = instruction[1] as string;
+        const obj = pop();
+
+        // If object is null/undefined/error, short-circuit and return null
+        if (obj === null || obj === undefined || isExprError(obj)) {
+          push(null);
+          break;
+        }
+
+        // Get property from object
+        if (typeof obj === 'object' && !Array.isArray(obj)) {
+          const objValue = obj as ExprObject;
+          if (isDangerousKey(property)) {
+            push(null);
+            break;
+          }
+          push(objValue[property] ?? null);
+        } else {
+          push(null);
+        }
+        break;
+      }
+
+      case Opcode.OPTIONAL_CHAIN_INDEX: {
+        const staticIdx = instruction[1] as number;
+        let obj: ExprValue;
+        let idx: ExprValue;
+
+        // If staticIdx is -1, index is dynamic (pop from stack)
+        if (staticIdx === -1) {
+          idx = pop();
+          if (isExprError(idx)) {
+            push(null);
+            break;
+          }
+          obj = pop();
+        } else {
+          obj = pop();
+          idx = staticIdx;
+        }
+
+        // If object is null/undefined/error, short-circuit and return null
+        if (obj === null || obj === undefined || isExprError(obj)) {
+          push(null);
+          break;
+        }
+
+        // Handle array indexing
+        if (Array.isArray(obj)) {
+          if (typeof idx === 'number') {
+            const adjustedIdx = idx < 0 ? obj.length + idx : idx;
+            push(adjustedIdx >= 0 && adjustedIdx < obj.length ? obj[adjustedIdx]! : null);
+          } else {
+            push(null);
+          }
+        }
+        // Handle object property access
+        else if (typeof obj === 'object') {
+          const objValue = obj as ExprObject;
+          const key = String(idx);
+          if (isDangerousKey(key)) {
+            push(null);
+            break;
+          }
+          push(objValue[key] ?? null);
+        } else {
+          push(null);
+        }
+        break;
+      }
+
       case Opcode.CALL: {
         const name = instruction[1] as string;
         const argc = instruction[2] as number;

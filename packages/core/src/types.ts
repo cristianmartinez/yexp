@@ -295,6 +295,8 @@ export enum Opcode {
   OPTIONAL_WILDCARD = 'OPTIONAL_WILDCARD',
   RECURSIVE_DESCENT = 'RECURSIVE_DESCENT',
   OPTIONAL_RECURSIVE_DESCENT = 'OPTIONAL_RECURSIVE_DESCENT',
+  OPTIONAL_CHAIN_GET = 'OPTIONAL_CHAIN_GET', // Optional chaining property access (combines null check + get)
+  OPTIONAL_CHAIN_INDEX = 'OPTIONAL_CHAIN_INDEX', // Optional chaining index access (combines null check + index)
 
   // Function calls
   CALL = 'CALL',
