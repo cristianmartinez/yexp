@@ -873,7 +873,16 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
 const SPREAD_MARKER = Symbol('spread');
 type StackValue = ExprValue | typeof SPREAD_MARKER;
 
-export function evaluate(program: BytecodeProgram, context: ExecutionContext): ExprValue {
+export interface EvaluateOptions {
+  /** Optional callback invoked after each instruction for debugging/visualization */
+  onStep?: (state: { ip: number; stack: readonly ExprValue[] }) => void;
+}
+
+export function evaluate(
+  program: BytecodeProgram,
+  context: ExecutionContext,
+  options?: EvaluateOptions
+): ExprValue {
   const stack: StackValue[] = [];
   const { code, constants, slots: slotPaths } = program;
 
@@ -881,6 +890,7 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
   const slotValues: ExprValue[] = slotPaths.map((path) => resolvePath(context, path));
 
   let ip = 0;
+  const { onStep } = options ?? {};
 
   function push(value: StackValue): void {
     stack.push(value);
@@ -2039,6 +2049,14 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
     }
 
     ip++;
+
+    // Call debug callback if provided
+    if (onStep) {
+      onStep({
+        ip,
+        stack: stack.filter((v): v is ExprValue => v !== SPREAD_MARKER),
+      });
+    }
   }
 
   return makeError('INVALID_INSTRUCTION', 'Program ended without RETURN');
