@@ -54,6 +54,59 @@ Try a ternary operator to see how the VM uses jump instructions:
 
 The IP doesn't just increment - it can jump forward or backward based on the bytecode!
 
+## Complex Expression
+
+Watch a real-world example that combines multiple features - filtering, mapping, and string templates:
+
+<VMExecutionDemo
+  initialExpression="data.users |> filter(u => u.age >= 18 && u.active) |> map(u => `${u.name} (${u.age})`) |> join(', ')"
+  initialContext={`{
+  "data": {
+    "users": [
+      { "name": "Alice", "age": 25, "active": true },
+      { "name": "Bob", "age": 17, "active": true },
+      { "name": "Carol", "age": 30, "active": false },
+      { "name": "Dave", "age": 22, "active": true }
+    ]
+  },
+  "state": {},
+  "env": {}
+}`}
+/>
+
+**What's Happening:**
+1. `filter` - Creates lambda, evaluates condition for each user
+2. Multiple `JUMP` instructions - For each lambda invocation
+3. `map` - Another lambda with template literal evaluation
+4. `join` - Final transformation to string
+5. Stack grows/shrinks as lambdas execute
+
+Watch the IP jump into and out of lambda functions!
+
+## Object Construction with Spread
+
+See how objects and arrays are built on the stack:
+
+<VMExecutionDemo
+  initialExpression="{ ...data.defaults, name: data.user.name, score: data.scores[0] * 2, status: data.active ? 'online' : 'offline' }"
+  initialContext={`{
+  "data": {
+    "defaults": { "color": "blue", "size": "medium" },
+    "user": { "name": "Alice" },
+    "scores": [45, 38, 42],
+    "active": true
+  },
+  "state": {},
+  "env": {}
+}`}
+/>
+
+**Stack Mechanics:**
+- Values are pushed in reverse order (right to left)
+- `SPREAD` operator flattens objects
+- `MAKE_OBJ` pops all values and constructs object
+- Each property evaluation pushes 2 values (key, value)
+
 ## More Examples to Try
 
 **Array Operations:**
@@ -61,9 +114,9 @@ The IP doesn't just increment - it can jump forward or backward based on the byt
 [1, 2, 3][1]
 ```
 
-**Object Access:**
+**Object Access with Optional Chaining:**
 ```
-data.user.name
+data.user?.profile?.avatar ?? "default.png"
 ```
 
 **Logical Operations:**
@@ -71,9 +124,19 @@ data.user.name
 data.age > 18 && data.verified
 ```
 
-**String Concatenation:**
+**String Template:**
 ```
-"Hello " + data.name
+`Hello ${data.name}, you have ${data.items.length} items`
+```
+
+**Nested Ternary (Complex Control Flow):**
+```
+data.score >= 90 ? "A" : data.score >= 80 ? "B" : data.score >= 70 ? "C" : "F"
+```
+
+**Recursive Descent (Deep Property Access):**
+```
+data..price[. > 100]
 ```
 
 ## Stack Operations
