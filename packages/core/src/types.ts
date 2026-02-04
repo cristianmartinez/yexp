@@ -278,6 +278,12 @@ export enum Opcode {
   LTE = 'LTE',
   GTE = 'GTE',
 
+  // Optimized comparison patterns
+  RANGE_CHECK = 'RANGE_CHECK',           // value >= min && value <= max
+  RANGE_CHECK_EXCLUSIVE = 'RANGE_CHECK_EXCLUSIVE',  // value > min && value < max
+  RANGE_CHECK_LO_INCLUSIVE = 'RANGE_CHECK_LO_INCLUSIVE',  // value >= min && value < max
+  RANGE_CHECK_HI_INCLUSIVE = 'RANGE_CHECK_HI_INCLUSIVE',  // value > min && value <= max
+
   // Logical & control flow
   NOT = 'NOT',
   JUMP_IF_FALSE = 'JUMP_IF_FALSE',

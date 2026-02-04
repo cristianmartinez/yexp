@@ -1101,6 +1101,67 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         break;
       }
 
+      // Optimized range check opcodes
+      case Opcode.RANGE_CHECK: {
+        // value >= min && value <= max
+        const slotIdx = instruction[1] as number;
+        const min = instruction[2] as number;
+        const max = instruction[3] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value >= min && value <= max);
+        } else {
+          stack.push(false);
+        }
+        break;
+      }
+
+      case Opcode.RANGE_CHECK_EXCLUSIVE: {
+        // value > min && value < max
+        const slotIdx = instruction[1] as number;
+        const min = instruction[2] as number;
+        const max = instruction[3] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value > min && value < max);
+        } else {
+          stack.push(false);
+        }
+        break;
+      }
+
+      case Opcode.RANGE_CHECK_LO_INCLUSIVE: {
+        // value >= min && value < max
+        const slotIdx = instruction[1] as number;
+        const min = instruction[2] as number;
+        const max = instruction[3] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value >= min && value < max);
+        } else {
+          stack.push(false);
+        }
+        break;
+      }
+
+      case Opcode.RANGE_CHECK_HI_INCLUSIVE: {
+        // value > min && value <= max
+        const slotIdx = instruction[1] as number;
+        const min = instruction[2] as number;
+        const max = instruction[3] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value > min && value <= max);
+        } else {
+          stack.push(false);
+        }
+        break;
+      }
+
       case Opcode.JUMP_IF_FALSE: {
         const target = instruction[1] as number;
         const v = pop();

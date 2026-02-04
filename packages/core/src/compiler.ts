@@ -293,7 +293,72 @@ export function compile(ast: ASTNode): BytecodeProgram {
     emit(Opcode.CONST, addConstant(lambdaValue as unknown as ExprValue));
   }
 
+  /**
+   * Try to compile range check pattern: var >= min && var <= max
+   * Returns true if pattern matched and compiled
+   */
+  function tryCompileRangeCheck(left: ASTNode, right: ASTNode): boolean {
+    // Both must be binary operations
+    if (left.type !== 'BinaryOp' || right.type !== 'BinaryOp') {
+      return false;
+    }
+
+    // Both must reference the same path
+    const leftPath = extractPathFromBinaryOp(left);
+    const rightPath = extractPathFromBinaryOp(right);
+    if (!leftPath || !rightPath || !isSamePath(leftPath, rightPath)) {
+      return false;
+    }
+
+    // Left must be >= or >, right must be <= or <
+    const leftOp = left.operator;
+    const rightOp = right.operator;
+
+    // Check for valid range check patterns
+    const isValidPattern =
+      ((leftOp === '>=' || leftOp === '>') && (rightOp === '<=' || rightOp === '<'));
+
+    if (!isValidPattern) {
+      return false;
+    }
+
+    // Right operands must be constants (literals)
+    if (left.right.type !== 'Literal' || right.right.type !== 'Literal') {
+      return false;
+    }
+
+    const minValue = left.right.value;
+    const maxValue = right.right.value;
+
+    // Both must be numbers
+    if (typeof minValue !== 'number' || typeof maxValue !== 'number') {
+      return false;
+    }
+
+    // Emit optimized range check opcode
+    const slotIdx = addSlot(resolvePath(leftPath));
+
+    // Choose the right opcode based on inclusive/exclusive bounds
+    if (leftOp === '>=' && rightOp === '<=') {
+      emit(Opcode.RANGE_CHECK, slotIdx, minValue, maxValue);
+    } else if (leftOp === '>' && rightOp === '<') {
+      emit(Opcode.RANGE_CHECK_EXCLUSIVE, slotIdx, minValue, maxValue);
+    } else if (leftOp === '>=' && rightOp === '<') {
+      emit(Opcode.RANGE_CHECK_LO_INCLUSIVE, slotIdx, minValue, maxValue);
+    } else if (leftOp === '>' && rightOp === '<=') {
+      emit(Opcode.RANGE_CHECK_HI_INCLUSIVE, slotIdx, minValue, maxValue);
+    }
+
+    return true;
+  }
+
   function compileLogical(operator: '&&' | '||', left: ASTNode, right: ASTNode): void {
+    // OPTIMIZATION: Range check pattern detection
+    // Pattern: `var >= min && var <= max` (or variations with > and <)
+    if (operator === '&&' && tryCompileRangeCheck(left, right)) {
+      return; // Successfully compiled as range check
+    }
+
     // CSE optimization: detect if both sides reference the same path
     // Pattern: `path op1 val && path op2 val` or `path op1 val || path op2 val`
     const leftPath = extractPathFromBinaryOp(left);
