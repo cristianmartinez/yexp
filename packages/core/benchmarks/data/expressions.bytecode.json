@@ -3452,44 +3452,13 @@
             "slots": [
               "$it.price"
             ],
-            "constants": [
-              50,
-              150,
-              false
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "DUP"
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GTE"
-              ],
-              [
-                "JUMP_IF_FALSE",
-                8
-              ],
-              [
-                "CONST",
-                1
-              ],
-              [
-                "LTE"
-              ],
-              [
-                "JUMP",
-                9
-              ],
-              [
-                "CONST",
-                2
+                "RANGE_CHECK",
+                0,
+                50,
+                150
               ],
               [
                 "RETURN"
