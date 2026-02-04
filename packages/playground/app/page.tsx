@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { tokenize, parse, compile, evaluate } from '@expr/core';
 import type { ExecutionContext } from '@expr/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -149,36 +148,39 @@ export default function PlaygroundPage() {
                   </CardTitle>
                   <CardDescription>Compiled bytecode representation</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="instructions" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="instructions">Instructions</TabsTrigger>
-                      <TabsTrigger value="slots">Slots</TabsTrigger>
-                      <TabsTrigger value="constants">Constants</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="instructions" className="space-y-1 mt-4">
-                      <div className="font-mono text-xs space-y-1 max-h-[300px] overflow-y-auto p-3 bg-muted rounded-md">
-                        {result.bytecode.code.map((inst, i) => (
-                          <div key={i} className="flex gap-3">
-                            <span className="text-muted-foreground w-8 text-right">{i}:</span>
-                            <span className="text-primary font-medium">{inst.join(' ')}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </TabsContent>
-                    <TabsContent value="slots" className="mt-4">
+                <CardContent className="space-y-4">
+                  {/* Instructions */}
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Instructions</h4>
+                    <div className="font-mono text-xs space-y-1 max-h-[300px] overflow-y-auto p-3 bg-muted rounded-md">
+                      {result.bytecode.code.map((inst, i) => (
+                        <div key={i} className="flex gap-3">
+                          <span className="text-muted-foreground w-8 text-right">{i}:</span>
+                          <span className="text-primary font-medium">{inst.join(' ')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Slots */}
+                  {result.bytecode.slots.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Slots</h4>
                       <pre className="text-xs font-mono p-3 bg-muted rounded-md">
-                        {result.bytecode.slots.length > 0
-                          ? result.bytecode.slots.join(', ')
-                          : 'No slots used'}
+                        {result.bytecode.slots.join(', ')}
                       </pre>
-                    </TabsContent>
-                    <TabsContent value="constants" className="mt-4">
+                    </div>
+                  )}
+
+                  {/* Constants */}
+                  {result.bytecode.constants.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Constants</h4>
                       <div className="rounded-md overflow-hidden border border-border">
-                        <JsonViewer value={result.bytecode.constants} height="200px" />
+                        <JsonViewer value={result.bytecode.constants} height="150px" />
                       </div>
-                    </TabsContent>
-                  </Tabs>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
