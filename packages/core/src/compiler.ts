@@ -1,8 +1,9 @@
 import type { ASTNode, BytecodeProgram, ExprValue, Instruction, LambdaValue } from './types.js';
 import { Opcode } from './types.js';
 
-// Comparison operators set for O(1) lookup
+// Operator sets for O(1) lookup
 const COMPARISON_OPERATORS = new Set(['>', '>=', '<', '<=', '==', '!=']);
+const ARITHMETIC_OPERATORS = new Set(['+', '-', '*', '/', '%']);
 
 export class CompileError extends Error {
   constructor(message: string) {
@@ -148,8 +149,7 @@ export function compile(ast: ASTNode): BytecodeProgram {
     if (node.type !== 'BinaryOp') return false;
 
     const op = node.operator;
-    const isArithmetic = ['+', '-', '*', '/', '%'].includes(op);
-    if (!isArithmetic) return false;
+    if (!ARITHMETIC_OPERATORS.has(op)) return false;
 
     // Pattern: LOAD slot, operate with constant (e.g., x + 10)
     if (isPath(node.left) && node.right.type === 'Literal') {

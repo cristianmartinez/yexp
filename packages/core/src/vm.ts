@@ -11,14 +11,14 @@ type BuiltinFn = (...args: ExprValue[]) => ExprValue;
 type HOBuiltinFn = (context: ExecutionContext, ...args: ExprValue[]) => ExprValue;
 
 // Security: Constants for preventing prototype pollution
-const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 const MAX_FLATTEN_DEPTH = 100;
 
 /**
  * Security: Check if a key is dangerous and could cause prototype pollution
  */
 function isDangerousKey(key: string): boolean {
-  return DANGEROUS_KEYS.includes(key);
+  return DANGEROUS_KEYS.has(key);
 }
 
 /**
