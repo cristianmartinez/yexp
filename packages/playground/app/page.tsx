@@ -174,9 +174,9 @@ export default function PlaygroundPage() {
                       </pre>
                     </TabsContent>
                     <TabsContent value="constants" className="mt-4">
-                      <pre className="text-xs font-mono p-3 bg-muted rounded-md whitespace-pre-wrap">
-                        {JSON.stringify(result.bytecode.constants, null, 2)}
-                      </pre>
+                      <div className="rounded-md overflow-hidden border border-border">
+                        <JsonViewer value={result.bytecode.constants} height="200px" />
+                      </div>
                     </TabsContent>
                   </Tabs>
                 </CardContent>
