@@ -1015,51 +1015,83 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
       }
 
       case Opcode.LT: {
-        const b = pop();
-        const a = pop();
+        // Optimization: inline stack operations + fast path for numbers
+        const stackLen = stack.length;
+        const b = stack[stackLen - 1] as ExprValue;
+        const a = stack[stackLen - 2] as ExprValue;
+
+        // Fast path: numeric comparison (most common case)
+        if (typeof a === 'number' && typeof b === 'number') {
+          stack.length = stackLen - 2;  // Pop 2
+          stack.push(a < b);  // Push result
+          break;
+        }
+
+        // Slow path: handle errors and type mismatches
+        stack.length = stackLen - 2;  // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
-        if (typeof a !== 'number' || typeof b !== 'number') {
-          return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
-        }
-        push(a < b);
-        break;
+        return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
       }
 
       case Opcode.GT: {
-        const b = pop();
-        const a = pop();
+        // Optimization: inline stack operations + fast path for numbers
+        const stackLen = stack.length;
+        const b = stack[stackLen - 1] as ExprValue;
+        const a = stack[stackLen - 2] as ExprValue;
+
+        // Fast path: numeric comparison (most common case)
+        if (typeof a === 'number' && typeof b === 'number') {
+          stack.length = stackLen - 2;  // Pop 2
+          stack.push(a > b);  // Push result
+          break;
+        }
+
+        // Slow path: handle errors and type mismatches
+        stack.length = stackLen - 2;  // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
-        if (typeof a !== 'number' || typeof b !== 'number') {
-          return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
-        }
-        push(a > b);
-        break;
+        return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
       }
 
       case Opcode.LTE: {
-        const b = pop();
-        const a = pop();
+        // Optimization: inline stack operations + fast path for numbers
+        const stackLen = stack.length;
+        const b = stack[stackLen - 1] as ExprValue;
+        const a = stack[stackLen - 2] as ExprValue;
+
+        // Fast path: numeric comparison (most common case)
+        if (typeof a === 'number' && typeof b === 'number') {
+          stack.length = stackLen - 2;  // Pop 2
+          stack.push(a <= b);  // Push result
+          break;
+        }
+
+        // Slow path: handle errors and type mismatches
+        stack.length = stackLen - 2;  // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
-        if (typeof a !== 'number' || typeof b !== 'number') {
-          return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
-        }
-        push(a <= b);
-        break;
+        return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
       }
 
       case Opcode.GTE: {
-        const b = pop();
-        const a = pop();
+        // Optimization: inline stack operations + fast path for numbers
+        const stackLen = stack.length;
+        const b = stack[stackLen - 1] as ExprValue;
+        const a = stack[stackLen - 2] as ExprValue;
+
+        // Fast path: numeric comparison (most common case)
+        if (typeof a === 'number' && typeof b === 'number') {
+          stack.length = stackLen - 2;  // Pop 2
+          stack.push(a >= b);  // Push result
+          break;
+        }
+
+        // Slow path: handle errors and type mismatches
+        stack.length = stackLen - 2;  // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
-        if (typeof a !== 'number' || typeof b !== 'number') {
-          return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
-        }
-        push(a >= b);
-        break;
+        return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
       }
 
       case Opcode.NOT: {
