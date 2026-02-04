@@ -164,7 +164,7 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
         },
       });
 
-      // Define custom theme for Vlot
+      // Define VS Code dark theme for Vlot
       monaco.editor.defineTheme('vlot-dark', {
         base: 'vs-dark',
         inherit: true,
@@ -178,7 +178,9 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
           { token: 'string.escape', foreground: 'D7BA7D' },
           { token: 'identifier', foreground: '9CDCFE' },
         ],
-        colors: {},
+        colors: {
+          'editor.background': '#1e1e1e',
+        },
       });
 
       // Register completion provider for autocompletion
