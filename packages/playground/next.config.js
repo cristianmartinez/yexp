@@ -1,11 +1,18 @@
+import nextra from 'nextra';
+
+const withNextra = nextra({
+  theme: 'nextra-theme-docs',
+  themeConfig: './theme.config.tsx',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@expr/core'],
+  transpilePackages: ['@jext/core'],
   experimental: {
-    optimizePackageImports: ['@expr/core'],
+    optimizePackageImports: ['@jext/core'],
   },
   webpack: (config) => {
-    // Handle @expr/core ES modules properly
+    // Handle @jext/core ES modules properly
     config.resolve.extensionAlias = {
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
     };
@@ -13,4 +20,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextra(nextConfig);

@@ -1,0 +1,110 @@
+import { VMExecutionDemo } from '../components/vm-execution-demo'
+
+export const metadata = {
+  title: 'VM Execution Visualizer',
+  description: 'Watch how the stack-based VM executes bytecode step-by-step'
+}
+
+# VM Execution Visualizer
+
+An interactive visualization showing how Jext's stack-based virtual machine executes bytecode instructions in real-time.
+
+## How It Works
+
+The Jext VM is a **stack-based virtual machine** that:
+1. Reads bytecode instructions sequentially
+2. Uses an **instruction pointer (IP)** to track position
+3. Manages a **stack** for intermediate values
+4. Supports **jumps** for control flow (conditionals, loops)
+
+## Try It Out!
+
+Enter any Jext expression below and watch how the VM executes it step-by-step:
+
+<VMExecutionDemo
+  initialExpression="1 + 2 * 3"
+/>
+
+## Simple Arithmetic
+
+Try changing the expression above to see how different operations work. Here are some examples to try:
+
+- `1 + 2 * 3` - See operator precedence in action
+- `(1 + 2) * 3` - Watch how parentheses change evaluation order
+- `5 - 3 + 2` - Left-to-right evaluation
+- `-10 + 5` - Unary negation
+
+## Conditional Jumps
+
+Try a ternary operator to see how the VM uses jump instructions:
+
+<VMExecutionDemo
+  initialExpression="data.x > 10 ? 'big' : 'small'"
+  initialContext={`{
+  "data": { "x": 15 },
+  "state": {},
+  "env": {}
+}`}
+/>
+
+**Jump Instructions** - Watch the instruction pointer (IP) jump around:
+- `JUMP_IF_FALSE` - Jump if condition is false
+- `JUMP_IF_TRUE` - Jump if condition is true
+- `JUMP` - Unconditional jump
+
+The IP doesn't just increment - it can jump forward or backward based on the bytecode!
+
+## More Examples to Try
+
+**Array Operations:**
+```
+[1, 2, 3][1]
+```
+
+**Object Access:**
+```
+data.user.name
+```
+
+**Logical Operations:**
+```
+data.age > 18 && data.verified
+```
+
+**String Concatenation:**
+```
+"Hello " + data.name
+```
+
+## Stack Operations
+
+The stack is a **LIFO (Last In, First Out)** data structure:
+
+- **Push**: Add value to top of stack
+- **Pop**: Remove and return top value
+- **Binary ops**: Pop two values, push result
+- **Unary ops**: Pop one value, push result
+
+## How to Use
+
+1. **Enter Expression** - Type any Jext expression in the editor
+2. **Set Context** - Switch to the Context tab to add data/state/env
+3. **Watch Execution** - The bytecode and stack update in real-time
+4. **Control Playback:**
+   - Click **Play** to auto-step through execution
+   - Use **Step Forward/Backward** to manually control
+   - **Reset** to start over
+
+## Understanding the Visualization
+
+**Left Panel - Bytecode Instructions:**
+- Blue highlight shows current instruction
+- Dimmed text shows already-executed instructions
+- Jump targets show where control flow goes
+
+**Right Panel - Stack:**
+- Shows current stack state (top at bottom)
+- Values animate in/out as they're pushed/popped
+- Final result appears when execution completes
+
+This is a **stack-based VM** - all operations work through the stack. No registers, just push and pop!

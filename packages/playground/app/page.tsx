@@ -2,10 +2,10 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { tokenize, parse, compile, evaluate } from '@vlot/core';
-import type { ExecutionContext } from '@vlot/core';
+import { tokenize, parse, compile, evaluate } from '@jext/core';
+import type { ExecutionContext } from '@jext/core';
 import { Code2, PlayCircle, Database, AlertCircle, FileCode } from 'lucide-react';
-import { ExprEditor } from '@/components/expr-editor';
+import { JextEditor } from '@/components/jext-editor';
 import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 import { PageHeader } from '@/components/page-header';
@@ -237,7 +237,7 @@ export default function PlaygroundPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <ExprEditor
+                <JextEditor
                   value={expression}
                   onChange={setExpression}
                   context={parsedContext}

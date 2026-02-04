@@ -124,7 +124,7 @@ const exprCondition = 'items |> filter(.active) |> map(.price * .qty) |> add > 1
   type: 'assign',
   path: 'state.total',
   value: {
-    type: 'expr',
+    type: 'jext',
     expr: 'items |> map(.price * .qty) |> add'  // ← Expr for computation
   }
 }

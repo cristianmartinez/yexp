@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Vlot Playground',
-  description: 'Interactive playground for the Vlot expression language',
+  title: 'Jext Playground',
+  description: 'Interactive playground for the Jext expression language',
 };
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className="antialiased">{children}</body>
     </html>
   );

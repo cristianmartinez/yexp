@@ -1,0 +1,293 @@
+# Architecture
+
+Jext is built on a **stack-based bytecode virtual machine**. This architecture provides safe, fast, and deterministic expression evaluation.
+
+## Compilation Pipeline
+
+Jext uses a 3-stage compilation model:
+
+```
+Source Code → AST → Bytecode → Execution
+```
+
+1. **Tokenizer** - Breaks source into tokens
+2. **Parser** - Builds Abstract Syntax Tree (AST)
+3. **Compiler** - Generates bytecode from AST
+4. **VM** - Executes bytecode with runtime context
+
+### Why Bytecode?
+
+- **Compile once, run many** - Cache compiled programs
+- **No eval()** - Safe execution without code injection
+- **Portable** - Bytecode can be serialized and transferred
+- **Fast** - Direct interpretation, no parsing overhead
+
+## Stack-Based VM
+
+The virtual machine uses a **value stack** for all operations:
+
+```
+Expression: 2 + 3 * 4
+
+Execution:
+  CONST 2    →  [2]
+  CONST 3    →  [2, 3]
+  CONST 4    →  [2, 3, 4]
+  MUL        →  [2, 12]      // pop 3,4 → push 12
+  ADD        →  [14]         // pop 2,12 → push 14
+  RETURN     →  14
+```
+
+Every instruction either:
+- **Pushes** values onto the stack
+- **Pops** values from the stack
+- **Transforms** the top of the stack
+
+## Bytecode Structure
+
+Every compiled program contains:
+
+### 1. Constants Pool
+Immutable values referenced by instructions:
+- Numbers: `100`, `3.14`
+- Strings: `"hello"`
+- Lambdas: `x => x * 2`
+
+### 2. Slots
+Pre-resolved paths from the execution context:
+- `data.items`
+- `state.count`
+- `env.API_URL`
+
+Slots are resolved **once** at execution start for performance.
+
+### 3. Code
+Array of instructions that execute sequentially:
+```
+[LOAD, 0]           // Load slot 0
+[CONST, 2]          // Push constant 2
+[CALL, "filter", 2] // Call filter with 2 args
+[RETURN]            // Return result
+```
+
+## Execution Context
+
+All expressions run with three namespaces:
+
+```javascript
+{
+  data: { ... },   // Immutable input data
+  state: { ... },  // Mutable application state
+  env: { ... }     // Environment configuration
+}
+```
+
+The VM can read from all three, but only mutate `state` (via assignment operations).
+
+## Instruction Set
+
+The VM implements ~80 opcodes organized into categories:
+
+### Data Movement
+- `CONST` - Push constant
+- `LOAD` - Load slot value
+- `DUP` - Duplicate top of stack
+- `POP` - Discard top value
+
+### Arithmetic
+- `ADD`, `SUB`, `MUL`, `DIV`, `MOD`
+- `NEG` - Negate number
+
+### Comparison
+- `LT`, `GT`, `LTE`, `GTE`
+- `EQ`, `NEQ` - Loose equality
+- `STRICT_EQ`, `STRICT_NEQ` - Strict equality
+
+### Logical
+- `NOT` - Logical negation
+- `JUMP_IF_FALSE`, `JUMP_IF_TRUE` - Conditional jumps
+- `JUMP` - Unconditional jump
+
+### Object Operations
+- `INDEX` - Array/object indexing
+- `OPTIONAL_INDEX` - Optional chaining (`?.`)
+- `WILDCARD` - Wildcard selector (`[*]`)
+- `RECURSIVE_DESCENT` - Recursive property search (`..`)
+
+### Construction
+- `MAKE_ARRAY` - Create array from stack values
+- `MAKE_OBJ` - Create object from key-value pairs
+- `SPREAD` - Spread operator
+
+### Function Calls
+- `CALL` - Invoke built-in function
+
+### Mutations
+- `SET_PATH` - Assign to variable
+- `INC_PATH`, `DEC_PATH` - Increment/decrement
+- `APPEND_PATH` - Push to array
+
+### Control
+- `RETURN` - Exit and return value
+
+## Lambda Execution
+
+Lambdas compile to **nested bytecode programs**:
+
+```javascript
+filter(x => x > 5)
+```
+
+Generates two programs:
+
+**Main Program:**
+```
+LOAD items
+CONST <lambda>
+CALL filter 2
+```
+
+**Lambda Program:**
+```
+LOAD x
+CONST 5
+GT
+RETURN
+```
+
+When the VM calls `filter()`, it:
+1. Invokes the lambda for each item
+2. Creates a new context with `x` bound
+3. Executes the lambda's bytecode
+4. Collects results that return `true`
+
+## Performance Design
+
+### Fused Instructions
+Common patterns combine into single instructions:
+
+**Before:**
+```
+LOAD x
+CONST 100
+GT
+```
+
+**After:**
+```
+LOAD_GT_CONST x 100
+```
+
+This reduces:
+- Instruction count (3→1)
+- Stack operations (4→1)
+- VM dispatch overhead
+
+### Range Checks
+Range comparisons optimize to single instruction:
+
+**Before:** `x >= 0 && x <= 100` (6 instructions)
+**After:** `RANGE_CHECK x 0 100` (1 instruction)
+
+### Slot Pre-Resolution
+Variable paths resolve once at execution start:
+
+**Slow:** Parse `"data.items.price"` on every access
+**Fast:** Resolve to slot index, access by array lookup
+
+## Security Model
+
+The VM is designed for **safe execution**:
+
+### Sandboxing
+- No access to JavaScript globals
+- No `eval()` or code generation
+- All operations through bytecode
+
+### Prototype Pollution Prevention
+Blocks dangerous property names:
+- `__proto__`
+- `constructor`
+- `prototype`
+
+### Resource Limits
+- Maximum recursion depth (100)
+- Maximum flatten depth (100)
+- Stack overflow protection
+
+### Determinism
+Same input **always** produces same output:
+- No access to `Date.now()` or `Math.random()` in expressions
+- Built-in functions are pure (except mutations)
+- Execution is reproducible
+
+## Built-in Functions
+
+Two categories of built-ins:
+
+### Pure Functions
+Regular functions that don't need context:
+```javascript
+toString(value)
+round(num, decimals)
+slice(arr, start, end)
+```
+
+### Higher-Order Functions
+Functions that accept lambdas:
+```javascript
+filter(array, lambda)
+map(array, lambda)
+reduce(array, lambda, initial)
+```
+
+Higher-order functions receive the execution context to invoke lambdas with proper variable binding.
+
+## Example: Full Execution
+
+Expression:
+```javascript
+data.items.filter(x => x.price < 100)
+```
+
+**Compiled Bytecode:**
+```
+Main Program:
+  constants: [<lambda>, 100]
+  slots: ["data.items"]
+  code:
+    LOAD 0              // Load data.items
+    CONST 0             // Push lambda
+    CALL filter 2       // filter(items, lambda)
+    RETURN
+
+Lambda Program:
+  constants: [100]
+  slots: ["x.price"]
+  code:
+    LOAD 0              // Load x.price
+    CONST 0             // Push 100
+    LT                  // price < 100
+    RETURN
+```
+
+**Execution Flow:**
+1. VM loads `data.items` from context
+2. VM calls `filter()` with items and lambda
+3. For each item, `filter()`:
+   - Creates context with `x` = item
+   - Executes lambda bytecode
+   - Keeps item if lambda returns `true`
+4. Returns filtered array
+
+## Why This Architecture?
+
+This design makes Jext ideal for:
+
+✓ **Safe data transformations** - No code injection
+✓ **High-performance filtering** - Compile once, run many times
+✓ **Embedded environments** - Simple runtime, predictable behavior
+✓ **Untrusted input** - Sandboxed execution
+✓ **Debugging** - Inspectable bytecode and execution
+
+The stack-based VM provides JavaScript-like expressiveness without JavaScript's complexity or security risks.

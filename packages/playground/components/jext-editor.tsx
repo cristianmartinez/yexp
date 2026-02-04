@@ -4,14 +4,14 @@ import { useRef } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import type { editor, languages, IPosition } from 'monaco-editor';
 
-interface ExprEditorProps {
+interface JextEditorProps {
   value: string;
   onChange: (value: string) => void;
   context?: Record<string, any>;
   height?: string;
 }
 
-export function ExprEditor({ value, onChange, context = {}, height = '120px' }: ExprEditorProps) {
+export function JextEditor({ value, onChange, context = {}, height = '120px' }: JextEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {

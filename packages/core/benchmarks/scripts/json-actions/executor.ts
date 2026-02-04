@@ -17,7 +17,7 @@ export type JsonAction =
 
 export type JsonValue =
   | { type: 'literal'; value: any }
-  | { type: 'expr'; expr: string } // Expr expression for reading
+  | { type: 'jext'; expr: string } // Expr expression for reading
   | { type: 'path'; path: string };
 
 /**
@@ -68,7 +68,7 @@ function evaluateValue(value: JsonValue, context: any): any {
     case 'literal':
       return value.value;
 
-    case 'expr': {
+    case 'jext': {
       // Use Expr to evaluate expressions (read-only)
       const bytecode = compile(parse(tokenize(value.expr)));
       return evalExpr(bytecode, context as any);

@@ -1,0 +1,121 @@
+# Syntax Reference
+
+Jext uses JavaScript-like syntax with functional programming features.
+
+## Property Access
+
+```javascript
+data.user.name
+data.user?.profile?.avatar  // Optional chaining
+```
+
+## Array Indexing
+
+```javascript
+data.items[0]
+data.items[-1]              // Negative indexing
+data.items[.price > 100]    // Predicate filtering
+data.items[*].name          // Wildcard (map all)
+```
+
+## Operators
+
+### Arithmetic
+```javascript
+a + b
+a - b
+a * b
+a / b
+a % b    // Modulo
+```
+
+### Comparison
+```javascript
+a == b   // Loose equality
+a === b  // Strict equality
+a != b
+a !== b
+a < b
+a <= b
+a > b
+a >= b
+```
+
+### Logical
+```javascript
+a && b
+a || b
+!a
+a ?? b   // Null coalescing
+```
+
+## Lambdas
+
+### Arrow Functions
+```javascript
+(x) => x * 2
+(a, b) => a + b
+x => x > 5              // Single param (no parens)
+```
+
+### Dot Shorthand
+```javascript
+.price > 100            // Same as: (x) => x.price > 100
+.active                 // Same as: (x) => x.active
+.user.name              // Same as: (x) => x.user.name
+```
+
+## Array Methods
+
+### Method Call Syntax
+```javascript
+data.items.filter(x => x > 5)
+data.items.map(x => x * 2)
+data.users.filter(.active).map(.name)
+```
+
+### Pipe Operator
+```javascript
+data.items |> filter(x => x > 5)
+data.items |> map(x => x * 2) |> reduce((a, b) => a + b, 0)
+```
+
+### Mixed Syntax
+```javascript
+data.items.filter(x => x > 5) |> map(x => x * 2)
+```
+
+## Template Literals
+
+```javascript
+`Hello, ${data.user.name}!`
+`Total: $${data.cart |> reduce((sum, item) => sum + item.price, 0)}`
+```
+
+## Object Literals
+
+```javascript
+{ name: "Alice", age: 25 }
+{ ...data.defaults, ...state.overrides }
+{ count: data.items |> length, total: data.items |> add }
+```
+
+## Spread Operator
+
+```javascript
+[...data.items, newItem]
+{ ...obj1, ...obj2, extra: "value" }
+max(...data.values)
+concat(...arrays)
+```
+
+## Ternary Operator
+
+```javascript
+age >= 18 ? "adult" : "minor"
+user ? user.name : "Guest"
+```
+
+## Comments
+
+Jext doesn't support comments in expressions (they're meant to be data, not code).

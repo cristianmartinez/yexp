@@ -17,7 +17,7 @@ type JsonAction =
 
 type JsonValue =
   | { type: 'literal'; value: any }
-  | { type: 'expr'; expr: string }  // Expr expression for reading
+  | { type: 'jext'; expr: string }  // Expr expression for reading
   | { type: 'path'; path: string };
 ```
 
@@ -30,8 +30,8 @@ type JsonValue =
   "type": "assign",
   "path": "state.count",
   "value": {
-    "type": "expr",
-    "expr": "state.count + 1"
+    "type": "jext",
+    "jext": "state.count + 1"
   }
 }
 ```
@@ -43,7 +43,7 @@ Equivalent to: `state.count = state.count + 1`
 ```json
 {
   "type": "conditional",
-  "condition": { "type": "expr", "expr": "state.count > 5" },
+  "condition": { "type": "jext", "jext": "state.count > 5" },
   "then": {
     "type": "assign",
     "path": "state.message",
@@ -109,7 +109,7 @@ const context = { state: { count: 0 } };
 executeAction({
   type: 'assign',
   path: 'state.count',
-  value: { type: 'expr', expr: 'state.count + 1' }
+  value: { type: 'jext', expr: 'state.count + 1' }
 }, context);
 
 console.log(context.state.count); // 1
@@ -133,8 +133,8 @@ console.log(context.state.count); // 1
   "type": "assign",
   "path": "state.total",
   "value": {
-    "type": "expr",
-    "expr": "items |> map(.price * .qty) |> add"  // ← Expr handles computation
+    "type": "jext",
+    "jext": "items |> map(.price * .qty) |> add"  // ← Expr handles computation
   }
 }
 ```
