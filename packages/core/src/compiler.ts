@@ -82,6 +82,114 @@ export function compile(ast: ASTNode): BytecodeProgram {
     }
   }
 
+  /**
+   * Try to compile fused comparison opcodes (LOAD + CONST + comparison)
+   * Returns true if pattern was detected and compiled, false otherwise
+   */
+  function tryCompileFusedComparison(node: ASTNode): boolean {
+    if (node.type !== 'BinaryOp') return false;
+
+    const op = node.operator;
+    const isComparison = ['>', '>=', '<', '<=', '==', '!='].includes(op);
+    if (!isComparison) return false;
+
+    // Pattern 1: LOAD slot, compare to constant (e.g., x > 5)
+    if (isPath(node.left) && node.right.type === 'Literal') {
+      const slotIdx = addSlot(resolvePath(node.left));
+      const constValue = node.right.value;
+
+      // Special case: comparison with null
+      if (constValue === null) {
+        if (op === '==') {
+          emit(Opcode.IS_NULL, slotIdx);
+          return true;
+        }
+        if (op === '!=') {
+          emit(Opcode.IS_NOT_NULL, slotIdx);
+          return true;
+        }
+      }
+
+      // Special case: increment/decrement detection for number constants
+      if (typeof constValue === 'number') {
+        switch (op) {
+          case '>':
+            emit(Opcode.LOAD_GT_CONST, slotIdx, constValue);
+            return true;
+          case '>=':
+            emit(Opcode.LOAD_GTE_CONST, slotIdx, constValue);
+            return true;
+          case '<':
+            emit(Opcode.LOAD_LT_CONST, slotIdx, constValue);
+            return true;
+          case '<=':
+            emit(Opcode.LOAD_LTE_CONST, slotIdx, constValue);
+            return true;
+          case '==':
+            emit(Opcode.LOAD_EQ_CONST, slotIdx, constValue);
+            return true;
+          case '!=':
+            emit(Opcode.LOAD_NEQ_CONST, slotIdx, constValue);
+            return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Try to compile fused arithmetic opcodes (LOAD + CONST + arithmetic)
+   * Returns true if pattern was detected and compiled, false otherwise
+   */
+  function tryCompileFusedArithmetic(node: ASTNode): boolean {
+    if (node.type !== 'BinaryOp') return false;
+
+    const op = node.operator;
+    const isArithmetic = ['+', '-', '*', '/', '%'].includes(op);
+    if (!isArithmetic) return false;
+
+    // Pattern: LOAD slot, operate with constant (e.g., x + 10)
+    if (isPath(node.left) && node.right.type === 'Literal') {
+      const slotIdx = addSlot(resolvePath(node.left));
+      const constValue = node.right.value;
+
+      // Only optimize for number constants
+      if (typeof constValue !== 'number') return false;
+
+      // Special cases: INCREMENT and DECREMENT
+      if (op === '+' && constValue === 1) {
+        emit(Opcode.INCREMENT, slotIdx);
+        return true;
+      }
+      if (op === '-' && constValue === 1) {
+        emit(Opcode.DECREMENT, slotIdx);
+        return true;
+      }
+
+      // General arithmetic operations
+      switch (op) {
+        case '+':
+          emit(Opcode.LOAD_ADD_CONST, slotIdx, constValue);
+          return true;
+        case '-':
+          emit(Opcode.LOAD_SUB_CONST, slotIdx, constValue);
+          return true;
+        case '*':
+          emit(Opcode.LOAD_MUL_CONST, slotIdx, constValue);
+          return true;
+        case '/':
+          emit(Opcode.LOAD_DIV_CONST, slotIdx, constValue);
+          return true;
+        case '%':
+          emit(Opcode.LOAD_MOD_CONST, slotIdx, constValue);
+          return true;
+      }
+    }
+
+    return false;
+  }
+
   function compileNode(node: ASTNode): void {
     switch (node.type) {
       case 'Literal':
@@ -123,6 +231,15 @@ export function compile(ast: ASTNode): BytecodeProgram {
         break;
 
       case 'BinaryOp':
+        // Try to compile as fused opcode first
+        if (tryCompileFusedComparison(node)) {
+          break; // Successfully compiled as fused comparison
+        }
+        if (tryCompileFusedArithmetic(node)) {
+          break; // Successfully compiled as fused arithmetic
+        }
+
+        // Fall back to standard compilation
         compileNode(node.left);
         compileNode(node.right);
         switch (node.operator) {
@@ -163,6 +280,14 @@ export function compile(ast: ASTNode): BytecodeProgram {
         break;
 
       case 'UnaryOp':
+        // Optimize: ! on a simple path becomes IS_FALSY
+        if (node.operator === '!' && isPath(node.operand)) {
+          const slotIdx = addSlot(resolvePath(node.operand));
+          emit(Opcode.IS_FALSY, slotIdx);
+          break;
+        }
+
+        // Fall back to standard compilation
         compileNode(node.operand);
         if (node.operator === '-') emit(Opcode.NEG);
         else emit(Opcode.NOT);

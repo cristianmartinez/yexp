@@ -284,6 +284,31 @@ export enum Opcode {
   RANGE_CHECK_LO_INCLUSIVE = 'RANGE_CHECK_LO_INCLUSIVE',  // value >= min && value < max
   RANGE_CHECK_HI_INCLUSIVE = 'RANGE_CHECK_HI_INCLUSIVE',  // value > min && value <= max
 
+  // Fused comparison opcodes (LOAD + CONST + comparison)
+  LOAD_GT_CONST = 'LOAD_GT_CONST',       // Load slot, compare > constant
+  LOAD_GTE_CONST = 'LOAD_GTE_CONST',     // Load slot, compare >= constant
+  LOAD_LT_CONST = 'LOAD_LT_CONST',       // Load slot, compare < constant
+  LOAD_LTE_CONST = 'LOAD_LTE_CONST',     // Load slot, compare <= constant
+  LOAD_EQ_CONST = 'LOAD_EQ_CONST',       // Load slot, compare == constant
+  LOAD_NEQ_CONST = 'LOAD_NEQ_CONST',     // Load slot, compare != constant
+
+  // Fused arithmetic opcodes (LOAD + CONST + arithmetic)
+  LOAD_ADD_CONST = 'LOAD_ADD_CONST',     // Load slot, add constant
+  LOAD_SUB_CONST = 'LOAD_SUB_CONST',     // Load slot, subtract constant
+  LOAD_MUL_CONST = 'LOAD_MUL_CONST',     // Load slot, multiply by constant
+  LOAD_DIV_CONST = 'LOAD_DIV_CONST',     // Load slot, divide by constant
+  LOAD_MOD_CONST = 'LOAD_MOD_CONST',     // Load slot, modulo constant
+
+  // Optimized increment/decrement
+  INCREMENT = 'INCREMENT',               // Load slot, add 1
+  DECREMENT = 'DECREMENT',               // Load slot, subtract 1
+
+  // Null and boolean checks
+  IS_NULL = 'IS_NULL',                   // Load slot, compare == null
+  IS_NOT_NULL = 'IS_NOT_NULL',           // Load slot, compare != null
+  IS_TRUTHY = 'IS_TRUTHY',               // Load slot, boolean coercion !!x
+  IS_FALSY = 'IS_FALSY',                 // Load slot, boolean negation !x
+
   // Logical & control flow
   NOT = 'NOT',
   JUMP_IF_FALSE = 'JUMP_IF_FALSE',

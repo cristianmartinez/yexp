@@ -25,20 +25,12 @@
       "slots": [
         "state.count"
       ],
-      "constants": [
-        0
-      ],
+      "constants": [],
       "code": [
         [
-          "LOAD",
+          "LOAD_GT_CONST",
+          0,
           0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "GT"
         ],
         [
           "RETURN"
@@ -144,20 +136,12 @@
             "slots": [
               "$it.price"
             ],
-            "constants": [
-              100
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                100
               ],
               [
                 "RETURN"
@@ -206,24 +190,17 @@
               "$it.active"
             ],
             "constants": [
-              18,
               false
             ],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                18
               ],
               [
                 "JUMP_IF_FALSE",
-                6
+                4
               ],
               [
                 "LOAD",
@@ -231,11 +208,11 @@
               ],
               [
                 "JUMP",
-                7
+                5
               ],
               [
                 "CONST",
-                1
+                0
               ],
               [
                 "RETURN"
@@ -350,20 +327,12 @@
             "slots": [
               "$it.price"
             ],
-            "constants": [
-              100
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                100
               ],
               [
                 "RETURN"
@@ -843,24 +812,17 @@
               "u.active"
             ],
             "constants": [
-              18,
               false
             ],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                18
               ],
               [
                 "JUMP_IF_FALSE",
-                6
+                4
               ],
               [
                 "LOAD",
@@ -868,11 +830,11 @@
               ],
               [
                 "JUMP",
-                7
+                5
               ],
               [
                 "CONST",
-                1
+                0
               ],
               [
                 "RETURN"
@@ -942,20 +904,12 @@
       "slots": [
         "state.count"
       ],
-      "constants": [
-        10
-      ],
+      "constants": [],
       "code": [
         [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "ADD"
+          "LOAD_ADD_CONST",
+          0,
+          10
         ],
         [
           "RETURN"
@@ -998,32 +952,25 @@
         "state.value"
       ],
       "constants": [
-        100,
         0.8,
         20
       ],
       "code": [
         [
-          "LOAD",
-          0
+          "LOAD_ADD_CONST",
+          0,
+          100
         ],
         [
           "CONST",
           0
-        ],
-        [
-          "ADD"
-        ],
-        [
-          "CONST",
-          1
         ],
         [
           "MUL"
         ],
         [
           "CONST",
-          2
+          1
         ],
         [
           "SUB"
@@ -1085,15 +1032,12 @@
       ],
       "code": [
         [
-          "LOAD",
+          "IS_FALSY",
           0
         ],
         [
-          "NOT"
-        ],
-        [
           "JUMP_IF_TRUE",
-          5
+          4
         ],
         [
           "LOAD",
@@ -1101,7 +1045,7 @@
         ],
         [
           "JUMP",
-          6
+          5
         ],
         [
           "CONST",
@@ -1123,25 +1067,18 @@
         "state.force"
       ],
       "constants": [
-        0,
         false,
         true
       ],
       "code": [
         [
-          "LOAD",
+          "LOAD_GT_CONST",
+          0,
           0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "GT"
         ],
         [
           "JUMP_IF_FALSE",
-          6
+          4
         ],
         [
           "LOAD",
@@ -1149,15 +1086,15 @@
         ],
         [
           "JUMP",
-          7
+          5
         ],
         [
           "CONST",
-          1
+          0
         ],
         [
           "JUMP_IF_TRUE",
-          10
+          8
         ],
         [
           "LOAD",
@@ -1165,11 +1102,11 @@
         ],
         [
           "JUMP",
-          11
+          9
         ],
         [
           "CONST",
-          2
+          1
         ],
         [
           "RETURN"
@@ -1465,20 +1402,12 @@
             "slots": [
               "$it.price"
             ],
-            "constants": [
-              100
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                100
               ],
               [
                 "RETURN"
@@ -2167,20 +2096,12 @@
             "slots": [
               "x"
             ],
-            "constants": [
-              2
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "MUL"
+                "LOAD_MUL_CONST",
+                0,
+                2
               ],
               [
                 "RETURN"
@@ -2304,20 +2225,12 @@
             "slots": [
               "$it.age"
             ],
-            "constants": [
-              18
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                18
               ],
               [
                 "RETURN"
@@ -2447,20 +2360,12 @@
             "slots": [
               "$it.price"
             ],
-            "constants": [
-              50
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                50
               ],
               [
                 "RETURN"
@@ -2848,20 +2753,12 @@
             "slots": [
               "u.age"
             ],
-            "constants": [
-              21
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                21
               ],
               [
                 "RETURN"
@@ -3332,20 +3229,12 @@
             "slots": [
               "$it.qty"
             ],
-            "constants": [
-              1
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "GT"
+                "LOAD_GT_CONST",
+                0,
+                1
               ],
               [
                 "RETURN"
@@ -3392,20 +3281,12 @@
             "slots": [
               "$it.price"
             ],
-            "constants": [
-              100
-            ],
+            "constants": [],
             "code": [
               [
-                "LOAD",
-                0
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "LT"
+                "LOAD_LT_CONST",
+                0,
+                100
               ],
               [
                 "RETURN"
@@ -3862,20 +3743,12 @@
       "slots": [
         "state.count"
       ],
-      "constants": [
-        2
-      ],
+      "constants": [],
       "code": [
         [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "DIV"
+          "LOAD_DIV_CONST",
+          0,
+          2
         ],
         [
           "RETURN"
@@ -3890,20 +3763,12 @@
       "slots": [
         "state.value"
       ],
-      "constants": [
-        50
-      ],
+      "constants": [],
       "code": [
         [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "SUB"
+          "LOAD_SUB_CONST",
+          0,
+          50
         ],
         [
           "RETURN"
@@ -4342,11 +4207,8 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          "IS_FALSY",
           0
-        ],
-        [
-          "NOT"
         ],
         [
           "RETURN"

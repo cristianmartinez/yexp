@@ -1162,6 +1162,201 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         break;
       }
 
+      // Fused comparison opcodes (LOAD + CONST + comparison)
+      case Opcode.LOAD_GT_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value > constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot compare ${typeof value} and number`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_GTE_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value >= constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot compare ${typeof value} and number`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_LT_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value < constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot compare ${typeof value} and number`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_LTE_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value <= constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot compare ${typeof value} and number`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_EQ_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2];
+        const value = slotValues[slotIdx];
+        stack.push(value === constValue);
+        break;
+      }
+
+      case Opcode.LOAD_NEQ_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2];
+        const value = slotValues[slotIdx];
+        stack.push(value !== constValue);
+        break;
+      }
+
+      // Fused arithmetic opcodes (LOAD + CONST + arithmetic)
+      case Opcode.LOAD_ADD_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value + constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot add number to ${typeof value}`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_SUB_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value - constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot subtract number from ${typeof value}`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_MUL_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value * constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot multiply ${typeof value} by number`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_DIV_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          if (constValue === 0) {
+            return makeError('DIVISION_BY_ZERO', 'Division by zero');
+          }
+          stack.push(value / constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot divide ${typeof value} by number`);
+        }
+        break;
+      }
+
+      case Opcode.LOAD_MOD_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          if (constValue === 0) {
+            return makeError('DIVISION_BY_ZERO', 'Modulo by zero');
+          }
+          stack.push(value % constValue);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot compute modulo of ${typeof value}`);
+        }
+        break;
+      }
+
+      // Optimized increment/decrement
+      case Opcode.INCREMENT: {
+        const slotIdx = instruction[1] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value + 1);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot increment ${typeof value}`);
+        }
+        break;
+      }
+
+      case Opcode.DECREMENT: {
+        const slotIdx = instruction[1] as number;
+        const value = slotValues[slotIdx];
+
+        if (typeof value === 'number') {
+          stack.push(value - 1);
+        } else {
+          return makeError('TYPE_ERROR', `Cannot decrement ${typeof value}`);
+        }
+        break;
+      }
+
+      // Null and boolean checks
+      case Opcode.IS_NULL: {
+        const slotIdx = instruction[1] as number;
+        const value = slotValues[slotIdx];
+        stack.push(value === null);
+        break;
+      }
+
+      case Opcode.IS_NOT_NULL: {
+        const slotIdx = instruction[1] as number;
+        const value = slotValues[slotIdx];
+        stack.push(value !== null);
+        break;
+      }
+
+      case Opcode.IS_TRUTHY: {
+        const slotIdx = instruction[1] as number;
+        const value = slotValues[slotIdx] ?? null;
+        stack.push(isTruthy(value));
+        break;
+      }
+
+      case Opcode.IS_FALSY: {
+        const slotIdx = instruction[1] as number;
+        const value = slotValues[slotIdx] ?? null;
+        stack.push(!isTruthy(value));
+        break;
+      }
+
       case Opcode.JUMP_IF_FALSE: {
         const target = instruction[1] as number;
         const v = pop();
