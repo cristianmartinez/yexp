@@ -470,10 +470,10 @@ export function parse(tokens: Token[]): ASTNode {
   }
 
   function isCallable(node: ASTNode): boolean {
-    return node.type === 'Identifier';
+    return node.type === 'Identifier' || node.type === 'MemberAccess';
   }
 
-  function parseCallArgs(callee: ASTNode): CallNode {
+  function parseCallArgs(callee: ASTNode): ASTNode {
     advance(); // skip (
     const args: ASTNode[] = [];
     while (peek() !== TokenType.RightParen && peek() !== TokenType.EOF) {
@@ -482,11 +482,25 @@ export function parse(tokens: Token[]): ASTNode {
       if (!match(TokenType.Comma)) break;
     }
     expect(TokenType.RightParen);
+
+    // Transform method calls to pipe operations
+    // e.g., arr.filter(x => x > 5) becomes arr |> filter(x => x > 5)
+    if (callee.type === 'MemberAccess') {
+      const memberAccess = callee as MemberAccessNode;
+      return {
+        type: 'Pipe',
+        value: memberAccess.object,
+        callee: memberAccess.property,
+        args,
+      } as PipeNode;
+    }
+
+    // Regular function call
     return {
       type: 'Call',
       callee: (callee as IdentifierNode).name,
       args,
-    };
+    } as CallNode;
   }
 
   // ─── Infix ──────────────────────────────────────────────────────────────

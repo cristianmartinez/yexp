@@ -718,6 +718,162 @@ describe('integration', () => {
     });
   });
 
+  describe('method call syntax (syntactic sugar)', () => {
+    test('array.filter() works like array |> filter()', () => {
+      expect(
+        run('[1, 2, 3, 4].filter(x => x > 2)', ctx()),
+      ).toEqual([3, 4]);
+    });
+
+    test('array.map() works like array |> map()', () => {
+      expect(
+        run('[1, 2, 3].map(x => x * 2)', ctx()),
+      ).toEqual([2, 4, 6]);
+    });
+
+    test('array.find() works like array |> find()', () => {
+      expect(
+        run('[1, 2, 3, 4].find(x => x > 2)', ctx()),
+      ).toBe(3);
+    });
+
+    test('array.reduce() works with initial value', () => {
+      expect(
+        run('[1, 2, 3].reduce((acc, x) => acc + x, 0)', ctx()),
+      ).toBe(6);
+    });
+
+    test('array.every() checks all elements', () => {
+      expect(run('[1, 2, 3].every(x => x > 0)', ctx())).toBe(true);
+      expect(run('[1, 2, 3].every(x => x > 2)', ctx())).toBe(false);
+    });
+
+    test('array.some() checks any element', () => {
+      expect(run('[1, 2, 3].some(x => x > 2)', ctx())).toBe(true);
+      expect(run('[1, 2, 3].some(x => x > 5)', ctx())).toBe(false);
+    });
+
+    test('method chaining works', () => {
+      expect(
+        run('[1, 2, 3, 4, 5].filter(x => x > 2).map(x => x * 2)', ctx()),
+      ).toEqual([6, 8, 10]);
+    });
+
+    test('method chaining with three methods', () => {
+      expect(
+        run('[1, 2, 3].map(x => x * 2).filter(x => x > 3).reduce((acc, x) => acc + x, 0)', ctx()),
+      ).toBe(10);
+    });
+
+    test('property access with method call', () => {
+      expect(
+        run('data.items.filter(x => x > 2)', ctx({}, { items: [1, 2, 3, 4] })),
+      ).toEqual([3, 4]);
+    });
+
+    test('nested property access with method call', () => {
+      expect(
+        run(
+          'data.products.filter(p => p.price < 100)',
+          ctx({}, {
+            products: [
+              { name: 'Laptop', price: 999 },
+              { name: 'Mouse', price: 25 },
+              { name: 'Keyboard', price: 75 }
+            ]
+          })
+        ),
+      ).toEqual([
+        { name: 'Mouse', price: 25 },
+        { name: 'Keyboard', price: 75 }
+      ]);
+    });
+
+    test('string.replace() works like string |> replace()', () => {
+      expect(
+        run('"hello world".replace("world", "there")', ctx()),
+      ).toBe('hello there');
+    });
+
+    test('string.split() works like string |> split()', () => {
+      expect(
+        run('"a,b,c".split(",")', ctx()),
+      ).toEqual(['a', 'b', 'c']);
+    });
+
+    test('array.join() works like array |> join()', () => {
+      expect(
+        run('["a", "b", "c"].join("-")', ctx()),
+      ).toBe('a-b-c');
+    });
+
+    test('string.toLowerCase() works', () => {
+      expect(
+        run('"HELLO".toLowerCase()', ctx()),
+      ).toBe('hello');
+    });
+
+    test('string.toUpperCase() works', () => {
+      expect(
+        run('"hello".toUpperCase()', ctx()),
+      ).toBe('HELLO');
+    });
+
+    test('array.slice() works', () => {
+      expect(
+        run('[1, 2, 3, 4, 5].slice(1, 3)', ctx()),
+      ).toEqual([2, 3]);
+    });
+
+    test('array.includes() works', () => {
+      expect(
+        run('[1, 2, 3].includes(2)', ctx()),
+      ).toBe(true);
+      expect(
+        run('[1, 2, 3].includes(5)', ctx()),
+      ).toBe(false);
+    });
+
+    test('array.reverse() works', () => {
+      expect(
+        run('[1, 2, 3].reverse()', ctx()),
+      ).toEqual([3, 2, 1]);
+    });
+
+    test('array.sort() with comparator', () => {
+      expect(
+        run('[3, 1, 2].sort((a, b) => a - b)', ctx()),
+      ).toEqual([1, 2, 3]);
+    });
+
+    test('array.flatMap() works', () => {
+      expect(
+        run('[1, 2, 3].flatMap(x => [x, x * 2])', ctx()),
+      ).toEqual([1, 2, 2, 4, 3, 6]);
+    });
+
+    test('method calls with dot shorthand', () => {
+      expect(
+        run(
+          'data.items.filter(.price > 50)',
+          ctx({}, { items: [{ price: 30 }, { price: 70 }] }),
+        ),
+      ).toEqual([{ price: 70 }]);
+    });
+
+    test('mixed pipe and method syntax', () => {
+      expect(
+        run('[1, 2, 3, 4].filter(x => x > 2) |> map(x => x * 2)', ctx()),
+      ).toEqual([6, 8]);
+    });
+
+    test('method call then pipe then method call', () => {
+      expect(
+        run('[1, 2, 3, 4].filter(x => x > 1) |> map(x => x * 2) |> filter(x => x > 5).reduce((acc, x) => acc + x, 0)', ctx()),
+      ).toBe(14);
+    });
+  });
+
   describe('utility functions', () => {
     test('first returns first element', () => {
       expect(run('data.items |> first', ctx({}, { items: [1, 2, 3] }))).toBe(1);
