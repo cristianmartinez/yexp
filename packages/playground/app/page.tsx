@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Code2, PlayCircle, Database, Binary, AlertCircle, BookOpen, Zap } from 'lucide-react';
+import { ExprEditor } from '@/components/expr-editor';
+import { JsonViewer } from '@/components/json-viewer';
 
 export default function PlaygroundPage() {
   const [expression, setExpression] = useState('data.items[0].name');
@@ -24,9 +26,17 @@ export default function PlaygroundPage() {
   "env": {}
 }`);
 
+  const parsedContext = useMemo(() => {
+    try {
+      return JSON.parse(contextJSON);
+    } catch {
+      return { data: {}, state: {}, env: {} };
+    }
+  }, [contextJSON]);
+
   const result = useMemo(() => {
     try {
-      const context: ExecutionContext = JSON.parse(contextJSON);
+      const context: ExecutionContext = parsedContext;
       const tokens = tokenize(expression);
       const ast = parse(tokens);
       const program = compile(ast);
@@ -35,7 +45,7 @@ export default function PlaygroundPage() {
     } catch (e: any) {
       return { value: null, error: e.message, bytecode: null };
     }
-  }, [expression, contextJSON]);
+  }, [expression, parsedContext]);
 
   return (
     <div className="min-h-screen p-6 md:p-8">
@@ -75,12 +85,12 @@ export default function PlaygroundPage() {
                 </CardTitle>
                 <CardDescription>Write your Expr expression to evaluate</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Textarea
+              <CardContent className="p-0 overflow-hidden">
+                <ExprEditor
                   value={expression}
-                  onChange={(e) => setExpression(e.target.value)}
-                  className="min-h-[120px] font-mono text-sm"
-                  placeholder="data.items[0].name"
+                  onChange={setExpression}
+                  context={parsedContext}
+                  height="120px"
                 />
               </CardContent>
             </Card>
@@ -123,9 +133,9 @@ export default function PlaygroundPage() {
                     </pre>
                   </div>
                 ) : (
-                  <pre className="text-sm font-mono whitespace-pre-wrap p-4 bg-muted rounded-md">
-                    {JSON.stringify(result.value, null, 2)}
-                  </pre>
+                  <div className="rounded-md overflow-hidden border border-border">
+                    <JsonViewer value={result.value} height="200px" />
+                  </div>
                 )}
               </CardContent>
             </Card>
