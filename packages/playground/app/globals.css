@@ -124,3 +124,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* React Split Gutter Styles */
+.gutter {
+  background-color: hsl(var(--border));
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+}
+
+.gutter.gutter-vertical {
+  cursor: row-resize;
+}

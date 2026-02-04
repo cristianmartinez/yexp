@@ -8,6 +8,7 @@ import { ExprEditor } from '@/components/expr-editor';
 import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 import { PageHeader } from '@/components/page-header';
+import Split from 'react-split';
 
 export default function PlaygroundPage() {
   const [expression, setExpression] = useState('data.items[0].name');
@@ -49,92 +50,113 @@ export default function PlaygroundPage() {
         <PageHeader currentPage="playground" />
       </div>
 
-      {/* Expression panel at top */}
-      <div className="border-b flex flex-col">
-        <div className="px-4 py-2 border-b bg-muted/50">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Code2 className="w-4 h-4" />
-            Expression
-          </div>
-        </div>
-        <div className="h-32">
-          <ExprEditor
-            value={expression}
-            onChange={setExpression}
-            context={parsedContext}
-            height="100%"
-          />
-        </div>
-      </div>
-
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left panel: Context */}
-        <div className="w-1/3 border-r flex flex-col">
+      <Split
+        className="flex-1 flex flex-col"
+        direction="vertical"
+        sizes={[20, 80]}
+        minSize={[100, 300]}
+        gutterSize={4}
+      >
+        {/* Expression panel */}
+        <div className="border-b flex flex-col overflow-hidden">
           <div className="px-4 py-2 border-b bg-muted/50">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Database className="w-4 h-4" />
-              Context
+              <Code2 className="w-4 h-4" />
+              Expression
             </div>
           </div>
-          <div className="flex-1 overflow-hidden">
-            <JsonEditor value={contextJSON} onChange={setContextJSON} height="100%" />
+          <div className="flex-1">
+            <ExprEditor
+              value={expression}
+              onChange={setExpression}
+              context={parsedContext}
+              height="100%"
+            />
           </div>
         </div>
 
-        {/* Right panel: Result and Bytecode */}
-        <div className="flex-1 flex flex-col">
-          {/* Result panel */}
-          <div className="h-1/2 border-b flex flex-col">
+        {/* Main content area */}
+        <Split
+          className="flex"
+          direction="horizontal"
+          sizes={[33, 67]}
+          minSize={[200, 300]}
+          gutterSize={4}
+        >
+          {/* Left panel: Context */}
+          <div className="border-r flex flex-col overflow-hidden">
             <div className="px-4 py-2 border-b bg-muted/50">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <PlayCircle className="w-4 h-4" />
-                Result
+                <Database className="w-4 h-4" />
+                Context
               </div>
             </div>
-            <div className="flex-1 overflow-auto p-4">
-              {result.error ? (
-                <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
-                  <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
-                  <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
-                    {result.error}
-                  </pre>
-                </div>
-              ) : (
-                <div className="h-full border">
-                  <JsonViewer value={result.value} height="100%" />
-                </div>
-              )}
+            <div className="flex-1 overflow-hidden">
+              <JsonEditor value={contextJSON} onChange={setContextJSON} height="100%" />
             </div>
           </div>
 
-          {/* Bytecode panel */}
-          {result.bytecode && (
-            <div className="h-1/2 flex flex-col">
+          {/* Right panel: Result and Bytecode */}
+          <Split
+            className="flex flex-col"
+            direction="vertical"
+            sizes={result.bytecode ? [50, 50] : [100]}
+            minSize={[200, 200]}
+            gutterSize={4}
+          >
+            {/* Result panel */}
+            <div className="border-b flex flex-col overflow-hidden">
               <div className="px-4 py-2 border-b bg-muted/50">
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <Binary className="w-4 h-4" />
-                  Bytecode
+                  <PlayCircle className="w-4 h-4" />
+                  Result
                 </div>
               </div>
-              <div className="flex-1 overflow-auto p-4 space-y-4">
-                <div className="font-mono text-xs space-y-1 max-h-[200px] overflow-y-auto p-3 bg-muted/50 border">
-                  {result.bytecode.code.map((inst, i) => (
-                    <div key={i} className="flex gap-3">
-                      <span className="text-muted-foreground w-8 text-right">{i}:</span>
-                      <span className="text-primary font-medium">{inst.join(' ')}</span>
-                    </div>
-                  ))}
-                </div>
-                {result.bytecode.constants.length > 0 && (
-                  <div className="border">
-                    <JsonViewer value={result.bytecode.constants} height="150px" />
+              <div className="flex-1 overflow-auto p-4">
+                {result.error ? (
+                  <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
+                    <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
+                    <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
+                      {result.error}
+                    </pre>
+                  </div>
+                ) : (
+                  <div className="h-full border">
+                    <JsonViewer value={result.value} height="100%" />
                   </div>
                 )}
               </div>
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* Bytecode panel */}
+            {result.bytecode && (
+              <div className="flex flex-col overflow-hidden">
+                <div className="px-4 py-2 border-b bg-muted/50">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Binary className="w-4 h-4" />
+                    Bytecode
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto p-4 space-y-4">
+                  <div className="font-mono text-xs space-y-1 max-h-[200px] overflow-y-auto p-3 bg-muted/50 border">
+                    {result.bytecode.code.map((inst, i) => (
+                      <div key={i} className="flex gap-3">
+                        <span className="text-muted-foreground w-8 text-right">{i}:</span>
+                        <span className="text-primary font-medium">{inst.join(' ')}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {result.bytecode.constants.length > 0 && (
+                    <div className="border">
+                      <JsonViewer value={result.bytecode.constants} height="150px" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </Split>
+        </Split>
+      </Split>
     </div>
   );
 }
