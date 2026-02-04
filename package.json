@@ -5,11 +5,14 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "build": "turbo build",
+    "dev": "turbo dev",
     "test": "turbo test",
     "lint": "turbo lint",
     "check": "turbo check",
     "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "playground": "turbo dev --filter=@expr/playground",
+    "playground:build": "turbo build --filter=@expr/playground"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
