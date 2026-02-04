@@ -1,0 +1,296 @@
+// ─── Token Types ────────────────────────────────────────────────────────────
+
+export enum TokenType {
+  // Literals
+  Number = 'Number',
+  String = 'String',
+  TemplateHead = 'TemplateHead',
+  TemplateMiddle = 'TemplateMiddle',
+  TemplateTail = 'TemplateTail',
+  TemplateNoSub = 'TemplateNoSub',
+  True = 'True',
+  False = 'False',
+  Null = 'Null',
+
+  // Identifiers
+  Identifier = 'Identifier',
+
+  // Arithmetic
+  Plus = 'Plus',
+  Minus = 'Minus',
+  Star = 'Star',
+  Slash = 'Slash',
+  Percent = 'Percent',
+
+  // Comparison
+  EqualEqual = 'EqualEqual',
+  BangEqual = 'BangEqual',
+  Less = 'Less',
+  Greater = 'Greater',
+  LessEqual = 'LessEqual',
+  GreaterEqual = 'GreaterEqual',
+
+  // Logical
+  AmpersandAmpersand = 'AmpersandAmpersand',
+  PipePipe = 'PipePipe',
+  Bang = 'Bang',
+
+  // Assignment & mutation
+  Equal = 'Equal',
+  PlusPlus = 'PlusPlus',
+  MinusMinus = 'MinusMinus',
+  LessLess = 'LessLess',
+
+  // Pipe
+  PipeGreater = 'PipeGreater',
+
+  // Spread
+  DotDotDot = 'DotDotDot',
+
+  // Punctuation
+  Dot = 'Dot',
+  Comma = 'Comma',
+  Colon = 'Colon',
+  LeftParen = 'LeftParen',
+  RightParen = 'RightParen',
+  LeftBracket = 'LeftBracket',
+  RightBracket = 'RightBracket',
+  LeftBrace = 'LeftBrace',
+  RightBrace = 'RightBrace',
+
+  // End
+  EOF = 'EOF',
+}
+
+export interface Token {
+  type: TokenType;
+  value: string;
+  position: number;
+}
+
+// ─── AST Node Types ─────────────────────────────────────────────────────────
+
+export type ASTNode =
+  | LiteralNode
+  | IdentifierNode
+  | MemberAccessNode
+  | IndexAccessNode
+  | BinaryOpNode
+  | UnaryOpNode
+  | LogicalOpNode
+  | CallNode
+  | PipeNode
+  | ArrayLiteralNode
+  | ObjectLiteralNode
+  | SpreadElementNode
+  | TemplateLiteralNode
+  | AssignmentNode
+  | UpdateNode
+  | AppendNode;
+
+export interface LiteralNode {
+  type: 'Literal';
+  value: number | string | boolean | null;
+  raw: string;
+}
+
+export interface IdentifierNode {
+  type: 'Identifier';
+  name: string;
+}
+
+export interface MemberAccessNode {
+  type: 'MemberAccess';
+  object: ASTNode;
+  property: string;
+}
+
+export interface IndexAccessNode {
+  type: 'IndexAccess';
+  object: ASTNode;
+  index: ASTNode;
+}
+
+export interface BinaryOpNode {
+  type: 'BinaryOp';
+  operator: '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=';
+  left: ASTNode;
+  right: ASTNode;
+}
+
+export interface UnaryOpNode {
+  type: 'UnaryOp';
+  operator: '-' | '!';
+  operand: ASTNode;
+}
+
+export interface LogicalOpNode {
+  type: 'LogicalOp';
+  operator: '&&' | '||';
+  left: ASTNode;
+  right: ASTNode;
+}
+
+export interface CallNode {
+  type: 'Call';
+  callee: string;
+  args: ASTNode[];
+}
+
+export interface PipeNode {
+  type: 'Pipe';
+  value: ASTNode;
+  callee: string;
+  args: ASTNode[];
+}
+
+export interface ArrayLiteralNode {
+  type: 'ArrayLiteral';
+  elements: ASTNode[];
+}
+
+export interface ObjectLiteralNode {
+  type: 'ObjectLiteral';
+  properties: ObjectProperty[];
+}
+
+export interface ObjectProperty {
+  key: string;
+  value: ASTNode;
+  shorthand: boolean;
+}
+
+export interface SpreadElementNode {
+  type: 'SpreadElement';
+  argument: ASTNode;
+}
+
+export interface TemplateLiteralNode {
+  type: 'TemplateLiteral';
+  parts: TemplatePart[];
+}
+
+export type TemplatePart =
+  | { type: 'string'; value: string }
+  | { type: 'expression'; value: ASTNode };
+
+export interface AssignmentNode {
+  type: 'Assignment';
+  target: ASTNode;
+  value: ASTNode;
+}
+
+export interface UpdateNode {
+  type: 'Update';
+  operator: '++' | '--';
+  target: ASTNode;
+}
+
+export interface AppendNode {
+  type: 'Append';
+  target: ASTNode;
+  value: ASTNode;
+}
+
+// ─── Opcodes ────────────────────────────────────────────────────────────────
+
+export enum Opcode {
+  // Constants & loading
+  CONST = 'CONST',
+  LOAD = 'LOAD',
+
+  // Arithmetic
+  ADD = 'ADD',
+  SUB = 'SUB',
+  MUL = 'MUL',
+  DIV = 'DIV',
+  MOD = 'MOD',
+  NEG = 'NEG',
+
+  // String
+  TO_STRING = 'TO_STRING',
+
+  // Comparison
+  EQ = 'EQ',
+  NEQ = 'NEQ',
+  LT = 'LT',
+  GT = 'GT',
+  LTE = 'LTE',
+  GTE = 'GTE',
+
+  // Logical & control flow
+  NOT = 'NOT',
+  JUMP_IF_FALSE = 'JUMP_IF_FALSE',
+  JUMP_IF_TRUE = 'JUMP_IF_TRUE',
+  JUMP = 'JUMP',
+
+  // Construction
+  MAKE_ARRAY = 'MAKE_ARRAY',
+  MAKE_OBJ = 'MAKE_OBJ',
+  SPREAD = 'SPREAD',
+
+  // Access
+  INDEX = 'INDEX',
+
+  // Function calls
+  CALL = 'CALL',
+
+  // Mutation
+  SET_PATH = 'SET_PATH',
+  DELETE_PATH = 'DELETE_PATH',
+  INC_PATH = 'INC_PATH',
+  DEC_PATH = 'DEC_PATH',
+  APPEND_PATH = 'APPEND_PATH',
+
+  // Control
+  RETURN = 'RETURN',
+}
+
+// ─── Bytecode ───────────────────────────────────────────────────────────────
+
+export type Instruction = [Opcode, ...unknown[]];
+
+export interface BytecodeProgram {
+  version: number;
+  slots: string[];
+  constants: ExprValue[];
+  code: Instruction[];
+}
+
+// ─── Values & Errors ────────────────────────────────────────────────────────
+
+export type ExprValue = number | string | boolean | null | ExprValue[] | ExprObject | ExprError;
+
+export type ExprObject = { [key: string]: ExprValue };
+
+export interface ExprError {
+  error: ExprErrorType;
+  message: string;
+}
+
+export type ExprErrorType =
+  | 'TYPE_ERROR'
+  | 'DIVISION_BY_ZERO'
+  | 'STACK_UNDERFLOW'
+  | 'INVALID_SLOT'
+  | 'INDEX_OUT_OF_BOUNDS'
+  | 'INVALID_INSTRUCTION'
+  | 'PARSE_ERROR'
+  | 'COMPILE_ERROR';
+
+export function isExprError(value: ExprValue): value is ExprError {
+  return typeof value === 'object' && value !== null && 'error' in value && 'message' in value;
+}
+
+export function makeError(error: ExprErrorType, message: string): ExprError {
+  return { error, message };
+}
+
+// ─── Execution Context ──────────────────────────────────────────────────────
+
+export interface ExecutionContext {
+  state: Record<string, ExprValue>;
+  data: Record<string, ExprValue>;
+  env: Record<string, ExprValue>;
+  [key: string]: Record<string, ExprValue>;
+}
