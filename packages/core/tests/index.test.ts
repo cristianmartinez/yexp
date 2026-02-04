@@ -320,10 +320,10 @@ describe('integration', () => {
       ]);
     });
 
-    test('group_by with dot shorthand', () => {
+    test('groupBy with dot shorthand', () => {
       expect(
         run(
-          'data.items |> group_by(.category)',
+          'data.items |> groupBy(.category)',
           ctx(
             {},
             {
@@ -344,10 +344,10 @@ describe('integration', () => {
       });
     });
 
-    test('unique_by with dot shorthand', () => {
+    test('uniqueBy with dot shorthand', () => {
       expect(
         run(
-          'data.items |> unique_by(.id)',
+          'data.items |> uniqueBy(.id)',
           ctx(
             {},
             {
@@ -365,10 +365,10 @@ describe('integration', () => {
       ]);
     });
 
-    test('min_by with dot shorthand', () => {
+    test('minBy with dot shorthand', () => {
       expect(
         run(
-          'data.items |> min_by(.price)',
+          'data.items |> minBy(.price)',
           ctx(
             {},
             {
@@ -383,10 +383,10 @@ describe('integration', () => {
       ).toEqual({ name: 'banana', price: 0.5 });
     });
 
-    test('max_by with dot shorthand', () => {
+    test('maxBy with dot shorthand', () => {
       expect(
         run(
-          'data.items |> max_by(.score)',
+          'data.items |> maxBy(.score)',
           ctx(
             {},
             {
@@ -401,27 +401,27 @@ describe('integration', () => {
       ).toEqual({ name: 'Bob', score: 92 });
     });
 
-    test('min_by returns null for empty array', () => {
-      expect(run('data.items |> min_by(.x)', ctx({}, { items: [] }))).toBe(null);
+    test('minBy returns null for empty array', () => {
+      expect(run('data.items |> minBy(.x)', ctx({}, { items: [] }))).toBe(null);
     });
 
-    test('max_by returns null for empty array', () => {
-      expect(run('data.items |> max_by(.x)', ctx({}, { items: [] }))).toBe(null);
+    test('maxBy returns null for empty array', () => {
+      expect(run('data.items |> maxBy(.x)', ctx({}, { items: [] }))).toBe(null);
     });
   });
 
   describe('object functions', () => {
-    test('to_entries converts object to key-value pairs', () => {
-      expect(run('data.obj |> to_entries', ctx({}, { obj: { a: 1, b: 2 } }))).toEqual([
+    test('entries converts object to key-value pairs', () => {
+      expect(run('data.obj |> entries', ctx({}, { obj: { a: 1, b: 2 } }))).toEqual([
         { key: 'a', value: 1 },
         { key: 'b', value: 2 },
       ]);
     });
 
-    test('from_entries converts key-value pairs to object', () => {
+    test('fromEntries converts key-value pairs to object', () => {
       expect(
         run(
-          'data.entries |> from_entries',
+          'data.entries |> fromEntries',
           ctx(
             {},
             {
@@ -435,10 +435,10 @@ describe('integration', () => {
       ).toEqual({ a: 1, b: 2 });
     });
 
-    test('with_entries transforms object entries', () => {
+    test('mapEntries transforms object entries', () => {
       expect(
         run(
-          'data.obj |> with_entries((entry) => {key: entry.key, value: entry.value * 2})',
+          'data.obj |> mapEntries((entry) => {key: entry.key, value: entry.value * 2})',
           ctx({}, { obj: { a: 1, b: 2 } }),
         ),
       ).toEqual({ a: 2, b: 4 });
@@ -482,44 +482,44 @@ describe('integration', () => {
       expect(run('data.items |> join', ctx({}, { items: ['a', 'b', 'c'] }))).toBe('abc');
     });
 
-    test('startswith returns true', () => {
-      expect(run('"hello world" |> startswith("hello")', ctx())).toBe(true);
+    test('startsWith returns true', () => {
+      expect(run('"hello world" |> startsWith("hello")', ctx())).toBe(true);
     });
 
-    test('startswith returns false', () => {
-      expect(run('"hello world" |> startswith("world")', ctx())).toBe(false);
+    test('startsWith returns false', () => {
+      expect(run('"hello world" |> startsWith("world")', ctx())).toBe(false);
     });
 
-    test('endswith returns true', () => {
-      expect(run('"hello world" |> endswith("world")', ctx())).toBe(true);
+    test('endsWith returns true', () => {
+      expect(run('"hello world" |> endsWith("world")', ctx())).toBe(true);
     });
 
-    test('endswith returns false', () => {
-      expect(run('"hello world" |> endswith("hello")', ctx())).toBe(false);
+    test('endsWith returns false', () => {
+      expect(run('"hello world" |> endsWith("hello")', ctx())).toBe(false);
     });
 
-    test('ltrimstr removes prefix', () => {
-      expect(run('"hello world" |> ltrimstr("hello ")', ctx())).toBe('world');
+    test('trimPrefix removes prefix', () => {
+      expect(run('"hello world" |> trimPrefix("hello ")', ctx())).toBe('world');
     });
 
-    test('ltrimstr when prefix not found', () => {
-      expect(run('"hello world" |> ltrimstr("foo")', ctx())).toBe('hello world');
+    test('trimPrefix when prefix not found', () => {
+      expect(run('"hello world" |> trimPrefix("foo")', ctx())).toBe('hello world');
     });
 
-    test('rtrimstr removes suffix', () => {
-      expect(run('"hello world" |> rtrimstr(" world")', ctx())).toBe('hello');
+    test('trimSuffix removes suffix', () => {
+      expect(run('"hello world" |> trimSuffix(" world")', ctx())).toBe('hello');
     });
 
-    test('rtrimstr when suffix not found', () => {
-      expect(run('"hello world" |> rtrimstr("foo")', ctx())).toBe('hello world');
+    test('trimSuffix when suffix not found', () => {
+      expect(run('"hello world" |> trimSuffix("foo")', ctx())).toBe('hello world');
     });
 
-    test('ascii_downcase converts to lowercase', () => {
-      expect(run('"Hello WORLD" |> ascii_downcase', ctx())).toBe('hello world');
+    test('toLowerCase converts to lowercase', () => {
+      expect(run('"Hello WORLD" |> toLowerCase', ctx())).toBe('hello world');
     });
 
-    test('ascii_upcase converts to uppercase', () => {
-      expect(run('"Hello world" |> ascii_upcase', ctx())).toBe('HELLO WORLD');
+    test('toUpperCase converts to uppercase', () => {
+      expect(run('"Hello world" |> toUpperCase', ctx())).toBe('HELLO WORLD');
     });
 
     test('index finds substring position', () => {
@@ -758,44 +758,44 @@ describe('integration', () => {
       expect(result).toBeLessThanOrEqual(after);
     });
 
-    test('fromdateiso8601 parses ISO 8601 date string', () => {
+    test('parseDate parses ISO 8601 date string', () => {
       const dateStr = '2024-01-15T10:30:00.000Z';
-      const result = run(`fromdateiso8601("${dateStr}")`, ctx());
+      const result = run(`parseDate("${dateStr}")`, ctx());
       expect(result).toBe(Date.parse(dateStr));
     });
 
-    test('fromdateiso8601 with data path', () => {
+    test('parseDate with data path', () => {
       const dateStr = '2024-01-15T10:30:00.000Z';
-      const result = run('data.date |> fromdateiso8601', ctx({}, { date: dateStr }));
+      const result = run('data.date |> parseDate', ctx({}, { date: dateStr }));
       expect(result).toBe(Date.parse(dateStr));
     });
 
-    test('fromdateiso8601 with invalid date returns error', () => {
-      const result = run('fromdateiso8601("not a date")', ctx());
+    test('parseDate with invalid date returns error', () => {
+      const result = run('parseDate("not a date")', ctx());
       expect(isExprError(result)).toBe(true);
       expect((result as ExprError).error).toBe('TYPE_ERROR');
     });
 
-    test('todateiso8601 converts timestamp to ISO 8601 string', () => {
+    test('toISOString converts timestamp to ISO 8601 string', () => {
       const timestamp = 1705314600000;
-      const result = run(`todateiso8601(${timestamp})`, ctx());
+      const result = run(`toISOString(${timestamp})`, ctx());
       expect(result).toBe(new Date(timestamp).toISOString());
     });
 
-    test('todateiso8601 with data path', () => {
+    test('toISOString with data path', () => {
       const timestamp = 1705314600000;
-      const result = run('data.timestamp |> todateiso8601', ctx({}, { timestamp }));
+      const result = run('data.timestamp |> toISOString', ctx({}, { timestamp }));
       expect(result).toBe(new Date(timestamp).toISOString());
     });
 
     test('round-trip date conversion', () => {
       const dateStr = '2024-01-15T10:30:00.000Z';
-      const result = run(`"${dateStr}" |> fromdateiso8601 |> todateiso8601`, ctx());
+      const result = run(`"${dateStr}" |> parseDate |> toISOString`, ctx());
       expect(result).toBe(dateStr);
     });
 
     test('now with date conversion', () => {
-      const result = run('now() |> todateiso8601', ctx());
+      const result = run('now() |> toISOString', ctx());
       expect(typeof result).toBe('string');
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });

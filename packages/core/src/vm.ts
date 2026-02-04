@@ -191,10 +191,10 @@ const BUILTINS = new Map<string, BuiltinFn>([
     },
   ],
   [
-    'to_entries',
+    'entries',
     (v) => {
       if (typeof v !== 'object' || v === null || Array.isArray(v)) {
-        return makeError('TYPE_ERROR', 'to_entries requires an object');
+        return makeError('TYPE_ERROR', 'entries requires an object');
       }
       const obj = v as ExprObject;
       const entries: ExprValue[] = [];
@@ -205,9 +205,9 @@ const BUILTINS = new Map<string, BuiltinFn>([
     },
   ],
   [
-    'from_entries',
+    'fromEntries',
     (v) => {
-      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'from_entries requires an array');
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'fromEntries requires an array');
       const result: ExprObject = {};
       for (const item of v) {
         if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
@@ -278,58 +278,58 @@ const BUILTINS = new Map<string, BuiltinFn>([
     },
   ],
   [
-    'startswith',
+    'startsWith',
     (v, prefix) => {
-      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'startswith requires a string');
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'startsWith requires a string');
       if (typeof prefix !== 'string') {
-        return makeError('TYPE_ERROR', 'startswith requires a string prefix');
+        return makeError('TYPE_ERROR', 'startsWith requires a string prefix');
       }
       return v.startsWith(prefix);
     },
   ],
   [
-    'endswith',
+    'endsWith',
     (v, suffix) => {
-      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'endswith requires a string');
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'endsWith requires a string');
       if (typeof suffix !== 'string') {
-        return makeError('TYPE_ERROR', 'endswith requires a string suffix');
+        return makeError('TYPE_ERROR', 'endsWith requires a string suffix');
       }
       return v.endsWith(suffix);
     },
   ],
   [
-    'ltrimstr',
+    'trimPrefix',
     (v, prefix) => {
-      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'ltrimstr requires a string');
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'trimPrefix requires a string');
       if (typeof prefix !== 'string') {
-        return makeError('TYPE_ERROR', 'ltrimstr requires a string prefix');
+        return makeError('TYPE_ERROR', 'trimPrefix requires a string prefix');
       }
       return v.startsWith(prefix) ? v.slice(prefix.length) : v;
     },
   ],
   [
-    'rtrimstr',
+    'trimSuffix',
     (v, suffix) => {
-      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'rtrimstr requires a string');
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'trimSuffix requires a string');
       if (typeof suffix !== 'string') {
-        return makeError('TYPE_ERROR', 'rtrimstr requires a string suffix');
+        return makeError('TYPE_ERROR', 'trimSuffix requires a string suffix');
       }
       return v.endsWith(suffix) ? v.slice(0, -suffix.length) : v;
     },
   ],
   [
-    'ascii_downcase',
+    'toLowerCase',
     (v) => {
       if (typeof v !== 'string') {
-        return makeError('TYPE_ERROR', 'ascii_downcase requires a string');
+        return makeError('TYPE_ERROR', 'toLowerCase requires a string');
       }
       return v.toLowerCase();
     },
   ],
   [
-    'ascii_upcase',
+    'toUpperCase',
     (v) => {
-      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'ascii_upcase requires a string');
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'toUpperCase requires a string');
       return v.toUpperCase();
     },
   ],
@@ -456,23 +456,23 @@ const BUILTINS = new Map<string, BuiltinFn>([
     },
   ],
   [
-    'fromdateiso8601',
+    'parseDate',
     (v) => {
       if (typeof v !== 'string') {
-        return makeError('TYPE_ERROR', 'fromdateiso8601 requires a string');
+        return makeError('TYPE_ERROR', 'parseDate requires a string');
       }
       const timestamp = Date.parse(v);
       if (Number.isNaN(timestamp)) {
-        return makeError('TYPE_ERROR', 'fromdateiso8601 requires a valid ISO 8601 date string');
+        return makeError('TYPE_ERROR', 'parseDate requires a valid ISO 8601 date string');
       }
       return timestamp;
     },
   ],
   [
-    'todateiso8601',
+    'toISOString',
     (v) => {
       if (typeof v !== 'number') {
-        return makeError('TYPE_ERROR', 'todateiso8601 requires a number (timestamp)');
+        return makeError('TYPE_ERROR', 'toISOString requires a number (timestamp)');
       }
       return new Date(v).toISOString();
     },
@@ -581,10 +581,10 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
     },
   ],
   [
-    'group_by',
+    'groupBy',
     (ctx, collection, lambda) => {
-      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'group_by requires an array');
-      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'group_by requires a lambda');
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'groupBy requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'groupBy requires a lambda');
       const groups = new Map<string, ExprValue[]>();
       for (const item of collection) {
         const key = invokeLambda(lambda, ctx, [item]);
@@ -602,10 +602,10 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
     },
   ],
   [
-    'unique_by',
+    'uniqueBy',
     (ctx, collection, lambda) => {
-      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'unique_by requires an array');
-      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'unique_by requires a lambda');
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'uniqueBy requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'uniqueBy requires a lambda');
       const seen = new Set<string>();
       const result: ExprValue[] = [];
       for (const item of collection) {
@@ -620,10 +620,10 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
     },
   ],
   [
-    'min_by',
+    'minBy',
     (ctx, collection, lambda) => {
-      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'min_by requires an array');
-      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'min_by requires a lambda');
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'minBy requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'minBy requires a lambda');
       if (collection.length === 0) return null;
       let minItem = collection[0]!;
       let minValue = invokeLambda(lambda, ctx, [minItem]);
@@ -639,10 +639,10 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
     },
   ],
   [
-    'max_by',
+    'maxBy',
     (ctx, collection, lambda) => {
-      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'max_by requires an array');
-      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'max_by requires a lambda');
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'maxBy requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'maxBy requires a lambda');
       if (collection.length === 0) return null;
       let maxItem = collection[0]!;
       let maxValue = invokeLambda(lambda, ctx, [maxItem]);
@@ -658,13 +658,13 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
     },
   ],
   [
-    'with_entries',
+    'mapEntries',
     (ctx, v, lambda) => {
       if (typeof v !== 'object' || v === null || Array.isArray(v)) {
-        return makeError('TYPE_ERROR', 'with_entries requires an object');
+        return makeError('TYPE_ERROR', 'mapEntries requires an object');
       }
       if (!isLambdaValue(lambda)) {
-        return makeError('TYPE_ERROR', 'with_entries requires a lambda');
+        return makeError('TYPE_ERROR', 'mapEntries requires a lambda');
       }
       const obj = v as ExprObject;
       const result: ExprObject = {};
