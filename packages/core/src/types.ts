@@ -253,95 +253,95 @@ export interface NullCoalescingNode {
 // ─── Opcodes ────────────────────────────────────────────────────────────────
 
 export enum Opcode {
-  // Constants & loading
-  CONST = 'CONST',
-  LOAD = 'LOAD',
-  DUP = 'DUP', // Duplicate top stack value
-  POP = 'POP', // Pop and discard top stack value
+  // Constants & loading (0-9)
+  CONST = 0,
+  LOAD = 1,
+  DUP = 2, // Duplicate top stack value
+  POP = 3, // Pop and discard top stack value
 
-  // Arithmetic
-  ADD = 'ADD',
-  SUB = 'SUB',
-  MUL = 'MUL',
-  DIV = 'DIV',
-  MOD = 'MOD',
-  NEG = 'NEG',
+  // Arithmetic (10-19)
+  ADD = 10,
+  SUB = 11,
+  MUL = 12,
+  DIV = 13,
+  MOD = 14,
+  NEG = 15,
 
-  // String
-  TO_STRING = 'TO_STRING',
+  // String (20-29)
+  TO_STRING = 20,
 
-  // Comparison
-  EQ = 'EQ',
-  NEQ = 'NEQ',
-  LT = 'LT',
-  GT = 'GT',
-  LTE = 'LTE',
-  GTE = 'GTE',
+  // Comparison (30-39)
+  EQ = 30,
+  NEQ = 31,
+  LT = 32,
+  GT = 33,
+  LTE = 34,
+  GTE = 35,
 
-  // Optimized comparison patterns
-  RANGE_CHECK = 'RANGE_CHECK',           // value >= min && value <= max
-  RANGE_CHECK_EXCLUSIVE = 'RANGE_CHECK_EXCLUSIVE',  // value > min && value < max
-  RANGE_CHECK_LO_INCLUSIVE = 'RANGE_CHECK_LO_INCLUSIVE',  // value >= min && value < max
-  RANGE_CHECK_HI_INCLUSIVE = 'RANGE_CHECK_HI_INCLUSIVE',  // value > min && value <= max
+  // Optimized comparison patterns (40-49)
+  RANGE_CHECK = 40,           // value >= min && value <= max
+  RANGE_CHECK_EXCLUSIVE = 41,  // value > min && value < max
+  RANGE_CHECK_LO_INCLUSIVE = 42,  // value >= min && value < max
+  RANGE_CHECK_HI_INCLUSIVE = 43,  // value > min && value <= max
 
-  // Fused comparison opcodes (LOAD + CONST + comparison)
-  LOAD_GT_CONST = 'LOAD_GT_CONST',       // Load slot, compare > constant
-  LOAD_GTE_CONST = 'LOAD_GTE_CONST',     // Load slot, compare >= constant
-  LOAD_LT_CONST = 'LOAD_LT_CONST',       // Load slot, compare < constant
-  LOAD_LTE_CONST = 'LOAD_LTE_CONST',     // Load slot, compare <= constant
-  LOAD_EQ_CONST = 'LOAD_EQ_CONST',       // Load slot, compare == constant
-  LOAD_NEQ_CONST = 'LOAD_NEQ_CONST',     // Load slot, compare != constant
+  // Fused comparison opcodes (50-59)
+  LOAD_GT_CONST = 50,       // Load slot, compare > constant
+  LOAD_GTE_CONST = 51,     // Load slot, compare >= constant
+  LOAD_LT_CONST = 52,       // Load slot, compare < constant
+  LOAD_LTE_CONST = 53,     // Load slot, compare <= constant
+  LOAD_EQ_CONST = 54,       // Load slot, compare == constant
+  LOAD_NEQ_CONST = 55,     // Load slot, compare != constant
 
-  // Fused arithmetic opcodes (LOAD + CONST + arithmetic)
-  LOAD_ADD_CONST = 'LOAD_ADD_CONST',     // Load slot, add constant
-  LOAD_SUB_CONST = 'LOAD_SUB_CONST',     // Load slot, subtract constant
-  LOAD_MUL_CONST = 'LOAD_MUL_CONST',     // Load slot, multiply by constant
-  LOAD_DIV_CONST = 'LOAD_DIV_CONST',     // Load slot, divide by constant
-  LOAD_MOD_CONST = 'LOAD_MOD_CONST',     // Load slot, modulo constant
+  // Fused arithmetic opcodes (60-69)
+  LOAD_ADD_CONST = 60,     // Load slot, add constant
+  LOAD_SUB_CONST = 61,     // Load slot, subtract constant
+  LOAD_MUL_CONST = 62,     // Load slot, multiply by constant
+  LOAD_DIV_CONST = 63,     // Load slot, divide by constant
+  LOAD_MOD_CONST = 64,     // Load slot, modulo constant
 
-  // Optimized increment/decrement
-  INCREMENT = 'INCREMENT',               // Load slot, add 1
-  DECREMENT = 'DECREMENT',               // Load slot, subtract 1
+  // Optimized increment/decrement (70-79)
+  INCREMENT = 70,               // Load slot, add 1
+  DECREMENT = 71,               // Load slot, subtract 1
 
-  // Null and boolean checks
-  IS_NULL = 'IS_NULL',                   // Load slot, compare == null
-  IS_NOT_NULL = 'IS_NOT_NULL',           // Load slot, compare != null
-  IS_TRUTHY = 'IS_TRUTHY',               // Load slot, boolean coercion !!x
-  IS_FALSY = 'IS_FALSY',                 // Load slot, boolean negation !x
+  // Null and boolean checks (80-89)
+  IS_NULL = 80,                   // Load slot, compare == null
+  IS_NOT_NULL = 81,           // Load slot, compare != null
+  IS_TRUTHY = 82,               // Load slot, boolean coercion !!x
+  IS_FALSY = 83,                 // Load slot, boolean negation !x
 
-  // Logical & control flow
-  NOT = 'NOT',
-  JUMP_IF_FALSE = 'JUMP_IF_FALSE',
-  JUMP_IF_TRUE = 'JUMP_IF_TRUE',
-  JUMP = 'JUMP',
+  // Logical & control flow (90-99)
+  NOT = 90,
+  JUMP_IF_FALSE = 91,
+  JUMP_IF_TRUE = 92,
+  JUMP = 93,
 
-  // Construction
-  MAKE_ARRAY = 'MAKE_ARRAY',
-  MAKE_OBJ = 'MAKE_OBJ',
-  SPREAD = 'SPREAD',
+  // Construction (100-109)
+  MAKE_ARRAY = 100,
+  MAKE_OBJ = 101,
+  SPREAD = 102,
 
-  // Access
-  INDEX = 'INDEX',
-  OPTIONAL_INDEX = 'OPTIONAL_INDEX',
-  WILDCARD = 'WILDCARD',
-  OPTIONAL_WILDCARD = 'OPTIONAL_WILDCARD',
-  RECURSIVE_DESCENT = 'RECURSIVE_DESCENT',
-  OPTIONAL_RECURSIVE_DESCENT = 'OPTIONAL_RECURSIVE_DESCENT',
-  OPTIONAL_CHAIN_GET = 'OPTIONAL_CHAIN_GET', // Optional chaining property access (combines null check + get)
-  OPTIONAL_CHAIN_INDEX = 'OPTIONAL_CHAIN_INDEX', // Optional chaining index access (combines null check + index)
+  // Access (110-129)
+  INDEX = 110,
+  OPTIONAL_INDEX = 111,
+  WILDCARD = 112,
+  OPTIONAL_WILDCARD = 113,
+  RECURSIVE_DESCENT = 114,
+  OPTIONAL_RECURSIVE_DESCENT = 115,
+  OPTIONAL_CHAIN_GET = 116, // Optional chaining property access (combines null check + get)
+  OPTIONAL_CHAIN_INDEX = 117, // Optional chaining index access (combines null check + index)
 
-  // Function calls
-  CALL = 'CALL',
+  // Function calls (130-139)
+  CALL = 130,
 
-  // Mutation
-  SET_PATH = 'SET_PATH',
-  DELETE_PATH = 'DELETE_PATH',
-  INC_PATH = 'INC_PATH',
-  DEC_PATH = 'DEC_PATH',
-  APPEND_PATH = 'APPEND_PATH',
+  // Mutation (140-149)
+  SET_PATH = 140,
+  DELETE_PATH = 141,
+  INC_PATH = 142,
+  DEC_PATH = 143,
+  APPEND_PATH = 144,
 
-  // Control
-  RETURN = 'RETURN',
+  // Control (200+)
+  RETURN = 200,
 }
 
 // ─── Bytecode ───────────────────────────────────────────────────────────────

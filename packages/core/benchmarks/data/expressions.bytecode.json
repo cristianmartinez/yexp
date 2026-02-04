@@ -9,11 +9,11 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -28,12 +28,12 @@
       "constants": [],
       "code": [
         [
-          "LOAD_GT_CONST",
+          50,
           0,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -48,11 +48,11 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -69,22 +69,22 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -101,22 +101,22 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -139,12 +139,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 100
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -155,20 +155,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -194,28 +194,28 @@
             ],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 18
               ],
               [
-                "JUMP_IF_FALSE",
+                91,
                 4
               ],
               [
-                "LOAD",
+                1,
                 1
               ],
               [
-                "JUMP",
+                93,
                 5
               ],
               [
-                "CONST",
+                0,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -226,20 +226,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -256,18 +256,18 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RECURSIVE_DESCENT"
+          114
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -285,29 +285,29 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RECURSIVE_DESCENT"
+          114
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -330,12 +330,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 100
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -346,20 +346,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -382,11 +382,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -397,25 +397,25 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CALL",
+          130,
           "add",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -438,11 +438,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -460,11 +460,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -476,38 +476,38 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "CALL",
+          130,
           "join",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -525,27 +525,27 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "JUMP_IF_FALSE",
+          91,
           4
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "JUMP",
+          93,
           5
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -563,36 +563,36 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "DUP"
+          2
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "NEQ"
+          31
         ],
         [
-          "JUMP_IF_TRUE",
+          92,
           8
         ],
         [
-          "POP"
+          3
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "JUMP",
+          93,
           8
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -607,19 +607,19 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "OPTIONAL_CHAIN_GET",
+          116,
           "profile"
         ],
         [
-          "OPTIONAL_CHAIN_GET",
+          116,
           "avatar"
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -637,28 +637,28 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "TO_STRING"
+          20
         ],
         [
-          "ADD"
+          10
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "ADD"
+          10
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -674,22 +674,22 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "SPREAD"
+          102
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "MAKE_ARRAY",
+          100,
           3
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -707,26 +707,26 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "SPREAD"
+          102
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "MAKE_OBJ",
+          101,
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -750,18 +750,18 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "LOAD",
+                1,
                 1
               ],
               [
-                "MUL"
+                12
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -772,25 +772,25 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CALL",
+          130,
           "add",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -816,28 +816,28 @@
             ],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 18
               ],
               [
-                "JUMP_IF_FALSE",
+                91,
                 4
               ],
               [
-                "LOAD",
+                1,
                 1
               ],
               [
-                "JUMP",
+                93,
                 5
               ],
               [
-                "CONST",
+                0,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -855,11 +855,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -870,29 +870,29 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -907,12 +907,12 @@
       "constants": [],
       "code": [
         [
-          "LOAD_ADD_CONST",
+          60,
           0,
           10
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -928,18 +928,18 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "MUL"
+          12
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -957,26 +957,26 @@
       ],
       "code": [
         [
-          "LOAD_ADD_CONST",
+          60,
           0,
           100
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "MUL"
+          12
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "SUB"
+          11
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -994,27 +994,27 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "JUMP_IF_FALSE",
+          91,
           4
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "JUMP",
+          93,
           5
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1032,27 +1032,27 @@
       ],
       "code": [
         [
-          "IS_FALSY",
+          83,
           0
         ],
         [
-          "JUMP_IF_TRUE",
+          92,
           4
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "JUMP",
+          93,
           5
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1072,44 +1072,44 @@
       ],
       "code": [
         [
-          "LOAD_GT_CONST",
+          50,
           0,
           0
         ],
         [
-          "JUMP_IF_FALSE",
+          91,
           4
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "JUMP",
+          93,
           5
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "JUMP_IF_TRUE",
+          92,
           8
         ],
         [
-          "LOAD",
+          1,
           2
         ],
         [
-          "JUMP",
+          93,
           9
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1124,16 +1124,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "length",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1148,16 +1148,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "first",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1172,16 +1172,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "last",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1196,16 +1196,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "reverse",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1228,11 +1228,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -1243,20 +1243,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "sortBy",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1271,16 +1271,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "unique",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1303,11 +1303,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -1318,20 +1318,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "groupBy",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1354,11 +1354,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -1369,20 +1369,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "find",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1405,12 +1405,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 100
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -1421,20 +1421,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "some",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1457,11 +1457,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -1472,20 +1472,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "every",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1500,16 +1500,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "keys",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1524,16 +1524,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "values",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1548,16 +1548,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "upper",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1572,16 +1572,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "lower",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1597,20 +1597,20 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "split",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1627,20 +1627,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "startsWith",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1655,16 +1655,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "abs",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1679,16 +1679,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "ceil",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1703,16 +1703,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "floor",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1727,16 +1727,16 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CALL",
+          130,
           "round",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1755,36 +1755,36 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "CONST",
+          0,
           3
         ],
         [
-          "CONST",
+          0,
           4
         ],
         [
-          "MAKE_ARRAY",
+          100,
           5
         ],
         [
-          "CALL",
+          130,
           "min",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1803,36 +1803,36 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "CONST",
+          0,
           3
         ],
         [
-          "CONST",
+          0,
           4
         ],
         [
-          "MAKE_ARRAY",
+          100,
           5
         ],
         [
-          "CALL",
+          130,
           "max",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1850,30 +1850,30 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "NEG"
+          15
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1891,30 +1891,30 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "NEG"
+          15
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1933,38 +1933,38 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "TO_STRING"
+          20
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "ADD"
+          10
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "TO_STRING"
+          20
         ],
         [
-          "ADD"
+          10
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "ADD"
+          10
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -1988,11 +1988,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2003,35 +2003,35 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CALL",
+          130,
           "add",
           1
         ],
         [
-          "TO_STRING"
+          20
         ],
         [
-          "ADD"
+          10
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2049,33 +2049,33 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "SPREAD"
+          102
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "MAKE_ARRAY",
+          100,
           3
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2099,12 +2099,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_MUL_CONST",
+                62,
                 0,
                 2
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2115,32 +2115,32 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "MAKE_ARRAY",
+          100,
           3
         ],
         [
-          "CONST",
+          0,
           3
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2164,18 +2164,18 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "LOAD",
+                1,
                 1
               ],
               [
-                "ADD"
+                10
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2188,24 +2188,24 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "reduce",
           3
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2228,12 +2228,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 18
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2245,31 +2245,31 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2293,11 +2293,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2309,38 +2309,38 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RECURSIVE_DESCENT"
+          114
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2363,12 +2363,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 50
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2386,11 +2386,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2401,39 +2401,39 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "sortBy",
           2
         ],
         [
-          "CALL",
+          130,
           "reverse",
           1
         ],
         [
-          "CALL",
+          130,
           "first",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2456,11 +2456,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2471,25 +2471,25 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "groupBy",
           2
         ],
         [
-          "CALL",
+          130,
           "keys",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2508,46 +2508,46 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "DUP"
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "GT"
-        ],
-        [
-          "JUMP_IF_FALSE",
-          8
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "MUL"
-        ],
-        [
-          "JUMP",
-          11
-        ],
-        [
-          "CONST",
           2
         ],
         [
-          "NEG"
+          0,
+          0
         ],
         [
-          "MUL"
+          33
         ],
         [
-          "RETURN"
+          91,
+          8
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          12
+        ],
+        [
+          93,
+          11
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          15
+        ],
+        [
+          12
+        ],
+        [
+          200
         ]
       ]
     }
@@ -2565,48 +2565,48 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "OPTIONAL_CHAIN_GET",
+          116,
           "profile"
         ],
         [
-          "OPTIONAL_CHAIN_GET",
+          116,
           "settings"
         ],
         [
-          "OPTIONAL_CHAIN_GET",
+          116,
           "theme"
         ],
         [
-          "DUP"
+          2
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "NEQ"
+          31
         ],
         [
-          "JUMP_IF_TRUE",
+          92,
           11
         ],
         [
-          "POP"
+          3
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "JUMP",
+          93,
           11
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2627,35 +2627,35 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "CONST",
+          0,
           3
         ],
         [
-          "MAKE_OBJ",
+          101,
           3
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2674,33 +2674,33 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "SPREAD"
+          102
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "SPREAD"
+          102
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "MAKE_OBJ",
+          101,
           3
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2717,23 +2717,23 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "join",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2756,12 +2756,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 21
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2779,11 +2779,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2801,11 +2801,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2816,38 +2816,38 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "sortBy",
           2
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2862,13 +2862,13 @@
       "constants": [],
       "code": [
         [
-          "RANGE_CHECK",
+          40,
           0,
           0,
           100
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2892,18 +2892,18 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "LOAD",
+                1,
                 1
               ],
               [
-                "MUL"
+                12
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -2914,25 +2914,25 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CALL",
+          130,
           "add",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -2952,52 +2952,52 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "MAKE_ARRAY",
+          100,
           2
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "CONST",
+          0,
           3
         ],
         [
-          "MAKE_ARRAY",
+          100,
           2
         ],
         [
-          "CONST",
+          0,
           4
         ],
         [
-          "CONST",
+          0,
           5
         ],
         [
-          "MAKE_ARRAY",
+          100,
           2
         ],
         [
-          "MAKE_ARRAY",
+          100,
           3
         ],
         [
-          "CALL",
+          130,
           "flatten",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3020,11 +3020,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -3035,30 +3035,30 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CALL",
+          130,
           "flatten",
           1
         ],
         [
-          "CALL",
+          130,
           "unique",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3083,20 +3083,20 @@
             ],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "CONST",
+                0,
                 0
               ],
               [
-                "CALL",
+                130,
                 "endsWith",
                 2
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -3107,20 +3107,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3135,11 +3135,11 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3154,11 +3154,11 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3175,22 +3175,22 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "NEG"
+          15
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3205,11 +3205,11 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3232,12 +3232,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_GT_CONST",
+                50,
                 0,
                 1
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -3248,20 +3248,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3284,12 +3284,12 @@
             "constants": [],
             "code": [
               [
-                "LOAD_LT_CONST",
+                52,
                 0,
                 100
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -3300,20 +3300,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3336,13 +3336,13 @@
             "constants": [],
             "code": [
               [
-                "RANGE_CHECK",
+                40,
                 0,
                 50,
                 150
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -3353,20 +3353,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3391,18 +3391,18 @@
             ],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "CONST",
+                0,
                 0
               ],
               [
-                "EQ"
+                30
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -3413,20 +3413,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3451,18 +3451,18 @@
             ],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "CONST",
+                0,
                 0
               ],
               [
-                "NEQ"
+                31
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -3473,20 +3473,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3513,40 +3513,40 @@
             ],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "DUP"
-              ],
-              [
-                "CONST",
-                0
-              ],
-              [
-                "LT"
-              ],
-              [
-                "JUMP_IF_TRUE",
-                8
-              ],
-              [
-                "CONST",
-                1
-              ],
-              [
-                "GT"
-              ],
-              [
-                "JUMP",
-                9
-              ],
-              [
-                "CONST",
                 2
               ],
               [
-                "RETURN"
+                0,
+                0
+              ],
+              [
+                32
+              ],
+              [
+                92,
+                8
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                33
+              ],
+              [
+                93,
+                9
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                200
               ]
             ]
           },
@@ -3557,20 +3557,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "filter",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3585,18 +3585,18 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "INDEX",
+          110,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3614,33 +3614,33 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "INDEX",
+          110,
           -1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3657,23 +3657,23 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RECURSIVE_DESCENT"
+          114
         ],
         [
-          "CALL",
+          130,
           "add",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3690,21 +3690,21 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "RECURSIVE_DESCENT"
+          114
         ],
         [
-          "WILDCARD"
+          112
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3720,18 +3720,18 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "MOD"
+          14
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3746,12 +3746,12 @@
       "constants": [],
       "code": [
         [
-          "LOAD_DIV_CONST",
+          63,
           0,
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3766,12 +3766,12 @@
       "constants": [],
       "code": [
         [
-          "LOAD_SUB_CONST",
+          61,
           0,
           50
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3787,18 +3787,18 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "EQ"
+          30
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3814,18 +3814,18 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "NEQ"
+          31
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3841,18 +3841,18 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "LTE"
+          34
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3868,18 +3868,18 @@
       "constants": [],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "LOAD",
+          1,
           1
         ],
         [
-          "GTE"
+          35
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3897,24 +3897,24 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CALL",
+          130,
           "slice",
           3
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3931,20 +3931,20 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "slice",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -3962,28 +3962,28 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "MAKE_ARRAY",
+          100,
           2
         ],
         [
-          "CALL",
+          130,
           "pick",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -4001,28 +4001,28 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "MAKE_ARRAY",
+          100,
           2
         ],
         [
-          "CALL",
+          130,
           "omit",
           2
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -4037,16 +4037,16 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "trim",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -4063,24 +4063,24 @@
       ],
       "code": [
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CONST",
+          0,
           1
         ],
         [
-          "CONST",
+          0,
           2
         ],
         [
-          "CALL",
+          130,
           "replace",
           3
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -4103,11 +4103,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -4118,25 +4118,25 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CALL",
+          130,
           "avg",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -4159,11 +4159,11 @@
             "constants": [],
             "code": [
               [
-                "LOAD",
+                1,
                 0
               ],
               [
-                "RETURN"
+                200
               ]
             ]
           },
@@ -4174,25 +4174,25 @@
       ],
       "code": [
         [
-          "LOAD",
+          1,
           0
         ],
         [
-          "CONST",
+          0,
           0
         ],
         [
-          "CALL",
+          130,
           "map",
           2
         ],
         [
-          "CALL",
+          130,
           "sum",
           1
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
@@ -4207,11 +4207,11 @@
       "constants": [],
       "code": [
         [
-          "IS_FALSY",
+          83,
           0
         ],
         [
-          "RETURN"
+          200
         ]
       ]
     }
