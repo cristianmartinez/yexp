@@ -117,6 +117,14 @@ describe('integration', () => {
     test('data path is read-only accessible', () => {
       expect(run('data.items |> length', ctx({}, { items: [1, 2, 3] }))).toBe(3);
     });
+
+    test('array.length property access', () => {
+      expect(run('data.items.length', ctx({}, { items: [1, 2, 3] }))).toBe(3);
+      expect(run('data.items.length', ctx({}, { items: [] }))).toBe(0);
+      expect(
+        run('data.users.length', ctx({}, { users: [{ name: 'Alice' }, { name: 'Bob' }] })),
+      ).toBe(2);
+    });
   });
 
   describe('action expressions', () => {

@@ -208,7 +208,7 @@ const BUILTINS = new Map<string, BuiltinFn>([
         if (d > MAX_FLATTEN_DEPTH) {
           return makeError(
             'TYPE_ERROR',
-            `flatten depth ${d} exceeds maximum of ${MAX_FLATTEN_DEPTH}`
+            `flatten depth ${d} exceeds maximum of ${MAX_FLATTEN_DEPTH}`,
           );
         }
       } else {
@@ -1022,13 +1022,13 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
 
         // Fast path: numeric comparison (most common case)
         if (typeof a === 'number' && typeof b === 'number') {
-          stack.length = stackLen - 2;  // Pop 2
-          stack.push(a < b);  // Push result
+          stack.length = stackLen - 2; // Pop 2
+          stack.push(a < b); // Push result
           break;
         }
 
         // Slow path: handle errors and type mismatches
-        stack.length = stackLen - 2;  // Pop 2
+        stack.length = stackLen - 2; // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
         return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
@@ -1042,13 +1042,13 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
 
         // Fast path: numeric comparison (most common case)
         if (typeof a === 'number' && typeof b === 'number') {
-          stack.length = stackLen - 2;  // Pop 2
-          stack.push(a > b);  // Push result
+          stack.length = stackLen - 2; // Pop 2
+          stack.push(a > b); // Push result
           break;
         }
 
         // Slow path: handle errors and type mismatches
-        stack.length = stackLen - 2;  // Pop 2
+        stack.length = stackLen - 2; // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
         return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
@@ -1062,13 +1062,13 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
 
         // Fast path: numeric comparison (most common case)
         if (typeof a === 'number' && typeof b === 'number') {
-          stack.length = stackLen - 2;  // Pop 2
-          stack.push(a <= b);  // Push result
+          stack.length = stackLen - 2; // Pop 2
+          stack.push(a <= b); // Push result
           break;
         }
 
         // Slow path: handle errors and type mismatches
-        stack.length = stackLen - 2;  // Pop 2
+        stack.length = stackLen - 2; // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
         return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
@@ -1082,13 +1082,13 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
 
         // Fast path: numeric comparison (most common case)
         if (typeof a === 'number' && typeof b === 'number') {
-          stack.length = stackLen - 2;  // Pop 2
-          stack.push(a >= b);  // Push result
+          stack.length = stackLen - 2; // Pop 2
+          stack.push(a >= b); // Push result
           break;
         }
 
         // Slow path: handle errors and type mismatches
-        stack.length = stackLen - 2;  // Pop 2
+        stack.length = stackLen - 2; // Pop 2
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
         return makeError('TYPE_ERROR', `Cannot compare ${typeof a} and ${typeof b}`);
@@ -1970,9 +1970,15 @@ function resolvePath(context: ExecutionContext, path: string): ExprValue {
     if (typeof current === 'object' && !Array.isArray(current) && !isExprError(current)) {
       current = (current as ExprObject)[part] ?? null;
     } else if (Array.isArray(current)) {
-      const idx = Number(part);
-      if (Number.isNaN(idx)) return null;
-      current = current[idx] ?? null;
+      // Check if it's a string property first (like "length")
+      if (part in current) {
+        current = (current as any)[part] ?? null;
+      } else {
+        // Try numeric index
+        const idx = Number(part);
+        if (Number.isNaN(idx)) return null;
+        current = current[idx] ?? null;
+      }
     } else {
       return null;
     }
