@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { tokenize, parse, compile, evaluate } from '@vlot/core';
 import type { ExecutionContext } from '@vlot/core';
 import { Code2, PlayCircle, Database, Binary, AlertCircle } from 'lucide-react';
@@ -8,9 +9,18 @@ import { ExprEditor } from '@/components/expr-editor';
 import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 import { PageHeader } from '@/components/page-header';
+import { ExamplesPanel } from '@/components/examples-panel';
+import { examples, type Example } from '@/lib/examples';
 import Split from 'react-split';
 
 export default function PlaygroundPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const exampleId = searchParams.get('example');
+
+  const [selectedExampleId, setSelectedExampleId] = useState<string | undefined>(
+    exampleId || undefined
+  );
   const [expression, setExpression] = useState('data.items[0].name');
   const [contextJSON, setContextJSON] = useState(`{
   "data": {
@@ -22,6 +32,29 @@ export default function PlaygroundPage() {
   "state": {},
   "env": {}
 }`);
+
+  // Load example on mount if URL has example param
+  useEffect(() => {
+    if (exampleId) {
+      const example = examples.find((ex) => ex.id === exampleId);
+      if (example) {
+        setExpression(example.expression);
+        setContextJSON(example.context);
+        setSelectedExampleId(example.id);
+      }
+    }
+  }, []); // Only run on mount
+
+  const handleSelectExample = (example: Example) => {
+    setExpression(example.expression);
+    setContextJSON(example.context);
+    setSelectedExampleId(example.id);
+
+    // Update URL
+    const params = new URLSearchParams();
+    params.set('example', example.id);
+    router.push(`?${params.toString()}`);
+  };
 
   const parsedContext = useMemo(() => {
     try {
@@ -50,113 +83,132 @@ export default function PlaygroundPage() {
         <PageHeader currentPage="playground" />
       </div>
 
-      <Split
-        className="flex-1 split split-vertical"
-        direction="vertical"
-        sizes={[25, 75]}
-        minSize={[150, 400]}
-        gutterSize={4}
-      >
-        {/* Expression panel */}
-        <div className="border-b flex flex-col overflow-hidden">
-          <div className="px-4 py-2 border-b bg-muted/50">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Code2 className="w-4 h-4" />
-              Expression
-            </div>
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar: Examples Navigation */}
+        <div className="w-80 border-r flex flex-col overflow-hidden bg-card">
+          <div className="px-4 py-3 border-b bg-muted/30">
+            <h2 className="text-sm font-semibold text-foreground">Examples</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Try different expressions
+            </p>
           </div>
-          <div className="flex-1">
-            <ExprEditor
-              value={expression}
-              onChange={setExpression}
-              context={parsedContext}
-              height="100%"
-            />
-          </div>
+          <ExamplesPanel
+            selectedId={selectedExampleId}
+            onSelectExample={handleSelectExample}
+          />
         </div>
 
-        {/* Main content area */}
-        <Split
-          className="flex-1 split split-horizontal"
-          direction="horizontal"
-          sizes={[33, 67]}
-          minSize={[200, 300]}
-          gutterSize={4}
-        >
-          {/* Left panel: Context */}
-          <div className="border-r flex flex-col overflow-hidden">
-            <div className="px-4 py-2 border-b bg-muted/50">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Database className="w-4 h-4" />
-                Context
-              </div>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <JsonEditor value={contextJSON} onChange={setContextJSON} height="100%" />
-            </div>
-          </div>
-
-          {/* Right panel: Result and Bytecode */}
+        {/* Right Side: Playground */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           <Split
             className="flex-1 split split-vertical"
             direction="vertical"
-            sizes={result.bytecode ? [50, 50] : [100]}
-            minSize={[200, 200]}
+            sizes={[25, 75]}
+            minSize={[150, 400]}
             gutterSize={4}
           >
-            {/* Result panel */}
+            {/* Expression panel */}
             <div className="border-b flex flex-col overflow-hidden">
               <div className="px-4 py-2 border-b bg-muted/50">
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <PlayCircle className="w-4 h-4" />
-                  Result
+                  <Code2 className="w-4 h-4" />
+                  Expression
                 </div>
               </div>
-              <div className="flex-1 overflow-auto p-4">
-                {result.error ? (
-                  <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
-                    <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
-                    <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
-                      {result.error}
-                    </pre>
-                  </div>
-                ) : (
-                  <div className="h-full border">
-                    <JsonViewer value={result.value} height="100%" />
-                  </div>
-                )}
+              <div className="flex-1">
+                <ExprEditor
+                  value={expression}
+                  onChange={setExpression}
+                  context={parsedContext}
+                  height="100%"
+                />
               </div>
             </div>
 
-            {/* Bytecode panel */}
-            {result.bytecode && (
-              <div className="flex flex-col overflow-hidden">
+            {/* Main content area */}
+            <Split
+              className="flex-1 split split-horizontal"
+              direction="horizontal"
+              sizes={[33, 67]}
+              minSize={[200, 300]}
+              gutterSize={4}
+            >
+              {/* Context panel */}
+              <div className="border-r flex flex-col overflow-hidden">
                 <div className="px-4 py-2 border-b bg-muted/50">
                   <div className="flex items-center gap-2 text-sm font-medium">
-                    <Binary className="w-4 h-4" />
-                    Bytecode
+                    <Database className="w-4 h-4" />
+                    Context
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto p-4 space-y-4">
-                  <div className="font-mono text-xs space-y-1 max-h-[200px] overflow-y-auto p-3 bg-muted/50 border">
-                    {result.bytecode.code.map((inst, i) => (
-                      <div key={i} className="flex gap-3">
-                        <span className="text-muted-foreground w-8 text-right">{i}:</span>
-                        <span className="text-primary font-medium">{inst.join(' ')}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {result.bytecode.constants.length > 0 && (
-                    <div className="border">
-                      <JsonViewer value={result.bytecode.constants} height="150px" />
-                    </div>
-                  )}
+                <div className="flex-1 overflow-hidden">
+                  <JsonEditor value={contextJSON} onChange={setContextJSON} height="100%" />
                 </div>
               </div>
-            )}
+
+              {/* Right panel: Result and Bytecode */}
+              <Split
+                className="flex-1 split split-vertical"
+                direction="vertical"
+                sizes={result.bytecode ? [50, 50] : [100]}
+                minSize={[200, 200]}
+                gutterSize={4}
+              >
+                {/* Result panel */}
+                <div className="border-b flex flex-col overflow-hidden">
+                  <div className="px-4 py-2 border-b bg-muted/50">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <PlayCircle className="w-4 h-4" />
+                      Result
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-auto p-4">
+                    {result.error ? (
+                      <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
+                        <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
+                        <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
+                          {result.error}
+                        </pre>
+                      </div>
+                    ) : (
+                      <div className="h-full border">
+                        <JsonViewer value={result.value} height="100%" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bytecode panel */}
+                {result.bytecode && (
+                  <div className="flex flex-col overflow-hidden">
+                    <div className="px-4 py-2 border-b bg-muted/50">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Binary className="w-4 h-4" />
+                        Bytecode
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-auto p-4 space-y-4">
+                      <div className="font-mono text-xs space-y-1 max-h-[200px] overflow-y-auto p-3 bg-muted/50 border">
+                        {result.bytecode.code.map((inst, i) => (
+                          <div key={i} className="flex gap-3">
+                            <span className="text-muted-foreground w-8 text-right">{i}:</span>
+                            <span className="text-primary font-medium">{inst.join(' ')}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {result.bytecode.constants.length > 0 && (
+                        <div className="border">
+                          <JsonViewer value={result.bytecode.constants} height="150px" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </Split>
+            </Split>
           </Split>
-        </Split>
-      </Split>
+        </div>
+      </div>
     </div>
   );
 }
