@@ -83,6 +83,8 @@ export type ASTNode =
   | IdentifierNode
   | MemberAccessNode
   | IndexAccessNode
+  | WildcardIndexNode
+  | PredicateIndexNode
   | BinaryOpNode
   | UnaryOpNode
   | LogicalOpNode
@@ -121,6 +123,19 @@ export interface IndexAccessNode {
   type: 'IndexAccess';
   object: ASTNode;
   index: ASTNode;
+  optional?: boolean;
+}
+
+export interface WildcardIndexNode {
+  type: 'WildcardIndex';
+  object: ASTNode;
+  optional?: boolean;
+}
+
+export interface PredicateIndexNode {
+  type: 'PredicateIndex';
+  object: ASTNode;
+  predicate: LambdaNode;
   optional?: boolean;
 }
 
@@ -264,6 +279,8 @@ export enum Opcode {
   // Access
   INDEX = 'INDEX',
   OPTIONAL_INDEX = 'OPTIONAL_INDEX',
+  WILDCARD = 'WILDCARD',
+  OPTIONAL_WILDCARD = 'OPTIONAL_WILDCARD',
 
   // Function calls
   CALL = 'CALL',

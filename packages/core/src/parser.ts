@@ -15,6 +15,7 @@ import type {
   ObjectLiteralNode,
   ObjectProperty,
   PipeNode,
+  PredicateIndexNode,
   SpreadElementNode,
   TemplateLiteralNode,
   TemplatePart,
@@ -22,6 +23,7 @@ import type {
   Token,
   UnaryOpNode,
   UpdateNode,
+  WildcardIndexNode,
 } from './types.js';
 import { TokenType } from './types.js';
 
@@ -356,6 +358,28 @@ export function parse(tokens: Token[]): ASTNode {
         // Check if it's ?.[expr] or ?.prop
         if (peek() === TokenType.LeftBracket) {
           advance(); // skip [
+
+          // Check for optional wildcard ?.[*]
+          if (peek() === TokenType.Star) {
+            advance(); // consume *
+            expect(TokenType.RightBracket);
+            node = { type: 'WildcardIndex', object: node, optional: true } as WildcardIndexNode;
+            continue;
+          }
+
+          // Check for optional predicate ?.[.condition] or ?.[!.condition] etc
+          if (peek() === TokenType.Dot || peek() === TokenType.Bang) {
+            // Parse as lambda with $it parameter
+            inDotShorthand = true;
+            const body = parseExpression();
+            inDotShorthand = false;
+            const predicate: LambdaNode = { type: 'Lambda', params: ['$it'], body };
+            expect(TokenType.RightBracket);
+            node = { type: 'PredicateIndex', object: node, predicate, optional: true } as PredicateIndexNode;
+            continue;
+          }
+
+          // Regular optional index access
           const index = parseExpression();
           expect(TokenType.RightBracket);
           node = { type: 'IndexAccess', object: node, index, optional: true } as IndexAccessNode;
@@ -374,6 +398,28 @@ export function parse(tokens: Token[]): ASTNode {
         node = { type: 'MemberAccess', object: node, property: prop.value } as MemberAccessNode;
       } else if (peek() === TokenType.LeftBracket) {
         advance();
+
+        // Check for wildcard [*]
+        if (peek() === TokenType.Star) {
+          advance(); // consume *
+          expect(TokenType.RightBracket);
+          node = { type: 'WildcardIndex', object: node } as WildcardIndexNode;
+          continue;
+        }
+
+        // Check for predicate [.condition] or [!.condition] etc
+        if (peek() === TokenType.Dot || peek() === TokenType.Bang) {
+          // Parse as lambda with $it parameter
+          inDotShorthand = true;
+          const body = parseExpression();
+          inDotShorthand = false;
+          const predicate: LambdaNode = { type: 'Lambda', params: ['$it'], body };
+          expect(TokenType.RightBracket);
+          node = { type: 'PredicateIndex', object: node, predicate } as PredicateIndexNode;
+          continue;
+        }
+
+        // Regular index access
         const index = parseExpression();
         expect(TokenType.RightBracket);
         node = { type: 'IndexAccess', object: node, index } as IndexAccessNode;

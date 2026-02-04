@@ -208,6 +208,49 @@ export function compile(ast: ASTNode): BytecodeProgram {
       case 'NullCoalescing':
         compileNullCoalescing(node);
         break;
+
+      case 'WildcardIndex':
+        // Syntactic sugar: just compile the object
+        // The wildcard behavior is handled by INDEX opcode auto-mapping on arrays
+        // For objects, we need to convert to Object.values
+        compileNode(node.object);
+        if (node.optional) {
+          emit(Opcode.OPTIONAL_WILDCARD);
+        } else {
+          emit(Opcode.WILDCARD);
+        }
+        break;
+
+      case 'PredicateIndex':
+        // Syntactic sugar: transform to filter operation
+        // arr[.condition] => arr |> filter(.condition)
+        compileNode(node.object);
+        if (node.optional) {
+          // For optional predicate, we need to handle null/undefined
+          // We'll emit a null coalescing to return empty array
+          emit(Opcode.CONST, addConstant(null));
+          emit(Opcode.EQ);
+          const skipIndex = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
+
+          // Not null: compile object again and filter
+          compileNode(node.object);
+          compileLambda(node.predicate);
+          emit(Opcode.CALL, 'filter', 2);
+          const doneIndex = emit(Opcode.JUMP, 0); // placeholder
+
+          // Null: push empty array
+          const nullLabel = code.length;
+          emit(Opcode.CONST, addConstant([]));
+
+          // Patch jumps
+          const endLabel = code.length;
+          code[skipIndex] = [Opcode.JUMP_IF_TRUE, nullLabel];
+          code[doneIndex] = [Opcode.JUMP, endLabel];
+        } else {
+          compileLambda(node.predicate);
+          emit(Opcode.CALL, 'filter', 2);
+        }
+        break;
     }
   }
 

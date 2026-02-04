@@ -10,6 +10,30 @@ import { Opcode, isExprError, isLambdaValue, makeError } from './types.js';
 type BuiltinFn = (...args: ExprValue[]) => ExprValue;
 type HOBuiltinFn = (context: ExecutionContext, ...args: ExprValue[]) => ExprValue;
 
+// Security: Constants for preventing prototype pollution
+const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
+const MAX_FLATTEN_DEPTH = 100;
+
+/**
+ * Security: Check if a key is dangerous and could cause prototype pollution
+ */
+function isDangerousKey(key: string): boolean {
+  return DANGEROUS_KEYS.includes(key);
+}
+
+/**
+ * Security: Filter dangerous keys from an object to prevent prototype pollution
+ */
+function sanitizeObject(obj: ExprObject): ExprObject {
+  const safe: ExprObject = {};
+  for (const key of Object.keys(obj)) {
+    if (!isDangerousKey(key)) {
+      safe[key] = obj[key]!;
+    }
+  }
+  return safe;
+}
+
 function invokeLambda(
   lambda: LambdaValue,
   context: ExecutionContext,
@@ -175,7 +199,23 @@ const BUILTINS = new Map<string, BuiltinFn>([
     'flatten',
     (v, depth) => {
       if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'flatten requires an array');
-      const d = typeof depth === 'number' ? depth : Number.POSITIVE_INFINITY;
+
+      // Security: Default to MAX_FLATTEN_DEPTH if no depth specified, otherwise use provided depth
+      let d: number;
+      if (typeof depth === 'number') {
+        d = depth;
+        // Security: Enforce maximum flatten depth to prevent stack overflow
+        if (d > MAX_FLATTEN_DEPTH) {
+          return makeError(
+            'TYPE_ERROR',
+            `flatten depth ${d} exceeds maximum of ${MAX_FLATTEN_DEPTH}`
+          );
+        }
+      } else {
+        // Default to max depth when not specified
+        d = MAX_FLATTEN_DEPTH;
+      }
+
       const flattenHelper = (arr: ExprValue[], currentDepth: number): ExprValue[] => {
         const result: ExprValue[] = [];
         for (const item of arr) {
@@ -214,7 +254,8 @@ const BUILTINS = new Map<string, BuiltinFn>([
           const entry = item as ExprObject;
           const key = entry.key;
           const value = entry.value;
-          if (typeof key === 'string') {
+          // Security: Filter dangerous keys to prevent prototype pollution
+          if (typeof key === 'string' && !isDangerousKey(key)) {
             result[key] = value ?? null;
           }
         }
@@ -1077,7 +1118,9 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
               !Array.isArray(source) &&
               !isExprError(source)
             ) {
-              Object.assign(result, source);
+              // Security: Filter dangerous keys from spread to prevent prototype pollution
+              const safeSource = sanitizeObject(source);
+              Object.assign(result, safeSource);
             }
             i++;
           } else {
@@ -1085,7 +1128,10 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
             i++;
             const value = items[i] as ExprValue;
             i++;
-            result[key] = value;
+            // Security: Filter dangerous keys to prevent prototype pollution
+            if (!isDangerousKey(key)) {
+              result[key] = value;
+            }
           }
         }
         push(result);
@@ -1124,9 +1170,42 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
 
         // Handle array indexing
         if (Array.isArray(obj)) {
+          // Auto-map: if index is a string (property name), map over array
+          if (typeof idx === 'string') {
+            const mapProperty = (arr: ExprValue[]): ExprValue[] => {
+              return arr.map((item) => {
+                // Recursively map over nested arrays
+                if (Array.isArray(item)) {
+                  return mapProperty(item);
+                }
+                // Access property on objects
+                if (typeof item === 'object' && item !== null && !isExprError(item)) {
+                  return (item as ExprObject)[idx] ?? null;
+                }
+                return null;
+              });
+            };
+            push(mapProperty(obj));
+            break;
+          }
+
           if (typeof idx !== 'number') {
             return makeError('TYPE_ERROR', 'Array index must be a number');
           }
+
+          // Auto-map: if array contains arrays, map numeric index access
+          if (obj.length > 0 && obj.every((item) => Array.isArray(item))) {
+            const result = obj.map((item) => {
+              const arr = item as ExprValue[];
+              if (idx < 0 || idx >= arr.length) {
+                return null;
+              }
+              return arr[idx]!;
+            });
+            push(result);
+            break;
+          }
+
           if (idx < 0 || idx >= obj.length) {
             return makeError(
               'INDEX_OUT_OF_BOUNDS',
@@ -1179,6 +1258,25 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
 
         // Handle array indexing - return null on out-of-bounds
         if (Array.isArray(obj)) {
+          // Auto-map: if index is a string (property name), map over array
+          if (typeof idx === 'string') {
+            const mapProperty = (arr: ExprValue[]): ExprValue[] => {
+              return arr.map((item) => {
+                // Recursively map over nested arrays
+                if (Array.isArray(item)) {
+                  return mapProperty(item);
+                }
+                // Access property on objects
+                if (typeof item === 'object' && item !== null && !isExprError(item)) {
+                  return (item as ExprObject)[idx] ?? null;
+                }
+                return null;
+              });
+            };
+            push(mapProperty(obj));
+            break;
+          }
+
           if (typeof idx !== 'number') {
             push(null);
             break;
@@ -1205,6 +1303,57 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
 
         // Not an object or array - return null
         push(null);
+        break;
+      }
+
+      case Opcode.WILDCARD: {
+        const obj = pop();
+        if (isExprError(obj)) return obj;
+
+        // Arrays: return as-is
+        if (Array.isArray(obj)) {
+          push(obj);
+          break;
+        }
+
+        // Objects: return all values as array
+        if (typeof obj === 'object' && obj !== null && !isLambdaValue(obj)) {
+          push(Object.values(obj as ExprObject));
+          break;
+        }
+
+        // Primitives: wrap in single-element array
+        push([obj]);
+        break;
+      }
+
+      case Opcode.OPTIONAL_WILDCARD: {
+        const obj = pop();
+        if (isExprError(obj)) {
+          push([]);
+          break;
+        }
+
+        // Null/undefined: return empty array
+        if (obj === null) {
+          push([]);
+          break;
+        }
+
+        // Arrays: return as-is
+        if (Array.isArray(obj)) {
+          push(obj);
+          break;
+        }
+
+        // Objects: return all values as array
+        if (typeof obj === 'object' && !isLambdaValue(obj)) {
+          push(Object.values(obj as ExprObject));
+          break;
+        }
+
+        // Primitives: wrap in single-element array
+        push([obj]);
         break;
       }
 
@@ -1313,6 +1462,10 @@ function resolvePath(context: ExecutionContext, path: string): ExprValue {
   let current: ExprValue = context as unknown as ExprValue;
 
   for (const part of parts) {
+    // Security: Block access to dangerous keys
+    if (isDangerousKey(part)) {
+      return null;
+    }
     if (current === null || current === undefined) return null;
     if (typeof current === 'object' && !Array.isArray(current) && !isExprError(current)) {
       current = (current as ExprObject)[part] ?? null;
@@ -1334,6 +1487,10 @@ function setPath(context: ExecutionContext, path: string, value: ExprValue): voi
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i]!;
+    // Security: Block access to dangerous keys
+    if (isDangerousKey(part)) {
+      return;
+    }
     const next = current[part];
     if (typeof next === 'object' && next !== null && !Array.isArray(next)) {
       current = next as Record<string, ExprValue>;
@@ -1343,7 +1500,10 @@ function setPath(context: ExecutionContext, path: string, value: ExprValue): voi
   }
 
   const lastPart = parts[parts.length - 1]!;
-  current[lastPart] = value;
+  // Security: Block setting dangerous keys to prevent prototype pollution
+  if (!isDangerousKey(lastPart)) {
+    current[lastPart] = value;
+  }
 }
 
 function deletePath(context: ExecutionContext, path: string): void {
@@ -1352,6 +1512,10 @@ function deletePath(context: ExecutionContext, path: string): void {
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i]!;
+    // Security: Block access to dangerous keys
+    if (isDangerousKey(part)) {
+      return;
+    }
     const next = current[part];
     if (typeof next === 'object' && next !== null && !Array.isArray(next)) {
       current = next as Record<string, ExprValue>;
@@ -1361,7 +1525,10 @@ function deletePath(context: ExecutionContext, path: string): void {
   }
 
   const lastPart = parts[parts.length - 1]!;
-  delete current[lastPart];
+  // Security: Block deleting dangerous keys
+  if (!isDangerousKey(lastPart)) {
+    delete current[lastPart];
+  }
 }
 
 function parsePath(path: string): string[] {
