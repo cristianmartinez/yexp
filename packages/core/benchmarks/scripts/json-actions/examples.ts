@@ -10,10 +10,10 @@ export const actionExamples = {
       path: 'state.count',
       value: {
         type: 'expr' as const,
-        expr: 'state.count + 1'
-      }
+        expr: 'state.count + 1',
+      },
     },
-    initialContext: { state: { count: 0 } }
+    initialContext: { state: { count: 0 } },
   },
 
   conditionalUpdate: {
@@ -22,20 +22,20 @@ export const actionExamples = {
       type: 'conditional' as const,
       condition: {
         type: 'expr' as const,
-        expr: 'state.count > 5'
+        expr: 'state.count > 5',
       },
       then: {
         type: 'assign' as const,
         path: 'state.message',
-        value: { type: 'literal' as const, value: 'Count is high' }
+        value: { type: 'literal' as const, value: 'Count is high' },
       },
       else: {
         type: 'assign' as const,
         path: 'state.message',
-        value: { type: 'literal' as const, value: 'Count is low' }
-      }
+        value: { type: 'literal' as const, value: 'Count is low' },
+      },
     },
-    initialContext: { state: { count: 10, message: '' } }
+    initialContext: { state: { count: 10, message: '' } },
   },
 
   sequence: {
@@ -46,20 +46,20 @@ export const actionExamples = {
         {
           type: 'assign' as const,
           path: 'state.loading',
-          value: { type: 'literal' as const, value: true }
+          value: { type: 'literal' as const, value: true },
         },
         {
           type: 'assign' as const,
           path: 'state.data',
-          value: { type: 'literal' as const, value: { result: 'success' } }
+          value: { type: 'literal' as const, value: { result: 'success' } },
         },
         {
           type: 'assign' as const,
           path: 'state.loading',
-          value: { type: 'literal' as const, value: false }
-        }
-      ]
+          value: { type: 'literal' as const, value: false },
+        },
+      ],
     },
-    initialContext: { state: { loading: false, data: null } }
-  }
+    initialContext: { state: { loading: false, data: null } },
+  },
 };

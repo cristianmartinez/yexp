@@ -867,7 +867,7 @@ describe('integration', () => {
     test('sqrt computes square root', () => {
       expect(run('sqrt(4)', ctx())).toBe(2);
       expect(run('sqrt(9)', ctx())).toBe(3);
-      expect(run('sqrt(2)', ctx())).toBeCloseTo(1.414, 3);
+      expect(run('sqrt(2)', ctx())).toBeCloseTo(Math.SQRT2, 3);
     });
 
     test('sqrt with data path', () => {
@@ -918,7 +918,7 @@ describe('integration', () => {
 
     test('exp computes exponential (e^x)', () => {
       expect(run('exp(0)', ctx())).toBe(1);
-      expect(run('exp(1)', ctx())).toBeCloseTo(2.718281828459045, 5);
+      expect(run('exp(1)', ctx())).toBeCloseTo(Math.E, 5);
       expect(run('exp(2)', ctx())).toBeCloseTo(7.389, 3);
     });
 

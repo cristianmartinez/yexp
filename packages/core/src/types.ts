@@ -283,37 +283,37 @@ export enum Opcode {
   STRICT_NEQ = 37,
 
   // Optimized comparison patterns (40-49)
-  RANGE_CHECK = 40,           // value >= min && value <= max
-  RANGE_CHECK_EXCLUSIVE = 41,  // value > min && value < max
-  RANGE_CHECK_LO_INCLUSIVE = 42,  // value >= min && value < max
-  RANGE_CHECK_HI_INCLUSIVE = 43,  // value > min && value <= max
+  RANGE_CHECK = 40, // value >= min && value <= max
+  RANGE_CHECK_EXCLUSIVE = 41, // value > min && value < max
+  RANGE_CHECK_LO_INCLUSIVE = 42, // value >= min && value < max
+  RANGE_CHECK_HI_INCLUSIVE = 43, // value > min && value <= max
 
   // Fused comparison opcodes (50-59)
-  LOAD_GT_CONST = 50,       // Load slot, compare > constant
-  LOAD_GTE_CONST = 51,     // Load slot, compare >= constant
-  LOAD_LT_CONST = 52,       // Load slot, compare < constant
-  LOAD_LTE_CONST = 53,     // Load slot, compare <= constant
-  LOAD_EQ_CONST = 54,       // Load slot, compare == constant
-  LOAD_NEQ_CONST = 55,     // Load slot, compare != constant
-  LOAD_STRICT_EQ_CONST = 56,   // Load slot, compare === constant
-  LOAD_STRICT_NEQ_CONST = 57,  // Load slot, compare !== constant
+  LOAD_GT_CONST = 50, // Load slot, compare > constant
+  LOAD_GTE_CONST = 51, // Load slot, compare >= constant
+  LOAD_LT_CONST = 52, // Load slot, compare < constant
+  LOAD_LTE_CONST = 53, // Load slot, compare <= constant
+  LOAD_EQ_CONST = 54, // Load slot, compare == constant
+  LOAD_NEQ_CONST = 55, // Load slot, compare != constant
+  LOAD_STRICT_EQ_CONST = 56, // Load slot, compare === constant
+  LOAD_STRICT_NEQ_CONST = 57, // Load slot, compare !== constant
 
   // Fused arithmetic opcodes (60-69)
-  LOAD_ADD_CONST = 60,     // Load slot, add constant
-  LOAD_SUB_CONST = 61,     // Load slot, subtract constant
-  LOAD_MUL_CONST = 62,     // Load slot, multiply by constant
-  LOAD_DIV_CONST = 63,     // Load slot, divide by constant
-  LOAD_MOD_CONST = 64,     // Load slot, modulo constant
+  LOAD_ADD_CONST = 60, // Load slot, add constant
+  LOAD_SUB_CONST = 61, // Load slot, subtract constant
+  LOAD_MUL_CONST = 62, // Load slot, multiply by constant
+  LOAD_DIV_CONST = 63, // Load slot, divide by constant
+  LOAD_MOD_CONST = 64, // Load slot, modulo constant
 
   // Optimized increment/decrement (70-79)
-  INCREMENT = 70,               // Load slot, add 1
-  DECREMENT = 71,               // Load slot, subtract 1
+  INCREMENT = 70, // Load slot, add 1
+  DECREMENT = 71, // Load slot, subtract 1
 
   // Null and boolean checks (80-89)
-  IS_NULL = 80,                   // Load slot, compare == null
-  IS_NOT_NULL = 81,           // Load slot, compare != null
-  IS_TRUTHY = 82,               // Load slot, boolean coercion !!x
-  IS_FALSY = 83,                 // Load slot, boolean negation !x
+  IS_NULL = 80, // Load slot, compare == null
+  IS_NOT_NULL = 81, // Load slot, compare != null
+  IS_TRUTHY = 82, // Load slot, boolean coercion !!x
+  IS_FALSY = 83, // Load slot, boolean negation !x
 
   // Logical & control flow (90-99)
   NOT = 90,

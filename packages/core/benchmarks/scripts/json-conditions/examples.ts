@@ -8,10 +8,10 @@ export const conditionExamples = {
     condition: {
       and: [
         { field: 'age', op: 'gte' as const, value: 18 },
-        { field: 'age', op: 'lte' as const, value: 65 }
-      ]
+        { field: 'age', op: 'lte' as const, value: 65 },
+      ],
     },
-    context: { age: 25 }
+    context: { age: 25 },
   },
 
   complex: {
@@ -24,20 +24,20 @@ export const conditionExamples = {
             {
               and: [
                 { field: 'age', op: 'gt' as const, value: 18 },
-                { field: 'verified', op: 'eq' as const, value: true }
-              ]
-            }
-          ]
+                { field: 'verified', op: 'eq' as const, value: true },
+              ],
+            },
+          ],
         },
         {
           or: [
             { field: 'country', op: 'eq' as const, value: 'US' },
-            { field: 'country', op: 'eq' as const, value: 'UK' }
-          ]
-        }
-      ]
+            { field: 'country', op: 'eq' as const, value: 'UK' },
+          ],
+        },
+      ],
     },
-    context: { age: 25, verified: false, country: 'US' }
+    context: { age: 25, verified: false, country: 'US' },
   },
 
   nested: {
@@ -45,8 +45,8 @@ export const conditionExamples = {
     condition: {
       and: [
         { path: 'user.profile.age', op: 'gte' as const, value: 18 },
-        { path: 'user.profile.country.code', op: 'eq' as const, value: 'US' }
-      ]
+        { path: 'user.profile.country.code', op: 'eq' as const, value: 'US' },
+      ],
     },
     context: {
       user: {
@@ -54,10 +54,10 @@ export const conditionExamples = {
           age: 25,
           country: {
             code: 'US',
-            name: 'United States'
-          }
-        }
-      }
-    }
-  }
+            name: 'United States',
+          },
+        },
+      },
+    },
+  },
 };

@@ -377,7 +377,12 @@ export function parse(tokens: Token[]): ASTNode {
             inDotShorthand = false;
             const predicate: LambdaNode = { type: 'Lambda', params: ['$it'], body };
             expect(TokenType.RightBracket);
-            node = { type: 'PredicateIndex', object: node, predicate, optional: true } as PredicateIndexNode;
+            node = {
+              type: 'PredicateIndex',
+              object: node,
+              predicate,
+              optional: true,
+            } as PredicateIndexNode;
             continue;
           }
 
@@ -606,10 +611,7 @@ export function parse(tokens: Token[]): ASTNode {
   function parseArrowLambda(left: ASTNode): LambdaNode {
     // Left side must be an identifier (single parameter)
     if (left.type !== 'Identifier') {
-      throw new ParseError(
-        'Arrow function parameter must be an identifier',
-        current().position,
-      );
+      throw new ParseError('Arrow function parameter must be an identifier', current().position);
     }
     const params = [left.name];
     const body = parseExpression(Prec.Lambda);

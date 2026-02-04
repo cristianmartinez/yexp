@@ -5,9 +5,9 @@
  */
 
 import { compile } from '../../../src/compiler.js';
-import { evaluate as evalExpr } from '../../../src/vm.js';
-import { parse } from '../../../src/parser.js';
 import { tokenize } from '../../../src/lexer.js';
+import { parse } from '../../../src/parser.js';
+import { evaluate as evalExpr } from '../../../src/vm.js';
 
 export type JsonAction =
   | { type: 'assign'; path: string; value: JsonValue }
@@ -17,7 +17,7 @@ export type JsonAction =
 
 export type JsonValue =
   | { type: 'literal'; value: any }
-  | { type: 'expr'; expr: string }  // Expr expression for reading
+  | { type: 'expr'; expr: string } // Expr expression for reading
   | { type: 'path'; path: string };
 
 /**
@@ -52,7 +52,7 @@ export function executeAction(action: JsonAction, context: any): void {
       // Call a registered function
       const fn = (context as any).__functions?.[action.function];
       if (typeof fn === 'function') {
-        const args = action.args?.map(arg => evaluateValue(arg, context)) || [];
+        const args = action.args?.map((arg) => evaluateValue(arg, context)) || [];
         fn(...args);
       }
       break;

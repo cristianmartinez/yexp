@@ -5,11 +5,11 @@
  * Usage: bun run packages/core/benchmarks/generate.ts
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { compile } from '../../src/compiler.js';
 import { tokenize } from '../../src/lexer.js';
 import { parse } from '../../src/parser.js';
-import { compile } from '../../src/compiler.js';
 import type { ASTNode, BytecodeProgram } from '../../src/types.js';
 
 interface Expression {

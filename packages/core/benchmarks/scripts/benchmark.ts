@@ -5,14 +5,13 @@
  * Usage: bun run packages/core/benchmarks/benchmark.ts [--no-history]
  */
 
-import { readFileSync, writeFileSync, existsSync, appendFileSync } from 'fs';
-import { join } from 'path';
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
+import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { compile } from '../../src/compiler.js';
 import { tokenize } from '../../src/lexer.js';
 import { parse } from '../../src/parser.js';
-import { compile } from '../../src/compiler.js';
 import { evaluate } from '../../src/vm.js';
-import type { BytecodeProgram } from '../../src/types.js';
 
 interface Expression {
   id: number;
@@ -26,11 +25,11 @@ interface BenchmarkResult {
   source: string;
   category: string;
   complexity: string;
-  lexer: number;      // avg time in ms
-  parser: number;     // avg time in ms
-  compiler: number;   // avg time in ms
-  vm: number;         // avg time in ms
-  total: number;      // avg time in ms
+  lexer: number; // avg time in ms
+  parser: number; // avg time in ms
+  compiler: number; // avg time in ms
+  vm: number; // avg time in ms
+  total: number; // avg time in ms
   iterations: number;
 }
 
@@ -120,16 +119,16 @@ for (const expr of expressions) {
       source: expr.source,
       category: expr.category,
       complexity: expr.complexity,
-      lexer: parseFloat(lexerTime.toFixed(6)),
-      parser: parseFloat(parserTime.toFixed(6)),
-      compiler: parseFloat(compilerTime.toFixed(6)),
-      vm: parseFloat(vmTime.toFixed(6)),
-      total: parseFloat(total.toFixed(6)),
+      lexer: Number.parseFloat(lexerTime.toFixed(6)),
+      parser: Number.parseFloat(parserTime.toFixed(6)),
+      compiler: Number.parseFloat(compilerTime.toFixed(6)),
+      vm: Number.parseFloat(vmTime.toFixed(6)),
+      total: Number.parseFloat(total.toFixed(6)),
       iterations: ITERATIONS,
     });
 
     console.log(
-      `    Lexer: ${lexerTime.toFixed(4)}ms | Parser: ${parserTime.toFixed(4)}ms | Compiler: ${compilerTime.toFixed(4)}ms | VM: ${vmTime.toFixed(4)}ms | Total: ${total.toFixed(4)}ms`
+      `    Lexer: ${lexerTime.toFixed(4)}ms | Parser: ${parserTime.toFixed(4)}ms | Compiler: ${compilerTime.toFixed(4)}ms | VM: ${vmTime.toFixed(4)}ms | Total: ${total.toFixed(4)}ms`,
     );
   } catch (error) {
     console.error(`    ✗ Error: ${error instanceof Error ? error.message : String(error)}`);
@@ -154,7 +153,7 @@ if (!SKIP_HISTORY) {
     results,
   };
 
-  appendFileSync(HISTORY_FILE, JSON.stringify(historyEntry) + '\n');
+  appendFileSync(HISTORY_FILE, `${JSON.stringify(historyEntry)}\n`);
   console.log(`📊 History updated: ${HISTORY_FILE}`);
 }
 
@@ -171,7 +170,8 @@ console.log('\n📊 Summary by Complexity:');
 const complexities = [...new Set(results.map((r) => r.complexity))];
 for (const complexity of complexities.sort()) {
   const complexityResults = results.filter((r) => r.complexity === complexity);
-  const avgTotal = complexityResults.reduce((sum, r) => sum + r.total, 0) / complexityResults.length;
+  const avgTotal =
+    complexityResults.reduce((sum, r) => sum + r.total, 0) / complexityResults.length;
   console.log(`   ${complexity.padEnd(20)}: ${avgTotal.toFixed(4)}ms avg`);
 }
 

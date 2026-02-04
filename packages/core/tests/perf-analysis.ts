@@ -1,6 +1,6 @@
+import { compile } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
-import { compile } from '../src/compiler.js';
 import { evaluate } from '../src/vm.js';
 
 // Helper to measure execution time
@@ -12,7 +12,9 @@ function measure(label: string, fn: () => void, iterations = 1000): number {
   const end = performance.now();
   const total = end - start;
   const avg = total / iterations;
-  console.log(`${label}: ${total.toFixed(2)}ms total, ${avg.toFixed(4)}ms avg (${iterations} iterations)`);
+  console.log(
+    `${label}: ${total.toFixed(2)}ms total, ${avg.toFixed(4)}ms avg (${iterations} iterations)`,
+  );
   return avg;
 }
 
@@ -102,36 +104,48 @@ console.log('\n=== Full Pipeline Comparison ===\n');
 // Compare full pipeline (lex + parse + compile + eval) for different operators
 console.log('Regular property access (data.users[0].name):');
 const simpleExpr = 'data.users[0].name';
-let simpleResult;
-measure('  Full pipeline', () => {
-  simpleResult = evaluate(compile(parse(tokenize(simpleExpr))), {
-    state: {},
-    data: smallData,
-    env: {},
-  });
-}, 5000);
+let _simpleResult;
+measure(
+  '  Full pipeline',
+  () => {
+    _simpleResult = evaluate(compile(parse(tokenize(simpleExpr))), {
+      state: {},
+      data: smallData,
+      env: {},
+    });
+  },
+  5000,
+);
 
 console.log('\nWildcard (data.users[*].name):');
 const wildcardExpr = 'data.users[*].name';
-let wildcardResult;
-measure('  Full pipeline', () => {
-  wildcardResult = evaluate(compile(parse(tokenize(wildcardExpr))), {
-    state: {},
-    data: smallData,
-    env: {},
-  });
-}, 5000);
+let _wildcardResult;
+measure(
+  '  Full pipeline',
+  () => {
+    _wildcardResult = evaluate(compile(parse(tokenize(wildcardExpr))), {
+      state: {},
+      data: smallData,
+      env: {},
+    });
+  },
+  5000,
+);
 
 console.log('\nRecursive descent (data..name):');
 const recursiveExpr = 'data..name';
-let recursiveResult;
-measure('  Full pipeline', () => {
-  recursiveResult = evaluate(compile(parse(tokenize(recursiveExpr))), {
-    state: {},
-    data: smallData,
-    env: {},
-  });
-}, 5000);
+let _recursiveResult;
+measure(
+  '  Full pipeline',
+  () => {
+    _recursiveResult = evaluate(compile(parse(tokenize(recursiveExpr))), {
+      state: {},
+      data: smallData,
+      env: {},
+    });
+  },
+  5000,
+);
 
 console.log('\n=== Analysis Summary ===');
 console.log('Recursive descent has O(n*m) complexity where:');

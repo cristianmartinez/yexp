@@ -5,8 +5,8 @@
  * Usage: bun run packages/core/benchmarks/compare.ts [--baseline=commit_hash]
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 interface BenchmarkResult {
   id: number;
@@ -90,7 +90,7 @@ console.log(
     'Parser'.padEnd(12) +
     'Compiler'.padEnd(12) +
     'VM'.padEnd(12) +
-    'Total'.padEnd(12)
+    'Total'.padEnd(12),
 );
 console.log('═'.repeat(120));
 
@@ -113,7 +113,8 @@ for (const current of latest.results) {
     return `${color}${sign}${diff.toFixed(1)}%${reset}`;
   };
 
-  const truncatedExpr = current.source.length > 47 ? current.source.substring(0, 47) + '...' : current.source;
+  const truncatedExpr =
+    current.source.length > 47 ? `${current.source.substring(0, 47)}...` : current.source;
 
   console.log(
     `${String(current.id).padEnd(4)}${truncatedExpr.padEnd(50)}` +
@@ -121,7 +122,7 @@ for (const current of latest.results) {
       `${formatDiff(current.parser, base.parser).padEnd(20)}` +
       `${formatDiff(current.compiler, base.compiler).padEnd(20)}` +
       `${formatDiff(current.vm, base.vm).padEnd(20)}` +
-      `${formatDiff(current.total, base.total).padEnd(20)}`
+      `${formatDiff(current.total, base.total).padEnd(20)}`,
   );
 }
 
@@ -129,7 +130,9 @@ console.log('═'.repeat(120));
 
 // Category-level comparison
 console.log('\n📊 Performance by Category:\n');
-console.log('Category'.padEnd(25) + 'Current'.padEnd(15) + 'Baseline'.padEnd(15) + 'Change'.padEnd(15));
+console.log(
+  'Category'.padEnd(25) + 'Current'.padEnd(15) + 'Baseline'.padEnd(15) + 'Change'.padEnd(15),
+);
 console.log('─'.repeat(70));
 
 const categories = [...new Set(latest.results.map((r) => r.category))];
@@ -146,16 +149,17 @@ for (const category of categories.sort()) {
   const reset = '\x1b[0m';
 
   console.log(
-    category.padEnd(25) +
+    `${
+      category.padEnd(25) +
       `${currentAvg.toFixed(4)}ms`.padEnd(15) +
-      `${baseAvg.toFixed(4)}ms`.padEnd(15) +
-      `${color}${sign}${diff.toFixed(1)}%${reset}`
+      `${baseAvg.toFixed(4)}ms`.padEnd(15)
+    }${color}${sign}${diff.toFixed(1)}%${reset}`,
   );
 }
 
 // Summary
-console.log('\n' + '═'.repeat(70));
-console.log(`\n📈 Summary:`);
+console.log(`\n${'═'.repeat(70)}`);
+console.log('\n📈 Summary:');
 console.log(`   Improvements: ${improvements} (>5% faster)`);
 console.log(`   Regressions:  ${regressions} (>5% slower)`);
 console.log(`   Stable:       ${latest.results.length - improvements - regressions} (±5%)`);

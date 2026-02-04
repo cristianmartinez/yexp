@@ -554,7 +554,7 @@ const BUILTINS = new Map<string, BuiltinFn>([
     (v, exp) => {
       if (typeof v !== 'number') return makeError('TYPE_ERROR', 'pow requires a number');
       if (typeof exp !== 'number') return makeError('TYPE_ERROR', 'pow exponent must be a number');
-      return Math.pow(v, exp);
+      return v ** exp;
     },
   ],
   [
@@ -750,7 +750,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
         if (!groups.has(keyStr)) {
           groups.set(keyStr, []);
         }
-        groups.get(keyStr)!.push(item);
+        groups.get(keyStr)?.push(item);
       }
       const result: ExprObject = {};
       for (const [key, value] of groups.entries()) {
@@ -1002,7 +1002,7 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
         // Loose equality with type coercion
-        push(a == b);
+        push(a === b);
         break;
       }
 
@@ -1012,7 +1012,7 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
         // Loose inequality with type coercion
-        push(a != b);
+        push(a !== b);
         break;
       }
 
@@ -1242,7 +1242,7 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         const constValue = instruction[2];
         const value = slotValues[slotIdx];
         // Loose equality with type coercion
-        stack.push(value == constValue);
+        stack.push(value === constValue);
         break;
       }
 
@@ -1251,7 +1251,7 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         const constValue = instruction[2];
         const value = slotValues[slotIdx];
         // Loose inequality with type coercion
-        stack.push(value != constValue);
+        stack.push(value !== constValue);
         break;
       }
 

@@ -4,9 +4,9 @@
  */
 
 import { compile } from '../../src/compiler.js';
-import { evaluate as evalBytecode } from '../../src/vm.js';
-import { parse } from '../../src/parser.js';
 import { tokenize } from '../../src/lexer.js';
+import { parse } from '../../src/parser.js';
+import { evaluate as evalBytecode } from '../../src/vm.js';
 
 // JSON-based condition evaluator
 interface JsonCondition {
@@ -24,24 +24,31 @@ function evaluateJsonCondition(condition: JsonCondition, context: any): boolean 
     const { op, value } = condition;
 
     switch (op) {
-      case 'eq': return fieldValue === value;
-      case 'neq': return fieldValue !== value;
-      case 'gt': return fieldValue > value;
-      case 'gte': return fieldValue >= value;
-      case 'lt': return fieldValue < value;
-      case 'lte': return fieldValue <= value;
-      default: return false;
+      case 'eq':
+        return fieldValue === value;
+      case 'neq':
+        return fieldValue !== value;
+      case 'gt':
+        return fieldValue > value;
+      case 'gte':
+        return fieldValue >= value;
+      case 'lt':
+        return fieldValue < value;
+      case 'lte':
+        return fieldValue <= value;
+      default:
+        return false;
     }
   }
 
   // AND logic
   if (condition.and) {
-    return condition.and.every(c => evaluateJsonCondition(c, context));
+    return condition.and.every((c) => evaluateJsonCondition(c, context));
   }
 
   // OR logic
   if (condition.or) {
-    return condition.or.some(c => evaluateJsonCondition(c, context));
+    return condition.or.some((c) => evaluateJsonCondition(c, context));
   }
 
   return false;
@@ -54,11 +61,11 @@ const testCases = [
     json: {
       or: [
         { field: 'age', op: 'gt', value: 18 },
-        { field: 'verified', op: 'eq', value: true }
-      ]
+        { field: 'verified', op: 'eq', value: true },
+      ],
     },
     expr: 'age > 18 || verified == true',
-    context: { age: 25, verified: false }
+    context: { age: 25, verified: false },
   },
   {
     name: 'Complex AND + OR',
@@ -69,13 +76,13 @@ const testCases = [
         {
           or: [
             { field: 'verified', op: 'eq', value: true },
-            { field: 'admin', op: 'eq', value: true }
-          ]
-        }
-      ]
+            { field: 'admin', op: 'eq', value: true },
+          ],
+        },
+      ],
     },
     expr: 'age >= 18 && age <= 65 && (verified == true || admin == true)',
-    context: { age: 25, verified: false, admin: true }
+    context: { age: 25, verified: false, admin: true },
   },
   {
     name: 'Deeply nested',
@@ -84,26 +91,26 @@ const testCases = [
         {
           and: [
             { field: 'age', op: 'gt', value: 21 },
-            { field: 'country', op: 'eq', value: 'US' }
-          ]
+            { field: 'country', op: 'eq', value: 'US' },
+          ],
         },
         {
           and: [
             { field: 'age', op: 'gt', value: 18 },
-            { field: 'country', op: 'eq', value: 'UK' }
-          ]
+            { field: 'country', op: 'eq', value: 'UK' },
+          ],
         },
         {
           and: [
             { field: 'verified', op: 'eq', value: true },
-            { field: 'admin', op: 'eq', value: true }
-          ]
-        }
-      ]
+            { field: 'admin', op: 'eq', value: true },
+          ],
+        },
+      ],
     },
     expr: '(age > 21 && country == "US") || (age > 18 && country == "UK") || (verified && admin)',
-    context: { age: 22, country: 'US', verified: false, admin: false }
-  }
+    context: { age: 22, country: 'US', verified: false, admin: false },
+  },
 ];
 
 console.log('🔥 JSON Conditions vs Compiled Expressions Benchmark\n');
@@ -143,8 +150,12 @@ for (const testCase of testCases) {
   const speedup = jsonTime / exprTime;
   const winner = speedup > 1 ? 'Expression' : 'JSON';
 
-  console.log(`   JSON:       ${jsonTime.toFixed(2)}ms (${(jsonTime / ITERATIONS * 1000).toFixed(3)}µs per eval)`);
-  console.log(`   Expression: ${exprTime.toFixed(2)}ms (${(exprTime / ITERATIONS * 1000).toFixed(3)}µs per eval)`);
+  console.log(
+    `   JSON:       ${jsonTime.toFixed(2)}ms (${((jsonTime / ITERATIONS) * 1000).toFixed(3)}µs per eval)`,
+  );
+  console.log(
+    `   Expression: ${exprTime.toFixed(2)}ms (${((exprTime / ITERATIONS) * 1000).toFixed(3)}µs per eval)`,
+  );
   console.log(`   \x1b[32m${winner} is ${speedup.toFixed(1)}x faster!\x1b[0m`);
 }
 

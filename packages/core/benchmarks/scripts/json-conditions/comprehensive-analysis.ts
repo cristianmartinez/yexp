@@ -9,13 +9,13 @@
  */
 
 import { compile } from '../../../src/compiler.js';
-import { evaluate as evalBytecode } from '../../../src/vm.js';
-import { parse } from '../../../src/parser.js';
 import { tokenize } from '../../../src/lexer.js';
-import { evaluateSimple, evaluateWithPaths, type JsonCondition } from './evaluator.js';
-import { executeAction } from '../json-actions/executor.js';
-import { conditionExamples } from './examples.js';
+import { parse } from '../../../src/parser.js';
+import { evaluate as evalBytecode } from '../../../src/vm.js';
 import { actionExamples } from '../json-actions/examples.js';
+import { executeAction } from '../json-actions/executor.js';
+import { type JsonCondition, evaluateSimple, evaluateWithPaths } from './evaluator.js';
+import { conditionExamples } from './examples.js';
 
 console.log('🔥 Comprehensive Performance Comparison: JSON vs Expressions\n');
 console.log('═'.repeat(70));
@@ -35,8 +35,8 @@ console.log('   (Same condition repeatedly)\n');
 const simpleJson: JsonCondition = {
   and: [
     { field: 'age', op: 'gte' as const, value: 18 },
-    { field: 'age', op: 'lte' as const, value: 65 }
-  ]
+    { field: 'age', op: 'lte' as const, value: 65 },
+  ],
 };
 const simpleExpr = 'age >= 18 && age <= 65';
 const simpleContext = { age: 25 };
@@ -59,7 +59,9 @@ const exprSimple = performance.now() - exprStart;
 
 console.log(`   JSON:       ${jsonSimple.toFixed(2)}ms`);
 console.log(`   Expression: ${exprSimple.toFixed(2)}ms`);
-console.log(`   Winner:     ${jsonSimple < exprSimple ? 'JSON' : 'Expression'} (${(Math.max(jsonSimple, exprSimple) / Math.min(jsonSimple, exprSimple)).toFixed(1)}x faster)\n`);
+console.log(
+  `   Winner:     ${jsonSimple < exprSimple ? 'JSON' : 'Expression'} (${(Math.max(jsonSimple, exprSimple) / Math.min(jsonSimple, exprSimple)).toFixed(1)}x faster)\n`,
+);
 
 // ============================================================
 // Scenario 2: Many different conditions (Expression wins!)
@@ -72,10 +74,10 @@ const conditions = Array.from({ length: 100 }, (_, i) => ({
   json: {
     and: [
       { field: 'score', op: 'gte' as const, value: i },
-      { field: 'score', op: 'lte' as const, value: i + 50 }
-    ]
+      { field: 'score', op: 'lte' as const, value: i + 50 },
+    ],
   } as JsonCondition,
-  expr: `score >= ${i} && score <= ${i + 50}`
+  expr: `score >= ${i} && score <= ${i + 50}`,
 }));
 
 const contexts = Array.from({ length: 100 }, (_, i) => ({ score: i + 25 }));
@@ -90,7 +92,7 @@ for (let round = 0; round < 1000; round++) {
 const jsonMany = performance.now() - jsonStart;
 
 // Expression approach: compile once, evaluate many times
-const bytecodes = conditions.map(c => compile(parse(tokenize(c.expr))));
+const bytecodes = conditions.map((c) => compile(parse(tokenize(c.expr))));
 
 exprStart = performance.now();
 for (let round = 0; round < 1000; round++) {
@@ -102,7 +104,9 @@ const exprMany = performance.now() - exprStart;
 
 console.log(`   JSON:       ${jsonMany.toFixed(2)}ms`);
 console.log(`   Expression: ${exprMany.toFixed(2)}ms`);
-console.log(`   Winner:     ${jsonMany < exprMany ? 'JSON' : 'Expression'} (${(Math.max(jsonMany, exprMany) / Math.min(jsonMany, exprMany)).toFixed(1)}x faster)\n`);
+console.log(
+  `   Winner:     ${jsonMany < exprMany ? 'JSON' : 'Expression'} (${(Math.max(jsonMany, exprMany) / Math.min(jsonMany, exprMany)).toFixed(1)}x faster)\n`,
+);
 
 // ============================================================
 // Scenario 3: Complex logic (Expression wins on readability)
@@ -110,7 +114,7 @@ console.log(`   Winner:     ${jsonMany < exprMany ? 'JSON' : 'Expression'} (${(M
 console.log('📊 Scenario 3: Complex business logic');
 console.log('   (Expression syntax advantage)\n');
 
-const complexJson = conditionExamples.complex.condition;
+const _complexJson = conditionExamples.complex.condition;
 const complexExpr = '(age > 21 || (age > 18 && verified)) && (country == "US" || country == "UK")';
 
 console.log('   JSON structure: 8 nested levels, 80+ chars');
@@ -130,8 +134,8 @@ const nestedContext = nestedContextRaw as any;
 const nestedJson: JsonCondition = {
   and: [
     { path: 'user.profile.age', op: 'gte' as const, value: 18 },
-    { path: 'user.profile.country.code', op: 'eq' as const, value: 'US' }
-  ]
+    { path: 'user.profile.country.code', op: 'eq' as const, value: 'US' },
+  ],
 };
 
 // Expression handles it naturally
@@ -155,7 +159,9 @@ const exprNested = performance.now() - exprNestedStart;
 
 console.log(`   JSON (with path parsing): ${jsonNested.toFixed(2)}ms`);
 console.log(`   Expression (native):      ${exprNested.toFixed(2)}ms`);
-console.log(`   Winner:                   ${jsonNested < exprNested ? 'JSON' : 'Expression'} (${(Math.max(jsonNested, exprNested) / Math.min(jsonNested, exprNested)).toFixed(1)}x faster)`);
+console.log(
+  `   Winner:                   ${jsonNested < exprNested ? 'JSON' : 'Expression'} (${(Math.max(jsonNested, exprNested) / Math.min(jsonNested, exprNested)).toFixed(1)}x faster)`,
+);
 console.log('\n   Note: JSON evaluator had to be extended to support paths!');
 console.log('         Expressions handle nested access naturally.\n');
 
@@ -274,8 +280,12 @@ for (let i = 0; i < iterations; i++) {
 }
 const jsTime = performance.now() - jsStart;
 
-console.log(`  JSON Actions:       ${jsonActionTime.toFixed(2)}ms (${(jsonActionTime / iterations * 1000).toFixed(3)}µs per action)`);
-console.log(`  Direct JS:          ${jsTime.toFixed(2)}ms (${(jsTime / iterations * 1000).toFixed(3)}µs per action)`);
+console.log(
+  `  JSON Actions:       ${jsonActionTime.toFixed(2)}ms (${((jsonActionTime / iterations) * 1000).toFixed(3)}µs per action)`,
+);
+console.log(
+  `  Direct JS:          ${jsTime.toFixed(2)}ms (${((jsTime / iterations) * 1000).toFixed(3)}µs per action)`,
+);
 console.log(`  Winner:             Direct JS is ${(jsonActionTime / jsTime).toFixed(1)}x faster`);
 
 console.log('\n  Note: Direct JS represents what compiled expressions could achieve');
@@ -283,7 +293,7 @@ console.log('\n  Note: Direct JS represents what compiled expressions could achi
 // ============================================================
 // FINAL RECOMMENDATIONS
 // ============================================================
-console.log('\n\n' + '═'.repeat(70));
+console.log(`\n\n${'═'.repeat(70)}`);
 console.log('\n📝 Comprehensive Verdict:\n');
 
 console.log('**JSON Conditions (READ operations)**');

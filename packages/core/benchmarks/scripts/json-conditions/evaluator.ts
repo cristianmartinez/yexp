@@ -34,24 +34,31 @@ export function evaluateSimple(condition: JsonCondition, context: any): boolean 
     const { op, value } = condition;
 
     switch (op) {
-      case 'eq': return fieldValue === value;
-      case 'neq': return fieldValue !== value;
-      case 'gt': return fieldValue > value;
-      case 'gte': return fieldValue >= value;
-      case 'lt': return fieldValue < value;
-      case 'lte': return fieldValue <= value;
-      default: return false;
+      case 'eq':
+        return fieldValue === value;
+      case 'neq':
+        return fieldValue !== value;
+      case 'gt':
+        return fieldValue > value;
+      case 'gte':
+        return fieldValue >= value;
+      case 'lt':
+        return fieldValue < value;
+      case 'lte':
+        return fieldValue <= value;
+      default:
+        return false;
     }
   }
 
   // AND logic
   if (condition.and) {
-    return condition.and.every(c => evaluateSimple(c, context));
+    return condition.and.every((c) => evaluateSimple(c, context));
   }
 
   // OR logic
   if (condition.or) {
-    return condition.or.some(c => evaluateSimple(c, context));
+    return condition.or.some((c) => evaluateSimple(c, context));
   }
 
   return false;
@@ -76,13 +83,20 @@ export function evaluateWithPaths(condition: JsonCondition, context: any): boole
 
     const { op, value: condValue } = condition;
     switch (op) {
-      case 'eq': return value === condValue;
-      case 'neq': return value !== condValue;
-      case 'gt': return value > condValue;
-      case 'gte': return value >= condValue;
-      case 'lt': return value < condValue;
-      case 'lte': return value <= condValue;
-      default: return false;
+      case 'eq':
+        return value === condValue;
+      case 'neq':
+        return value !== condValue;
+      case 'gt':
+        return value > condValue;
+      case 'gte':
+        return value >= condValue;
+      case 'lt':
+        return value < condValue;
+      case 'lte':
+        return value <= condValue;
+      default:
+        return false;
     }
   }
 
@@ -92,24 +106,31 @@ export function evaluateWithPaths(condition: JsonCondition, context: any): boole
     const { op, value } = condition;
 
     switch (op) {
-      case 'eq': return fieldValue === value;
-      case 'neq': return fieldValue !== value;
-      case 'gt': return fieldValue > value;
-      case 'gte': return fieldValue >= value;
-      case 'lt': return fieldValue < value;
-      case 'lte': return fieldValue <= value;
-      default: return false;
+      case 'eq':
+        return fieldValue === value;
+      case 'neq':
+        return fieldValue !== value;
+      case 'gt':
+        return fieldValue > value;
+      case 'gte':
+        return fieldValue >= value;
+      case 'lt':
+        return fieldValue < value;
+      case 'lte':
+        return fieldValue <= value;
+      default:
+        return false;
     }
   }
 
   // AND logic
   if (condition.and) {
-    return condition.and.every(c => evaluateWithPaths(c, context));
+    return condition.and.every((c) => evaluateWithPaths(c, context));
   }
 
   // OR logic
   if (condition.or) {
-    return condition.or.some(c => evaluateWithPaths(c, context));
+    return condition.or.some((c) => evaluateWithPaths(c, context));
   }
 
   return false;
