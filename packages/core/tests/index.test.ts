@@ -274,4 +274,306 @@ describe('integration', () => {
       ).toEqual([3, 4]);
     });
   });
+
+  describe('array functions', () => {
+    test('add sums numbers', () => {
+      expect(run('data.items |> add', ctx({}, { items: [1, 2, 3] }))).toBe(6);
+    });
+
+    test('add concatenates strings', () => {
+      expect(run('data.items |> add', ctx({}, { items: ['a', 'b', 'c'] }))).toBe('abc');
+    });
+
+    test('add returns null for empty array', () => {
+      expect(run('data.items |> add', ctx({}, { items: [] }))).toBe(null);
+    });
+
+    test('unique removes duplicates', () => {
+      expect(run('data.items |> unique', ctx({}, { items: [1, 2, 2, 3, 1] }))).toEqual([1, 2, 3]);
+    });
+
+    test('reverse reverses array', () => {
+      expect(run('data.items |> reverse', ctx({}, { items: [1, 2, 3] }))).toEqual([3, 2, 1]);
+    });
+
+    test('flatten flattens nested arrays', () => {
+      expect(
+        run(
+          'data.items |> flatten',
+          ctx(
+            {},
+            {
+              items: [
+                [1, 2],
+                [3, 4],
+              ],
+            },
+          ),
+        ),
+      ).toEqual([1, 2, 3, 4]);
+    });
+
+    test('flatten with depth', () => {
+      expect(run('data.items |> flatten(1)', ctx({}, { items: [[[1]], [[2]]] }))).toEqual([
+        [1],
+        [2],
+      ]);
+    });
+
+    test('group_by with dot shorthand', () => {
+      expect(
+        run(
+          'data.items |> group_by(.category)',
+          ctx(
+            {},
+            {
+              items: [
+                { name: 'apple', category: 'fruit' },
+                { name: 'carrot', category: 'vegetable' },
+                { name: 'banana', category: 'fruit' },
+              ],
+            },
+          ),
+        ),
+      ).toEqual({
+        fruit: [
+          { name: 'apple', category: 'fruit' },
+          { name: 'banana', category: 'fruit' },
+        ],
+        vegetable: [{ name: 'carrot', category: 'vegetable' }],
+      });
+    });
+
+    test('unique_by with dot shorthand', () => {
+      expect(
+        run(
+          'data.items |> unique_by(.id)',
+          ctx(
+            {},
+            {
+              items: [
+                { id: 1, name: 'a' },
+                { id: 2, name: 'b' },
+                { id: 1, name: 'c' },
+              ],
+            },
+          ),
+        ),
+      ).toEqual([
+        { id: 1, name: 'a' },
+        { id: 2, name: 'b' },
+      ]);
+    });
+
+    test('min_by with dot shorthand', () => {
+      expect(
+        run(
+          'data.items |> min_by(.price)',
+          ctx(
+            {},
+            {
+              items: [
+                { name: 'apple', price: 1.5 },
+                { name: 'banana', price: 0.5 },
+                { name: 'orange', price: 2.0 },
+              ],
+            },
+          ),
+        ),
+      ).toEqual({ name: 'banana', price: 0.5 });
+    });
+
+    test('max_by with dot shorthand', () => {
+      expect(
+        run(
+          'data.items |> max_by(.score)',
+          ctx(
+            {},
+            {
+              items: [
+                { name: 'Alice', score: 85 },
+                { name: 'Bob', score: 92 },
+                { name: 'Charlie', score: 78 },
+              ],
+            },
+          ),
+        ),
+      ).toEqual({ name: 'Bob', score: 92 });
+    });
+
+    test('min_by returns null for empty array', () => {
+      expect(run('data.items |> min_by(.x)', ctx({}, { items: [] }))).toBe(null);
+    });
+
+    test('max_by returns null for empty array', () => {
+      expect(run('data.items |> max_by(.x)', ctx({}, { items: [] }))).toBe(null);
+    });
+  });
+
+  describe('object functions', () => {
+    test('to_entries converts object to key-value pairs', () => {
+      expect(run('data.obj |> to_entries', ctx({}, { obj: { a: 1, b: 2 } }))).toEqual([
+        { key: 'a', value: 1 },
+        { key: 'b', value: 2 },
+      ]);
+    });
+
+    test('from_entries converts key-value pairs to object', () => {
+      expect(
+        run(
+          'data.entries |> from_entries',
+          ctx(
+            {},
+            {
+              entries: [
+                { key: 'a', value: 1 },
+                { key: 'b', value: 2 },
+              ],
+            },
+          ),
+        ),
+      ).toEqual({ a: 1, b: 2 });
+    });
+
+    test('with_entries transforms object entries', () => {
+      expect(
+        run(
+          'data.obj |> with_entries((entry) => {key: entry.key, value: entry.value * 2})',
+          ctx({}, { obj: { a: 1, b: 2 } }),
+        ),
+      ).toEqual({ a: 2, b: 4 });
+    });
+
+    test('del removes a key', () => {
+      expect(run('data.obj |> del("a")', ctx({}, { obj: { a: 1, b: 2, c: 3 } }))).toEqual({
+        b: 2,
+        c: 3,
+      });
+    });
+
+    test('pick selects specific fields', () => {
+      expect(
+        run(
+          'data.obj |> pick(["name", "email"])',
+          ctx({}, { obj: { name: 'Alice', email: 'alice@example.com', age: 30 } }),
+        ),
+      ).toEqual({ name: 'Alice', email: 'alice@example.com' });
+    });
+
+    test('has checks key existence - true', () => {
+      expect(run('data.obj |> has("name")', ctx({}, { obj: { name: 'Alice', age: 30 } }))).toBe(
+        true,
+      );
+    });
+
+    test('has checks key existence - false', () => {
+      expect(run('data.obj |> has("email")', ctx({}, { obj: { name: 'Alice', age: 30 } }))).toBe(
+        false,
+      );
+    });
+  });
+
+  describe('string functions', () => {
+    test('join with separator', () => {
+      expect(run('data.items |> join(", ")', ctx({}, { items: ['a', 'b', 'c'] }))).toBe('a, b, c');
+    });
+
+    test('join without separator', () => {
+      expect(run('data.items |> join', ctx({}, { items: ['a', 'b', 'c'] }))).toBe('abc');
+    });
+
+    test('startswith returns true', () => {
+      expect(run('"hello world" |> startswith("hello")', ctx())).toBe(true);
+    });
+
+    test('startswith returns false', () => {
+      expect(run('"hello world" |> startswith("world")', ctx())).toBe(false);
+    });
+
+    test('endswith returns true', () => {
+      expect(run('"hello world" |> endswith("world")', ctx())).toBe(true);
+    });
+
+    test('endswith returns false', () => {
+      expect(run('"hello world" |> endswith("hello")', ctx())).toBe(false);
+    });
+
+    test('ltrimstr removes prefix', () => {
+      expect(run('"hello world" |> ltrimstr("hello ")', ctx())).toBe('world');
+    });
+
+    test('ltrimstr when prefix not found', () => {
+      expect(run('"hello world" |> ltrimstr("foo")', ctx())).toBe('hello world');
+    });
+
+    test('rtrimstr removes suffix', () => {
+      expect(run('"hello world" |> rtrimstr(" world")', ctx())).toBe('hello');
+    });
+
+    test('rtrimstr when suffix not found', () => {
+      expect(run('"hello world" |> rtrimstr("foo")', ctx())).toBe('hello world');
+    });
+
+    test('ascii_downcase converts to lowercase', () => {
+      expect(run('"Hello WORLD" |> ascii_downcase', ctx())).toBe('hello world');
+    });
+
+    test('ascii_upcase converts to uppercase', () => {
+      expect(run('"Hello world" |> ascii_upcase', ctx())).toBe('HELLO WORLD');
+    });
+
+    test('index finds substring position', () => {
+      expect(run('"hello world" |> index("world")', ctx())).toBe(6);
+    });
+
+    test('index returns null when not found', () => {
+      expect(run('"hello world" |> index("foo")', ctx())).toBe(null);
+    });
+
+    test('rindex finds last substring position', () => {
+      expect(run('"hello world hello" |> rindex("hello")', ctx())).toBe(12);
+    });
+
+    test('rindex returns null when not found', () => {
+      expect(run('"hello world" |> rindex("foo")', ctx())).toBe(null);
+    });
+  });
+
+  describe('utility functions', () => {
+    test('first returns first element', () => {
+      expect(run('data.items |> first', ctx({}, { items: [1, 2, 3] }))).toBe(1);
+    });
+
+    test('first returns null for empty array', () => {
+      expect(run('data.items |> first', ctx({}, { items: [] }))).toBe(null);
+    });
+
+    test('last returns last element', () => {
+      expect(run('data.items |> last', ctx({}, { items: [1, 2, 3] }))).toBe(3);
+    });
+
+    test('last returns null for empty array', () => {
+      expect(run('data.items |> last', ctx({}, { items: [] }))).toBe(null);
+    });
+
+    test('limit takes first n elements', () => {
+      expect(run('data.items |> limit(2)', ctx({}, { items: [1, 2, 3, 4, 5] }))).toEqual([1, 2]);
+    });
+
+    test('limit with n greater than length', () => {
+      expect(run('data.items |> limit(10)', ctx({}, { items: [1, 2, 3] }))).toEqual([1, 2, 3]);
+    });
+
+    test('select filters value by condition', () => {
+      expect(run('data.value |> select(.active)', ctx({}, { value: { active: true } }))).toEqual({
+        active: true,
+      });
+    });
+
+    test('select returns null when condition false', () => {
+      expect(run('data.value |> select(.active)', ctx({}, { value: { active: false } }))).toBe(
+        null,
+      );
+    });
+  });
 });

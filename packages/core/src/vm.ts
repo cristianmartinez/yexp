@@ -122,6 +122,261 @@ const BUILTINS = new Map<string, BuiltinFn>([
       return typeof v;
     },
   ],
+  [
+    'add',
+    (v) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'add requires an array');
+      if (v.length === 0) return null;
+      const first = v[0];
+      if (typeof first === 'number') {
+        let sum = 0;
+        for (const item of v) {
+          if (typeof item !== 'number') {
+            return makeError(
+              'TYPE_ERROR',
+              'add requires all elements to be numbers or all strings',
+            );
+          }
+          sum += item;
+        }
+        return sum;
+      }
+      if (typeof first === 'string') {
+        let result = '';
+        for (const item of v) {
+          if (typeof item !== 'string') {
+            return makeError(
+              'TYPE_ERROR',
+              'add requires all elements to be numbers or all strings',
+            );
+          }
+          result += item;
+        }
+        return result;
+      }
+      return makeError('TYPE_ERROR', 'add requires array of numbers or strings');
+    },
+  ],
+  [
+    'unique',
+    (v) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'unique requires an array');
+      return Array.from(new Set(v));
+    },
+  ],
+  [
+    'reverse',
+    (v) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'reverse requires an array');
+      return [...v].reverse();
+    },
+  ],
+  [
+    'flatten',
+    (v, depth) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'flatten requires an array');
+      const d = typeof depth === 'number' ? depth : Number.POSITIVE_INFINITY;
+      const flattenHelper = (arr: ExprValue[], currentDepth: number): ExprValue[] => {
+        const result: ExprValue[] = [];
+        for (const item of arr) {
+          if (Array.isArray(item) && currentDepth > 0) {
+            result.push(...flattenHelper(item, currentDepth - 1));
+          } else {
+            result.push(item);
+          }
+        }
+        return result;
+      };
+      return flattenHelper(v, d);
+    },
+  ],
+  [
+    'to_entries',
+    (v) => {
+      if (typeof v !== 'object' || v === null || Array.isArray(v)) {
+        return makeError('TYPE_ERROR', 'to_entries requires an object');
+      }
+      const obj = v as ExprObject;
+      const entries: ExprValue[] = [];
+      for (const [key, value] of Object.entries(obj)) {
+        entries.push({ key, value } as ExprObject);
+      }
+      return entries;
+    },
+  ],
+  [
+    'from_entries',
+    (v) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'from_entries requires an array');
+      const result: ExprObject = {};
+      for (const item of v) {
+        if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+          const entry = item as ExprObject;
+          const key = entry.key;
+          const value = entry.value;
+          if (typeof key === 'string') {
+            result[key] = value ?? null;
+          }
+        }
+      }
+      return result;
+    },
+  ],
+  [
+    'del',
+    (v, key) => {
+      if (typeof v !== 'object' || v === null || Array.isArray(v)) {
+        return makeError('TYPE_ERROR', 'del requires an object');
+      }
+      if (typeof key !== 'string') {
+        return makeError('TYPE_ERROR', 'del requires a string key');
+      }
+      const obj = v as ExprObject;
+      const result = { ...obj };
+      delete result[key];
+      return result;
+    },
+  ],
+  [
+    'pick',
+    (v, keys) => {
+      if (typeof v !== 'object' || v === null || Array.isArray(v)) {
+        return makeError('TYPE_ERROR', 'pick requires an object');
+      }
+      if (!Array.isArray(keys)) {
+        return makeError('TYPE_ERROR', 'pick requires an array of keys');
+      }
+      const obj = v as ExprObject;
+      const result: ExprObject = {};
+      for (const key of keys) {
+        if (typeof key === 'string' && key in obj) {
+          result[key] = obj[key]!;
+        }
+      }
+      return result;
+    },
+  ],
+  [
+    'has',
+    (v, key) => {
+      if (typeof v !== 'object' || v === null || Array.isArray(v)) {
+        return makeError('TYPE_ERROR', 'has requires an object');
+      }
+      if (typeof key !== 'string') {
+        return makeError('TYPE_ERROR', 'has requires a string key');
+      }
+      const obj = v as ExprObject;
+      return key in obj;
+    },
+  ],
+  [
+    'join',
+    (v, separator) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'join requires an array');
+      const sep = typeof separator === 'string' ? separator : '';
+      return v.map((item) => String(item)).join(sep);
+    },
+  ],
+  [
+    'startswith',
+    (v, prefix) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'startswith requires a string');
+      if (typeof prefix !== 'string') {
+        return makeError('TYPE_ERROR', 'startswith requires a string prefix');
+      }
+      return v.startsWith(prefix);
+    },
+  ],
+  [
+    'endswith',
+    (v, suffix) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'endswith requires a string');
+      if (typeof suffix !== 'string') {
+        return makeError('TYPE_ERROR', 'endswith requires a string suffix');
+      }
+      return v.endsWith(suffix);
+    },
+  ],
+  [
+    'ltrimstr',
+    (v, prefix) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'ltrimstr requires a string');
+      if (typeof prefix !== 'string') {
+        return makeError('TYPE_ERROR', 'ltrimstr requires a string prefix');
+      }
+      return v.startsWith(prefix) ? v.slice(prefix.length) : v;
+    },
+  ],
+  [
+    'rtrimstr',
+    (v, suffix) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'rtrimstr requires a string');
+      if (typeof suffix !== 'string') {
+        return makeError('TYPE_ERROR', 'rtrimstr requires a string suffix');
+      }
+      return v.endsWith(suffix) ? v.slice(0, -suffix.length) : v;
+    },
+  ],
+  [
+    'ascii_downcase',
+    (v) => {
+      if (typeof v !== 'string') {
+        return makeError('TYPE_ERROR', 'ascii_downcase requires a string');
+      }
+      return v.toLowerCase();
+    },
+  ],
+  [
+    'ascii_upcase',
+    (v) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'ascii_upcase requires a string');
+      return v.toUpperCase();
+    },
+  ],
+  [
+    'index',
+    (v, substring) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'index requires a string');
+      if (typeof substring !== 'string') {
+        return makeError('TYPE_ERROR', 'index requires a string argument');
+      }
+      const idx = v.indexOf(substring);
+      return idx === -1 ? null : idx;
+    },
+  ],
+  [
+    'rindex',
+    (v, substring) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'rindex requires a string');
+      if (typeof substring !== 'string') {
+        return makeError('TYPE_ERROR', 'rindex requires a string argument');
+      }
+      const idx = v.lastIndexOf(substring);
+      return idx === -1 ? null : idx;
+    },
+  ],
+  [
+    'first',
+    (v) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'first requires an array');
+      return v.length > 0 ? v[0]! : null;
+    },
+  ],
+  [
+    'last',
+    (v) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'last requires an array');
+      return v.length > 0 ? v[v.length - 1]! : null;
+    },
+  ],
+  [
+    'limit',
+    (v, n) => {
+      if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'limit requires an array');
+      if (typeof n !== 'number') return makeError('TYPE_ERROR', 'limit requires a number');
+      return v.slice(0, n);
+    },
+  ],
 ]);
 
 const HO_BUILTINS = new Map<string, HOBuiltinFn>([
@@ -223,6 +478,121 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
         }
       }
       return result;
+    },
+  ],
+  [
+    'group_by',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'group_by requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'group_by requires a lambda');
+      const groups = new Map<string, ExprValue[]>();
+      for (const item of collection) {
+        const key = invokeLambda(lambda, ctx, [item]);
+        const keyStr = String(key);
+        if (!groups.has(keyStr)) {
+          groups.set(keyStr, []);
+        }
+        groups.get(keyStr)!.push(item);
+      }
+      const result: ExprObject = {};
+      for (const [key, value] of groups.entries()) {
+        result[key] = value;
+      }
+      return result;
+    },
+  ],
+  [
+    'unique_by',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'unique_by requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'unique_by requires a lambda');
+      const seen = new Set<string>();
+      const result: ExprValue[] = [];
+      for (const item of collection) {
+        const key = invokeLambda(lambda, ctx, [item]);
+        const keyStr = String(key);
+        if (!seen.has(keyStr)) {
+          seen.add(keyStr);
+          result.push(item);
+        }
+      }
+      return result;
+    },
+  ],
+  [
+    'min_by',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'min_by requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'min_by requires a lambda');
+      if (collection.length === 0) return null;
+      let minItem = collection[0]!;
+      let minValue = invokeLambda(lambda, ctx, [minItem]);
+      for (let i = 1; i < collection.length; i++) {
+        const item = collection[i]!;
+        const value = invokeLambda(lambda, ctx, [item]);
+        if (typeof value === 'number' && typeof minValue === 'number' && value < minValue) {
+          minValue = value;
+          minItem = item;
+        }
+      }
+      return minItem;
+    },
+  ],
+  [
+    'max_by',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'max_by requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'max_by requires a lambda');
+      if (collection.length === 0) return null;
+      let maxItem = collection[0]!;
+      let maxValue = invokeLambda(lambda, ctx, [maxItem]);
+      for (let i = 1; i < collection.length; i++) {
+        const item = collection[i]!;
+        const value = invokeLambda(lambda, ctx, [item]);
+        if (typeof value === 'number' && typeof maxValue === 'number' && value > maxValue) {
+          maxValue = value;
+          maxItem = item;
+        }
+      }
+      return maxItem;
+    },
+  ],
+  [
+    'with_entries',
+    (ctx, v, lambda) => {
+      if (typeof v !== 'object' || v === null || Array.isArray(v)) {
+        return makeError('TYPE_ERROR', 'with_entries requires an object');
+      }
+      if (!isLambdaValue(lambda)) {
+        return makeError('TYPE_ERROR', 'with_entries requires a lambda');
+      }
+      const obj = v as ExprObject;
+      const result: ExprObject = {};
+      for (const [key, value] of Object.entries(obj)) {
+        const entry = { key, value } as ExprObject;
+        const transformed = invokeLambda(lambda, ctx, [entry]);
+        if (
+          typeof transformed === 'object' &&
+          transformed !== null &&
+          !Array.isArray(transformed)
+        ) {
+          const newEntry = transformed as ExprObject;
+          const newKey = newEntry.key;
+          const newValue = newEntry.value;
+          if (typeof newKey === 'string') {
+            result[newKey] = newValue ?? null;
+          }
+        }
+      }
+      return result;
+    },
+  ],
+  [
+    'select',
+    (ctx, v, lambda) => {
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'select requires a lambda');
+      const result = invokeLambda(lambda, ctx, [v]);
+      return isTruthy(result) ? v : null;
     },
   ],
 ]);
