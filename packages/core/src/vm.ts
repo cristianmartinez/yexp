@@ -1401,11 +1401,10 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
               if (Object.hasOwn(objValue, property) && !isDangerousKey(property)) {
                 results.push(objValue[property]!);
               }
-              // Recurse into all object values
-              for (const key of Object.keys(objValue)) {
-                if (!isDangerousKey(key)) {
-                  recurse(objValue[key]!, depth + 1);
-                }
+              // Recurse into all object values using for...in to avoid Object.keys() allocation
+              for (const key in objValue) {
+                if (!Object.hasOwn(objValue, key) || isDangerousKey(key)) continue;
+                recurse(objValue[key]!, depth + 1);
               }
             }
           }
@@ -1467,11 +1466,10 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
               if (Object.hasOwn(objValue, property) && !isDangerousKey(property)) {
                 results.push(objValue[property]!);
               }
-              // Recurse into all object values
-              for (const key of Object.keys(objValue)) {
-                if (!isDangerousKey(key)) {
-                  recurse(objValue[key]!, depth + 1);
-                }
+              // Recurse into all object values using for...in to avoid Object.keys() allocation
+              for (const key in objValue) {
+                if (!Object.hasOwn(objValue, key) || isDangerousKey(key)) continue;
+                recurse(objValue[key]!, depth + 1);
               }
             }
           }
