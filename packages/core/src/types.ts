@@ -50,6 +50,9 @@ export enum TokenType {
   // Spread
   DotDotDot = 'DotDotDot',
 
+  // Recursive descent
+  DotDot = 'DotDot',
+
   // Conditional
   Question = 'Question',
   QuestionQuestion = 'QuestionQuestion',
@@ -85,6 +88,7 @@ export type ASTNode =
   | IndexAccessNode
   | WildcardIndexNode
   | PredicateIndexNode
+  | RecursiveDescentNode
   | BinaryOpNode
   | UnaryOpNode
   | LogicalOpNode
@@ -136,6 +140,13 @@ export interface PredicateIndexNode {
   type: 'PredicateIndex';
   object: ASTNode;
   predicate: LambdaNode;
+  optional?: boolean;
+}
+
+export interface RecursiveDescentNode {
+  type: 'RecursiveDescent';
+  object: ASTNode;
+  property: string;
   optional?: boolean;
 }
 
@@ -281,6 +292,8 @@ export enum Opcode {
   OPTIONAL_INDEX = 'OPTIONAL_INDEX',
   WILDCARD = 'WILDCARD',
   OPTIONAL_WILDCARD = 'OPTIONAL_WILDCARD',
+  RECURSIVE_DESCENT = 'RECURSIVE_DESCENT',
+  OPTIONAL_RECURSIVE_DESCENT = 'OPTIONAL_RECURSIVE_DESCENT',
 
   // Function calls
   CALL = 'CALL',

@@ -16,6 +16,7 @@ import type {
   ObjectProperty,
   PipeNode,
   PredicateIndexNode,
+  RecursiveDescentNode,
   SpreadElementNode,
   TemplateLiteralNode,
   TemplatePart,
@@ -383,6 +384,16 @@ export function parse(tokens: Token[]): ASTNode {
           const index = parseExpression();
           expect(TokenType.RightBracket);
           node = { type: 'IndexAccess', object: node, index, optional: true } as IndexAccessNode;
+        } else if (peek() === TokenType.Dot) {
+          // Optional recursive descent ?..property
+          advance(); // consume the second dot
+          const prop = expect(TokenType.Identifier);
+          node = {
+            type: 'RecursiveDescent',
+            object: node,
+            property: prop.value,
+            optional: true,
+          } as RecursiveDescentNode;
         } else {
           const prop = expect(TokenType.Identifier);
           node = {
@@ -392,6 +403,15 @@ export function parse(tokens: Token[]): ASTNode {
             optional: true,
           } as MemberAccessNode;
         }
+      } else if (peek() === TokenType.DotDot) {
+        advance();
+        const prop = expect(TokenType.Identifier);
+        node = {
+          type: 'RecursiveDescent',
+          object: node,
+          property: prop.value,
+          optional: false,
+        } as RecursiveDescentNode;
       } else if (peek() === TokenType.Dot) {
         advance();
         const prop = expect(TokenType.Identifier);

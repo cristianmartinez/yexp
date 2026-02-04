@@ -301,6 +301,58 @@ length(slice(state.list, 0, 5))
 // pipe inserts the left side as the FIRST argument
 ```
 
+### Lambda Functions
+
+Lambda functions are anonymous functions that can be passed as arguments to higher-order built-in functions like `map`, `filter`, and `reduce`.
+
+#### Arrow Syntax
+
+Lambda functions use arrow function syntax:
+
+```
+(x) => x > 5
+(x, y) => x + y
+(item) => item.price * item.qty
+```
+
+The left side declares parameter names (in parentheses), and the right side is the expression body that gets evaluated.
+
+#### Dot Shorthand Syntax
+
+For single-parameter lambdas that access members of the parameter, a shorthand syntax is available:
+
+```
+.price > 100
+.name
+.user.active
+```
+
+This is syntactic sugar that expands to a full lambda:
+
+```
+.price > 100    →    (x) => x.price > 100
+.name           →    (x) => x.name
+.user.active    →    (x) => x.user.active
+```
+
+The dot shorthand can only be used in positions where a lambda is expected (as arguments to higher-order functions).
+
+#### Usage with Higher-Order Functions
+
+```
+data.items |> filter((x) => x.price > 100)
+data.items |> filter(.price > 100)              // shorthand equivalent
+
+data.items |> map((x) => x.price * x.qty)
+data.items |> map(.price * .qty)                // shorthand (NOT YET SUPPORTED - use arrow for complex expressions)
+
+data.items |> sort((a, b) => a.price - b.price)
+```
+
+#### Compilation
+
+Lambdas compile to self-contained bytecode programs embedded in the parent program. At runtime, when a higher-order function is invoked, the lambda's bytecode is evaluated with the lambda parameters bound to the execution context.
+
 ---
 
 ## 3. Operators
@@ -342,6 +394,152 @@ Logical operators use **truthiness** (see §1 Type Coercion).
 `&&` returns the left operand if falsy, otherwise the right operand.
 `||` returns the left operand if truthy, otherwise the right operand.
 
+### Ternary Operator
+
+| Operator | Name     | Syntax              | Description                                    |
+|----------|----------|---------------------|------------------------------------------------|
+| `? :`    | Ternary  | `condition ? a : b` | Returns `a` if condition is truthy, else `b`   |
+
+The ternary operator evaluates a condition and returns one of two values based on truthiness:
+
+```
+state.count > 0 ? "positive" : "zero or negative"
+state.user ? state.user.name : "Guest"
+state.value ? state.value : "default"
+```
+
+The ternary operator short-circuits: only the selected branch is evaluated.
+
+### Null Coalescing Operator
+
+| Operator | Name            | Syntax    | Description                              |
+|----------|-----------------|-----------|------------------------------------------|
+| `??`     | Null coalescing | `a ?? b`  | Returns `b` if `a` is `null`, else `a`   |
+
+The null coalescing operator provides a default value when the left operand is `null`:
+
+```
+state.user.name ?? "Anonymous"
+data.config.timeout ?? 5000
+env.locale ?? "en-US"
+```
+
+Unlike `||`, the `??` operator only checks for `null`, not general falsiness. `false`, `0`, and `""` are not considered null.
+
+The operator short-circuits: if the left side is not `null`, the right side is not evaluated.
+
+### Optional Chaining Operator
+
+| Operator | Name              | Syntax     | Description                                        |
+|----------|-------------------|------------|----------------------------------------------------|
+| `?.`     | Optional chaining | `a?.b`     | Access `b` if `a` is not `null`, otherwise `null`  |
+
+The optional chaining operator safely accesses nested properties without explicit null checks:
+
+```
+state.user?.profile?.avatar
+data.response?.data?.items
+```
+
+If any part of the chain is `null`, the entire expression evaluates to `null` without error:
+
+```
+// If state.user is null:
+state.user?.name              →  null (not an error)
+
+// If state.user.profile is null:
+state.user.profile?.avatar    →  null (not an error)
+
+// Equivalent explicit null checks:
+state.user && state.user.name
+state.user && state.user.profile && state.user.profile.avatar
+```
+
+Optional chaining can be combined with bracket access and function calls (future feature):
+
+```
+state.users?.[0]?.name
+state.handler?.()              // (not yet supported)
+```
+
+### Recursive Descent Operator
+
+| Operator | Name              | Syntax     | Description                                        |
+|----------|-------------------|------------|----------------------------------------------------|
+| `..`     | Recursive descent | `a..prop`  | Find all occurrences of `prop` at any depth in `a` |
+
+The recursive descent operator searches for a property at all levels of a nested structure, recursively traversing objects and arrays:
+
+```
+data..name
+data.users..email
+data..items[*].price
+```
+
+If the object is:
+
+```json
+{
+  "users": [
+    { "name": "Alice", "profile": { "name": "Alice Admin" } },
+    { "name": "Bob", "posts": [{ "name": "Post 1" }] }
+  ],
+  "config": { "settings": { "name": "App Settings" } }
+}
+```
+
+Then `data..name` returns an array of all `name` values found at any depth:
+
+```
+["Alice", "Alice Admin", "Bob", "Post 1", "App Settings"]
+```
+
+#### Search Semantics
+
+The recursive descent operator performs a **depth-first traversal**:
+
+1. If the current value has the property, collect it
+2. Recursively traverse all child values (object properties and array elements)
+3. Return all collected values as an array
+
+The search:
+- Returns an empty array if no matches are found (not an error)
+- Works on both objects and arrays
+- Skips dangerous keys (`__proto__`, `constructor`, `prototype`) for security
+- Limits recursion depth to 100 levels to prevent infinite loops
+- Detects circular references using a visited set
+
+#### Optional Variant (`?..`)
+
+The optional recursive descent operator returns an empty array if the left side is `null`:
+
+```
+data.users?..email         // returns [] if data.users is null
+data.missing?..property    // returns [] if data.missing is undefined
+```
+
+This is useful for safe traversal when the starting point might not exist.
+
+#### Chaining with Other Operators
+
+Recursive descent integrates with wildcards, predicates, and property access:
+
+```
+// Recursive descent + wildcard
+data..users[*].email
+// Finds all "users" arrays, then extracts email from each user
+
+// Recursive descent + property access
+data..user.name
+// Finds all "user" objects, then accesses their name property
+
+// Multiple recursive descents
+data..groups..name
+// Finds all "groups" arrays, then finds all "name" properties within them
+```
+
+When chained, the recursive descent returns an array, and subsequent operators automatically map over the results.
+
 ### Unary Operators
 
 | Operator | Name        | Operand Type | Result Type |
@@ -351,12 +549,15 @@ Logical operators use **truthiness** (see §1 Type Coercion).
 
 ### Member Access Operators
 
-| Operator | Name            | Example             |
-|----------|-----------------|---------------------|
-| `.`      | Dot access      | `state.user.name`   |
-| `[]`     | Bracket access  | `data.items[0]`     |
+| Operator | Name              | Example           |
+|----------|-------------------|-------------------|
+| `.`      | Dot access        | `state.user.name` |
+| `[]`     | Bracket access    | `data.items[0]`   |
+| `..`     | Recursive descent | `data..name`      |
 
 Bracket access supports number literals only (for array indexing). Dynamic bracket access (`items[state.i]`) is not supported in this version.
+
+The recursive descent operator (`..`) searches for a property at all depths in a nested structure, returning an array of all matches. See §2 Recursive Descent Operator for full syntax and semantics.
 
 ### Pipe
 
@@ -380,10 +581,10 @@ Spread is not a general-purpose operator — it is only valid inside `[]` and `{
 
 From highest to lowest:
 
-| Precedence | Operator(s)             | Associativity |
-|------------|-------------------------|---------------|
-| 1          | `.` `[]`                | Left          |
-| 2          | `!` `-` (unary) `...`  | Right         |
+| Precedence | Operator(s)                  | Associativity |
+|------------|------------------------------|---------------|
+| 1          | `.` `[]` `?.` `..` `?..`     | Left          |
+| 2          | `!` `-` (unary) `...`        | Right         |
 | 3          | `\|>`                  | Left          |
 | 4          | `*` `/` `%`            | Left          |
 | 5          | `+` `-`                | Left          |
@@ -391,10 +592,168 @@ From highest to lowest:
 | 7          | `==` `!=`              | Left          |
 | 8          | `&&`                   | Left          |
 | 9          | `\|\|`                 | Left          |
+| 10         | `??`                   | Left          |
+| 11         | `? :`                  | Right         |
 
 ---
 
-## 5. Path Resolution and Slots
+## 5. Built-in Functions
+
+The expression language provides a rich set of **built-in functions** that can be called directly or via the pipe operator. All built-in functions are **pure** (no side effects, except `now` and `random`) and **deterministic** (same inputs produce same outputs).
+
+Built-in functions are invoked using call syntax or pipe syntax:
+
+```
+toString(state.value)           // call syntax
+state.value |> toString         // pipe syntax
+```
+
+### Type Conversion and Inspection
+
+| Function   | Signature              | Description                                    |
+|------------|------------------------|------------------------------------------------|
+| `toString` | `(any) → string`       | Convert any value to string representation     |
+| `type`     | `(any) → string`       | Return type name: "number", "string", "boolean", "null", "array", "object" |
+| `length`   | `(string\|array) → number` | Return length of string or array           |
+
+### Math Functions
+
+| Function | Signature                  | Description                        |
+|----------|----------------------------|------------------------------------|
+| `round`  | `(number, decimals?) → number` | Round to N decimal places (default: 0) |
+| `floor`  | `(number) → number`        | Round down to integer              |
+| `ceil`   | `(number) → number`        | Round up to integer                |
+| `abs`    | `(number) → number`        | Absolute value                     |
+| `min`    | `(...numbers) → number`    | Minimum of arguments               |
+| `max`    | `(...numbers) → number`    | Maximum of arguments               |
+| `sqrt`   | `(number) → number`        | Square root                        |
+| `pow`    | `(number, exponent) → number` | Exponentiation                  |
+| `sin`    | `(number) → number`        | Sine (radians)                     |
+| `cos`    | `(number) → number`        | Cosine (radians)                   |
+| `tan`    | `(number) → number`        | Tangent (radians)                  |
+| `log`    | `(number) → number`        | Natural logarithm                  |
+| `log10`  | `(number) → number`        | Base-10 logarithm                  |
+| `log2`   | `(number) → number`        | Base-2 logarithm                   |
+| `exp`    | `(number) → number`        | e raised to the power              |
+| `random` | `() → number`              | Random number between 0 and 1 (non-deterministic) |
+
+### String Functions
+
+| Function      | Signature                              | Description                            |
+|---------------|----------------------------------------|----------------------------------------|
+| `toLowerCase` | `(string) → string`                    | Convert to lowercase                   |
+| `toUpperCase` | `(string) → string`                    | Convert to uppercase                   |
+| `trim`        | `(string) → string`                    | Remove whitespace from both ends       |
+| `trimStart`   | `(string) → string`                    | Remove whitespace from start           |
+| `trimEnd`     | `(string) → string`                    | Remove whitespace from end             |
+| `startsWith`  | `(string, prefix) → boolean`           | Check if string starts with prefix     |
+| `endsWith`    | `(string, suffix) → boolean`           | Check if string ends with suffix       |
+| `trimPrefix`  | `(string, prefix) → string`            | Remove prefix if present               |
+| `trimSuffix`  | `(string, suffix) → string`            | Remove suffix if present               |
+| `index`       | `(string, substring) → number\|null`   | Find first occurrence index (null if not found) |
+| `rindex`      | `(string, substring) → number\|null`   | Find last occurrence index (null if not found) |
+| `split`       | `(string, delimiter) → array`          | Split string by delimiter              |
+| `replace`     | `(string, search, replacement) → string` | Replace first occurrence             |
+| `replaceAll`  | `(string, search, replacement) → string` | Replace all occurrences              |
+| `substring`   | `(string, start, end?) → string`       | Extract substring                      |
+| `slice`       | `(string\|array, start, end?) → string\|array` | Extract slice (works on strings and arrays) |
+| `padStart`    | `(string, length, fill?) → string`     | Pad start to length (default fill: " ") |
+| `padEnd`      | `(string, length, fill?) → string`     | Pad end to length (default fill: " ")  |
+| `repeat`      | `(string, count) → string`             | Repeat string N times                  |
+| `includes`    | `(string\|array, item) → boolean`      | Check if string/array contains item    |
+
+### Array Functions
+
+| Function  | Signature                          | Description                           |
+|-----------|------------------------------------|---------------------------------------|
+| `first`   | `(array) → any`                    | First element (null if empty)         |
+| `last`    | `(array) → any`                    | Last element (null if empty)          |
+| `limit`   | `(array, n) → array`               | Take first N elements                 |
+| `slice`   | `(array, start, end?) → array`     | Extract slice                         |
+| `includes`| `(array, item) → boolean`          | Check if array contains item          |
+| `join`    | `(array, separator?) → string`     | Join elements to string (default: "") |
+| `add`     | `(array) → number\|string`         | Sum numbers or concatenate strings    |
+| `unique`  | `(array) → array`                  | Remove duplicates                     |
+| `reverse` | `(array) → array`                  | Reverse order (returns new array)     |
+| `flatten` | `(array, depth?) → array`          | Flatten nested arrays (default: infinite) |
+
+### Object Functions
+
+| Function      | Signature                          | Description                            |
+|---------------|------------------------------------|----------------------------------------|
+| `keys`        | `(object) → array`                 | Get object keys                        |
+| `values`      | `(object) → array`                 | Get object values                      |
+| `entries`     | `(object) → array`                 | Get array of `{key, value}` objects    |
+| `fromEntries` | `(array) → object`                 | Create object from `{key, value}` array |
+| `has`         | `(object, key) → boolean`          | Check if object has key                |
+| `pick`        | `(object, keys) → object`          | Extract specified keys                 |
+| `del`         | `(object, key) → object`           | Return object with key removed         |
+
+### Date Functions
+
+| Function      | Signature                  | Description                                |
+|---------------|----------------------------|--------------------------------------------|
+| `now`         | `() → number`              | Current Unix timestamp in milliseconds (non-deterministic) |
+| `parseDate`   | `(string) → number`        | Parse ISO 8601 date string to timestamp    |
+| `toISOString` | `(number) → string`        | Convert timestamp to ISO 8601 string       |
+
+### Higher-Order Functions
+
+Higher-order functions accept **lambda functions** as arguments and operate on collections.
+
+| Function     | Signature                                  | Description                                |
+|--------------|--------------------------------------------|--------------------------------------------|
+| `map`        | `(array, lambda) → array`                  | Transform each element                     |
+| `filter`     | `(array, lambda) → array`                  | Keep elements where lambda returns truthy  |
+| `find`       | `(array, lambda) → any`                    | Find first element where lambda returns truthy |
+| `reduce`     | `(array, lambda, initial?) → any`          | Reduce array to single value               |
+| `every`      | `(array, lambda) → boolean`                | Test if all elements match                 |
+| `some`       | `(array, lambda) → boolean`                | Test if any element matches                |
+| `sort`       | `(array, comparator?) → array`             | Sort array (default: natural order)        |
+| `flatMap`    | `(array, lambda) → array`                  | Map and flatten results                    |
+| `groupBy`    | `(array, lambda) → object`                 | Group elements by key                      |
+| `uniqueBy`   | `(array, lambda) → array`                  | Remove duplicates by key                   |
+| `minBy`      | `(array, lambda) → any`                    | Find element with minimum value            |
+| `maxBy`      | `(array, lambda) → any`                    | Find element with maximum value            |
+| `mapEntries` | `(object, lambda) → object`                | Transform object entries                   |
+| `select`     | `(any, lambda) → any\|null`                | Return value if lambda returns truthy, else null |
+
+#### Higher-Order Function Examples
+
+```
+// map: transform elements
+data.items |> map((x) => x.price * x.qty)
+data.items |> map(.price)                    // dot shorthand
+
+// filter: keep matching elements
+data.items |> filter((x) => x.price > 100)
+data.items |> filter(.active)
+
+// reduce: accumulate values
+data.numbers |> reduce((acc, x) => acc + x, 0)
+
+// sort: order elements
+data.items |> sort((a, b) => a.price - b.price)
+
+// groupBy: group by key
+data.items |> groupBy((x) => x.category)
+data.items |> groupBy(.category)
+
+// uniqueBy: deduplicate by key
+data.items |> uniqueBy((x) => x.id)
+data.items |> uniqueBy(.id)
+
+// minBy/maxBy: find extremes
+data.items |> minBy((x) => x.price)
+data.items |> maxBy(.priority)
+
+// mapEntries: transform object
+state.settings |> mapEntries((e) => { key: e.key, value: e.value * 2 })
+```
+
+---
+
+## 6. Path Resolution and Slots
 
 At compile time, all path expressions are extracted and assigned numeric **slot indices**.
 
@@ -433,7 +792,7 @@ If a path does not exist in the context, the slot resolves to `null`.
 
 ---
 
-## 6. Opcode Set
+## 7. Opcode Set
 
 All opcodes operate on an implicit **value stack**. Each opcode documents its stack effect as `(before -- after)`.
 
@@ -528,6 +887,55 @@ MAKE_OBJ 2     // 2 segments (spread, key-value) — resolved at runtime
 | Opcode  | Operands      | Stack Effect     | Description                            |
 |---------|---------------|------------------|----------------------------------------|
 | `INDEX` | index: number | (array -- value) | Access array element at constant index |
+
+### Recursive Descent
+
+| Opcode                       | Operands | Stack Effect            | Description                                              |
+|------------------------------|----------|-------------------------|----------------------------------------------------------|
+| `RECURSIVE_DESCENT`          | —        | (obj property -- array) | Find all occurrences of property at any depth            |
+| `OPTIONAL_RECURSIVE_DESCENT` | —        | (obj property -- array) | Same as RECURSIVE_DESCENT but returns [] on null/error   |
+
+The `RECURSIVE_DESCENT` opcode performs a depth-first traversal of the object structure:
+
+1. Pop property name (string) and object from stack
+2. Recursively search for the property at all depths
+3. Collect all matching values into an array
+4. Push the result array onto the stack
+
+The opcode includes these security protections:
+- Maximum recursion depth of 100 levels
+- Circular reference detection using a visited set
+- Skips dangerous keys (`__proto__`, `constructor`, `prototype`)
+
+#### Compilation Example
+
+```
+data..name
+```
+
+Compiles to:
+
+```
+LOAD 0                    // data
+CONST 0                   // "name"
+RECURSIVE_DESCENT
+RETURN
+```
+
+Optional variant:
+
+```
+data.users?..email
+```
+
+Compiles to:
+
+```
+LOAD 0                    // data.users
+CONST 0                   // "email"
+OPTIONAL_RECURSIVE_DESCENT
+RETURN
+```
 
 ### Function Calls (Pipe)
 
@@ -636,7 +1044,7 @@ APPEND_PATH 0  // state.items
 
 ---
 
-## 7. Execution Model
+## 8. Execution Model
 
 ### Evaluation Loop
 
@@ -686,11 +1094,11 @@ RETURN
 
 ### Execution Context
 
-See §0 for the full context specification. Value expressions only read from the context. Action expressions can mutate `state` via mutation opcodes (see §6 Mutation).
+See §0 for the full context specification. Value expressions only read from the context. Action expressions can mutate `state` via mutation opcodes (see §7 Mutation).
 
 ---
 
-## 8. Bytecode Format
+## 9. Bytecode Format
 
 Compiled expressions are serialized as JSON:
 
@@ -731,7 +1139,7 @@ Each instruction is an array: `[opcode, ...operands]`.
 
 ---
 
-## 9. Error Model
+## 10. Error Model
 
 The expression engine does not throw exceptions. All errors produce an **error result value**.
 

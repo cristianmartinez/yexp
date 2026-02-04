@@ -1357,6 +1357,131 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         break;
       }
 
+      case Opcode.RECURSIVE_DESCENT: {
+        const property = pop();
+        if (isExprError(property)) return property;
+        if (typeof property !== 'string') {
+          return makeError('TYPE_ERROR', 'Recursive descent property must be a string');
+        }
+
+        const obj = pop();
+        if (isExprError(obj)) return obj;
+
+        const results: ExprValue[] = [];
+        const visited = new WeakSet<object>();
+
+        const recurse = (value: ExprValue, depth: number): void => {
+          // Security: limit recursion depth
+          if (depth > MAX_FLATTEN_DEPTH) {
+            return;
+          }
+
+          // Circular reference protection
+          if (typeof value === 'object' && value !== null) {
+            if (visited.has(value)) return;
+            visited.add(value);
+          }
+
+          // Check if current value is an object with the target property
+          if (
+            typeof value === 'object' &&
+            value !== null &&
+            !isExprError(value) &&
+            !isLambdaValue(value)
+          ) {
+            if (Array.isArray(value)) {
+              // Recurse into array elements
+              for (const item of value) {
+                recurse(item, depth + 1);
+              }
+            } else {
+              const objValue = value as ExprObject;
+              // If object has the property, collect it (but not dangerous keys)
+              // Use hasOwnProperty to avoid traversing prototype chain
+              if (Object.hasOwn(objValue, property) && !isDangerousKey(property)) {
+                results.push(objValue[property]!);
+              }
+              // Recurse into all object values
+              for (const key of Object.keys(objValue)) {
+                if (!isDangerousKey(key)) {
+                  recurse(objValue[key]!, depth + 1);
+                }
+              }
+            }
+          }
+        };
+
+        recurse(obj, 0);
+        push(results);
+        break;
+      }
+
+      case Opcode.OPTIONAL_RECURSIVE_DESCENT: {
+        const property = pop();
+        if (isExprError(property)) {
+          push([]);
+          break;
+        }
+        if (typeof property !== 'string') {
+          push([]);
+          break;
+        }
+
+        const obj = pop();
+        if (isExprError(obj) || obj === null) {
+          push([]);
+          break;
+        }
+
+        const results: ExprValue[] = [];
+        const visited = new WeakSet<object>();
+
+        const recurse = (value: ExprValue, depth: number): void => {
+          // Security: limit recursion depth
+          if (depth > MAX_FLATTEN_DEPTH) {
+            return;
+          }
+
+          // Circular reference protection
+          if (typeof value === 'object' && value !== null) {
+            if (visited.has(value)) return;
+            visited.add(value);
+          }
+
+          // Check if current value is an object with the target property
+          if (
+            typeof value === 'object' &&
+            value !== null &&
+            !isExprError(value) &&
+            !isLambdaValue(value)
+          ) {
+            if (Array.isArray(value)) {
+              // Recurse into array elements
+              for (const item of value) {
+                recurse(item, depth + 1);
+              }
+            } else {
+              const objValue = value as ExprObject;
+              // If object has the property, collect it (but not dangerous keys)
+              // Use hasOwnProperty to avoid traversing prototype chain
+              if (Object.hasOwn(objValue, property) && !isDangerousKey(property)) {
+                results.push(objValue[property]!);
+              }
+              // Recurse into all object values
+              for (const key of Object.keys(objValue)) {
+                if (!isDangerousKey(key)) {
+                  recurse(objValue[key]!, depth + 1);
+                }
+              }
+            }
+          }
+        };
+
+        recurse(obj, 0);
+        push(results);
+        break;
+      }
+
       case Opcode.CALL: {
         const name = instruction[1] as string;
         const argc = instruction[2] as number;

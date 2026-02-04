@@ -286,6 +286,9 @@ export function tokenize(source: string): Token[] {
         if (source[pos] === '.' && source[pos + 1] === '.') {
           pos += 2;
           addToken(TokenType.DotDotDot, '...', start);
+        } else if (source[pos] === '.') {
+          pos++;
+          addToken(TokenType.DotDot, '..', start);
         } else {
           addToken(TokenType.Dot, '.', start);
         }

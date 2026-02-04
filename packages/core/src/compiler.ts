@@ -251,6 +251,16 @@ export function compile(ast: ASTNode): BytecodeProgram {
           emit(Opcode.CALL, 'filter', 2);
         }
         break;
+
+      case 'RecursiveDescent':
+        compileNode(node.object);
+        emit(Opcode.CONST, addConstant(node.property));
+        if (node.optional) {
+          emit(Opcode.OPTIONAL_RECURSIVE_DESCENT);
+        } else {
+          emit(Opcode.RECURSIVE_DESCENT);
+        }
+        break;
     }
   }
 
