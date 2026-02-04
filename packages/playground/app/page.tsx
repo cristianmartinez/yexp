@@ -45,7 +45,7 @@ export default function PlaygroundPage() {
   }, [expression, parsedContext]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       <div className="px-6 py-4 border-b">
         <PageHeader currentPage="playground" />
       </div>
