@@ -2,7 +2,7 @@ import type { ASTNode, BytecodeProgram, ExprValue, Instruction, LambdaValue } fr
 import { Opcode } from './types.js';
 
 // Operator sets for O(1) lookup
-const COMPARISON_OPERATORS = new Set(['>', '>=', '<', '<=', '==', '!=']);
+const COMPARISON_OPERATORS = new Set(['>', '>=', '<', '<=', '==', '!=', '===', '!==']);
 const ARITHMETIC_OPERATORS = new Set(['+', '-', '*', '/', '%']);
 
 export class CompileError extends Error {
@@ -133,6 +133,12 @@ export function compile(ast: ASTNode): BytecodeProgram {
             return true;
           case '!=':
             emit(Opcode.LOAD_NEQ_CONST, slotIdx, constValue);
+            return true;
+          case '===':
+            emit(Opcode.LOAD_STRICT_EQ_CONST, slotIdx, constValue);
+            return true;
+          case '!==':
+            emit(Opcode.LOAD_STRICT_NEQ_CONST, slotIdx, constValue);
             return true;
         }
       }
@@ -265,6 +271,12 @@ export function compile(ast: ASTNode): BytecodeProgram {
             break;
           case '!=':
             emit(Opcode.NEQ);
+            break;
+          case '===':
+            emit(Opcode.STRICT_EQ);
+            break;
+          case '!==':
+            emit(Opcode.STRICT_NEQ);
             break;
           case '<':
             emit(Opcode.LT);
@@ -554,6 +566,12 @@ export function compile(ast: ASTNode): BytecodeProgram {
         break;
       case '!=':
         emit(Opcode.NEQ);
+        break;
+      case '===':
+        emit(Opcode.STRICT_EQ);
+        break;
+      case '!==':
+        emit(Opcode.STRICT_NEQ);
         break;
       case '<':
         emit(Opcode.LT);

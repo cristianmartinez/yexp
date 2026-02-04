@@ -25,6 +25,8 @@ export enum TokenType {
   // Comparison
   EqualEqual = 'EqualEqual',
   BangEqual = 'BangEqual',
+  EqualEqualEqual = 'EqualEqualEqual',
+  BangEqualEqual = 'BangEqualEqual',
   Less = 'Less',
   Greater = 'Greater',
   LessEqual = 'LessEqual',
@@ -152,7 +154,7 @@ export interface RecursiveDescentNode {
 
 export interface BinaryOpNode {
   type: 'BinaryOp';
-  operator: '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=';
+  operator: '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '===' | '!==' | '<' | '>' | '<=' | '>=';
   left: ASTNode;
   right: ASTNode;
 }
@@ -277,6 +279,8 @@ export enum Opcode {
   GT = 33,
   LTE = 34,
   GTE = 35,
+  STRICT_EQ = 36,
+  STRICT_NEQ = 37,
 
   // Optimized comparison patterns (40-49)
   RANGE_CHECK = 40,           // value >= min && value <= max
@@ -291,6 +295,8 @@ export enum Opcode {
   LOAD_LTE_CONST = 53,     // Load slot, compare <= constant
   LOAD_EQ_CONST = 54,       // Load slot, compare == constant
   LOAD_NEQ_CONST = 55,     // Load slot, compare != constant
+  LOAD_STRICT_EQ_CONST = 56,   // Load slot, compare === constant
+  LOAD_STRICT_NEQ_CONST = 57,  // Load slot, compare !== constant
 
   // Fused arithmetic opcodes (60-69)
   LOAD_ADD_CONST = 60,     // Load slot, add constant

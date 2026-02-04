@@ -1001,7 +1001,8 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         const a = pop();
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
-        push(a === b);
+        // Loose equality with type coercion
+        push(a == b);
         break;
       }
 
@@ -1010,6 +1011,27 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         const a = pop();
         if (isExprError(a)) return a;
         if (isExprError(b)) return b;
+        // Loose inequality with type coercion
+        push(a != b);
+        break;
+      }
+
+      case Opcode.STRICT_EQ: {
+        const b = pop();
+        const a = pop();
+        if (isExprError(a)) return a;
+        if (isExprError(b)) return b;
+        // Strict equality without type coercion
+        push(a === b);
+        break;
+      }
+
+      case Opcode.STRICT_NEQ: {
+        const b = pop();
+        const a = pop();
+        if (isExprError(a)) return a;
+        if (isExprError(b)) return b;
+        // Strict inequality without type coercion
         push(a !== b);
         break;
       }
@@ -1219,7 +1241,8 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         const slotIdx = instruction[1] as number;
         const constValue = instruction[2];
         const value = slotValues[slotIdx];
-        stack.push(value === constValue);
+        // Loose equality with type coercion
+        stack.push(value == constValue);
         break;
       }
 
@@ -1227,6 +1250,25 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         const slotIdx = instruction[1] as number;
         const constValue = instruction[2];
         const value = slotValues[slotIdx];
+        // Loose inequality with type coercion
+        stack.push(value != constValue);
+        break;
+      }
+
+      case Opcode.LOAD_STRICT_EQ_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2];
+        const value = slotValues[slotIdx];
+        // Strict equality without type coercion
+        stack.push(value === constValue);
+        break;
+      }
+
+      case Opcode.LOAD_STRICT_NEQ_CONST: {
+        const slotIdx = instruction[1] as number;
+        const constValue = instruction[2];
+        const value = slotValues[slotIdx];
+        // Strict inequality without type coercion
         stack.push(value !== constValue);
         break;
       }

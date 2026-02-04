@@ -139,8 +139,8 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
             [/=>/, 'keyword.operator'],
             // Logical operators
             [/&&|\|\|/, 'keyword.operator'],
-            // Comparison operators
-            [/[<>]=?|[!=]=/, 'keyword.operator'],
+            // Comparison operators (including ===, !==)
+            [/[<>]=?|[!=]==?/, 'keyword.operator'],
             // Arithmetic operators
             [/[+\-*/%]/, 'keyword.operator'],
             // Other operators

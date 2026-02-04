@@ -503,6 +503,8 @@ export function parse(tokens: Token[]): ASTNode {
         return Prec.And;
       case TokenType.EqualEqual:
       case TokenType.BangEqual:
+      case TokenType.EqualEqualEqual:
+      case TokenType.BangEqualEqual:
         return Prec.Equality;
       case TokenType.Less:
       case TokenType.Greater:

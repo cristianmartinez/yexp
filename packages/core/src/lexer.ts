@@ -243,7 +243,11 @@ export function tokenize(source: string): Token[] {
         break;
       case '=':
         if (match('=')) {
-          addToken(TokenType.EqualEqual, '==', start);
+          if (match('=')) {
+            addToken(TokenType.EqualEqualEqual, '===', start);
+          } else {
+            addToken(TokenType.EqualEqual, '==', start);
+          }
         } else if (match('>')) {
           addToken(TokenType.Arrow, '=>', start);
         } else {
@@ -252,7 +256,11 @@ export function tokenize(source: string): Token[] {
         break;
       case '!':
         if (match('=')) {
-          addToken(TokenType.BangEqual, '!=', start);
+          if (match('=')) {
+            addToken(TokenType.BangEqualEqual, '!==', start);
+          } else {
+            addToken(TokenType.BangEqual, '!=', start);
+          }
         } else {
           addToken(TokenType.Bang, '!', start);
         }
