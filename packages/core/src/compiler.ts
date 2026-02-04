@@ -1,6 +1,9 @@
 import type { ASTNode, BytecodeProgram, ExprValue, Instruction, LambdaValue } from './types.js';
 import { Opcode } from './types.js';
 
+// Comparison operators set for O(1) lookup
+const COMPARISON_OPERATORS = new Set(['>', '>=', '<', '<=', '==', '!=']);
+
 export class CompileError extends Error {
   constructor(message: string) {
     super(message);
@@ -90,8 +93,7 @@ export function compile(ast: ASTNode): BytecodeProgram {
     if (node.type !== 'BinaryOp') return false;
 
     const op = node.operator;
-    const isComparison = ['>', '>=', '<', '<=', '==', '!='].includes(op);
-    if (!isComparison) return false;
+    if (!COMPARISON_OPERATORS.has(op)) return false;
 
     // Pattern 1: LOAD slot, compare to constant (e.g., x > 5)
     if (isPath(node.left) && node.right.type === 'Literal') {
@@ -441,7 +443,7 @@ export function compile(ast: ASTNode): BytecodeProgram {
 
     // Check for valid range check patterns
     const isValidPattern =
-      ((leftOp === '>=' || leftOp === '>') && (rightOp === '<=' || rightOp === '<'));
+      (leftOp === '>=' || leftOp === '>') && (rightOp === '<=' || rightOp === '<');
 
     if (!isValidPattern) {
       return false;
