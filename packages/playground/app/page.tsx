@@ -53,8 +53,8 @@ export default function PlaygroundPage() {
       <Split
         className="flex-1 flex flex-col"
         direction="vertical"
-        sizes={[20, 80]}
-        minSize={[100, 300]}
+        sizes={[25, 75]}
+        minSize={[150, 400]}
         gutterSize={4}
       >
         {/* Expression panel */}
