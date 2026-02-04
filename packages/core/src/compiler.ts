@@ -63,6 +63,25 @@ export function compile(ast: ASTNode): BytecodeProgram {
     return false;
   }
 
+  // Extract the path node from a BinaryOp (e.g., from `x > 0` extract `x`)
+  function extractPathFromBinaryOp(node: ASTNode): ASTNode | null {
+    if (node.type !== 'BinaryOp') return null;
+    // Check if left side is a path
+    if (isPath(node.left)) return node.left;
+    return null;
+  }
+
+  // Check if two AST nodes represent the same path
+  function isSamePath(a: ASTNode | null, b: ASTNode | null): boolean {
+    if (!a || !b) return false;
+    if (!isPath(a) || !isPath(b)) return false;
+    try {
+      return resolvePath(a) === resolvePath(b);
+    } catch {
+      return false;
+    }
+  }
+
   function compileNode(node: ASTNode): void {
     switch (node.type) {
       case 'Literal':
@@ -275,20 +294,86 @@ export function compile(ast: ASTNode): BytecodeProgram {
   }
 
   function compileLogical(operator: '&&' | '||', left: ASTNode, right: ASTNode): void {
-    compileNode(left);
-    const jumpOp = operator === '&&' ? Opcode.JUMP_IF_FALSE : Opcode.JUMP_IF_TRUE;
-    const skipIndex = emit(jumpOp, 0); // placeholder
-    compileNode(right);
-    const doneIndex = emit(Opcode.JUMP, 0); // placeholder
+    // CSE optimization: detect if both sides reference the same path
+    // Pattern: `path op1 val && path op2 val` where path is the same
+    const leftPath = extractPathFromBinaryOp(left);
+    const rightPath = extractPathFromBinaryOp(right);
 
-    // Patch skip jump to land here (push the short-circuit value)
-    const falseLabel = code.length;
-    emit(Opcode.CONST, addConstant(operator !== '&&'));
+    if (
+      operator === '&&' &&
+      leftPath &&
+      rightPath &&
+      isSamePath(leftPath, rightPath) &&
+      left.type === 'BinaryOp' &&
+      right.type === 'BinaryOp'
+    ) {
+      // Optimized: load path once, DUP for both comparisons
+      // e.g., `state.count >= 0 && state.count <= 100`
 
-    // Patch done jump
-    const endLabel = code.length;
-    code[skipIndex] = [jumpOp, falseLabel];
-    code[doneIndex] = [Opcode.JUMP, endLabel];
+      // Load path once
+      compileNode(leftPath);
+      emit(Opcode.DUP);
+
+      // First comparison (uses DUP'd value)
+      compileNode(left.right); // right operand of left BinaryOp
+      emitBinaryOp(left.operator);
+
+      // Short-circuit if false
+      const skipIndex = emit(Opcode.JUMP_IF_FALSE, 0);
+
+      // Second comparison (uses original value still on stack)
+      compileNode(right.right); // right operand of right BinaryOp
+      emitBinaryOp(right.operator);
+
+      const doneIndex = emit(Opcode.JUMP, 0);
+
+      // Patch skip jump
+      const falseLabel = code.length;
+      emit(Opcode.CONST, addConstant(false));
+
+      const endLabel = code.length;
+      code[skipIndex] = [Opcode.JUMP_IF_FALSE, falseLabel];
+      code[doneIndex] = [Opcode.JUMP, endLabel];
+    } else {
+      // Standard compilation (no optimization)
+      compileNode(left);
+      const jumpOp = operator === '&&' ? Opcode.JUMP_IF_FALSE : Opcode.JUMP_IF_TRUE;
+      const skipIndex = emit(jumpOp, 0); // placeholder
+      compileNode(right);
+      const doneIndex = emit(Opcode.JUMP, 0); // placeholder
+
+      // Patch skip jump to land here (push the short-circuit value)
+      const falseLabel = code.length;
+      emit(Opcode.CONST, addConstant(operator !== '&&'));
+
+      // Patch done jump
+      const endLabel = code.length;
+      code[skipIndex] = [jumpOp, falseLabel];
+      code[doneIndex] = [Opcode.JUMP, endLabel];
+    }
+  }
+
+  function emitBinaryOp(operator: string): void {
+    switch (operator) {
+      case '==':
+        emit(Opcode.EQ);
+        break;
+      case '!=':
+        emit(Opcode.NEQ);
+        break;
+      case '<':
+        emit(Opcode.LT);
+        break;
+      case '>':
+        emit(Opcode.GT);
+        break;
+      case '<=':
+        emit(Opcode.LTE);
+        break;
+      case '>=':
+        emit(Opcode.GTE);
+        break;
+    }
   }
 
   function compileTernary(node: {
