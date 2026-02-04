@@ -9,7 +9,8 @@ function compileExpr(source: string): BytecodeProgram {
   return compileAst(parse(tokenize(source)));
 }
 
-describe('Wildcard Syntax [*]', () => {
+describe('Wildcard and Predicate Array Syntax', () => {
+  describe('Wildcard Syntax [*]', () => {
   describe('Basic Wildcard on Arrays', () => {
     test('Get property from all array elements', () => {
       const program = compileExpr(`data.users[*].name`);
@@ -371,6 +372,259 @@ describe('Wildcard Syntax [*]', () => {
         env: {},
       });
       expect(result).toEqual([['Alice', 'Bob'], ['Charlie']]);
+    });
+  });
+  });
+
+  describe('Predicate Syntax [.condition]', () => {
+    describe('Basic Predicates', () => {
+      test('Filter with simple comparison', () => {
+        const program = compileExpr(`data.users[.age > 18]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', age: 17 },
+              { name: 'Bob', age: 25 },
+              { name: 'Charlie', age: 30 },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Bob', age: 25 },
+          { name: 'Charlie', age: 30 },
+        ]);
+      });
+
+      test('Filter with property access after', () => {
+        const program = compileExpr(`data.users[.age > 18].name`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', age: 17 },
+              { name: 'Bob', age: 25 },
+              { name: 'Charlie', age: 30 },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual(['Bob', 'Charlie']);
+      });
+
+      test('Filter with equality comparison', () => {
+        const program = compileExpr(`data.users[.status == "active"]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', status: 'active' },
+              { name: 'Bob', status: 'inactive' },
+              { name: 'Charlie', status: 'active' },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Alice', status: 'active' },
+          { name: 'Charlie', status: 'active' },
+        ]);
+      });
+    });
+
+    describe('Complex Predicates', () => {
+      test('Filter with AND condition', () => {
+        const program = compileExpr(`data.users[.age > 18 && .active]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', age: 17, active: true },
+              { name: 'Bob', age: 25, active: false },
+              { name: 'Charlie', age: 30, active: true },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Charlie', age: 30, active: true },
+        ]);
+      });
+
+      test('Filter with OR condition', () => {
+        const program = compileExpr(`data.users[.age < 20 || .age > 60]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Teen', age: 17 },
+              { name: 'Adult', age: 35 },
+              { name: 'Senior', age: 65 },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Teen', age: 17 },
+          { name: 'Senior', age: 65 },
+        ]);
+      });
+
+      test('Filter with nested property access', () => {
+        const program = compileExpr(`data.users[.profile.verified]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', profile: { verified: true } },
+              { name: 'Bob', profile: { verified: false } },
+              { name: 'Charlie', profile: { verified: true } },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Alice', profile: { verified: true } },
+          { name: 'Charlie', profile: { verified: true } },
+        ]);
+      });
+    });
+
+    describe('Optional Predicates ?.[.condition]', () => {
+      test('Optional predicate on null returns empty array', () => {
+        const program = compileExpr(`data.users?.[.age > 18]`);
+        const result = evaluate(program, {
+          state: {},
+          data: { users: null },
+          env: {},
+        });
+        expect(result).toEqual([]);
+      });
+
+      test('Optional predicate on valid array works normally', () => {
+        const program = compileExpr(`data.users?.[.age > 18]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', age: 17 },
+              { name: 'Bob', age: 25 },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Bob', age: 25 },
+        ]);
+      });
+    });
+
+    describe('Combining Wildcards and Predicates', () => {
+      test('Wildcard after predicate', () => {
+        const program = compileExpr(`data.groups[.active][*].users`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            groups: [
+              { active: true, users: ['Alice', 'Bob'] },
+              { active: false, users: ['Charlie'] },
+              { active: true, users: ['David'] },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([['Alice', 'Bob'], ['David']]);
+      });
+
+      test('Multiple predicates in chain', () => {
+        const program = compileExpr(`data.users[.age > 18][.active]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', age: 17, active: true },
+              { name: 'Bob', age: 25, active: false },
+              { name: 'Charlie', age: 30, active: true },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Charlie', age: 30, active: true },
+        ]);
+      });
+
+      test('Wildcard property access after predicate', () => {
+        const program = compileExpr(`data.users[.age > 18][*].tags`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', age: 17, tags: ['student'] },
+              { name: 'Bob', age: 25, tags: ['employee', 'manager'] },
+              { name: 'Charlie', age: 30, tags: ['admin'] },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([['employee', 'manager'], ['admin']]);
+      });
+    });
+
+    describe('Edge Cases', () => {
+      test('Predicate with boolean property', () => {
+        const program = compileExpr(`data.items[.available]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            items: [
+              { name: 'Book', available: true },
+              { name: 'Laptop', available: false },
+              { name: 'Pen', available: true },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Book', available: true },
+          { name: 'Pen', available: true },
+        ]);
+      });
+
+      test('Predicate with negation', () => {
+        const program = compileExpr(`data.users[!.banned]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', banned: false },
+              { name: 'Bob', banned: true },
+              { name: 'Charlie', banned: false },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([
+          { name: 'Alice', banned: false },
+          { name: 'Charlie', banned: false },
+        ]);
+      });
+
+      test('Filter that matches nothing returns empty array', () => {
+        const program = compileExpr(`data.users[.age > 100]`);
+        const result = evaluate(program, {
+          state: {},
+          data: {
+            users: [
+              { name: 'Alice', age: 25 },
+              { name: 'Bob', age: 30 },
+            ],
+          },
+          env: {},
+        });
+        expect(result).toEqual([]);
+      });
     });
   });
 });
