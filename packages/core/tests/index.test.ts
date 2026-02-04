@@ -676,4 +676,128 @@ describe('integration', () => {
       expect(run('data.user?.name ?? "anonymous"', ctx({}, { user: null }))).toBe('anonymous');
     });
   });
+
+  describe('Math functions', () => {
+    test('random returns number between 0 and 1', () => {
+      const result = run('random()', ctx());
+      expect(typeof result).toBe('number');
+      expect(result).toBeGreaterThanOrEqual(0);
+      expect(result).toBeLessThan(1);
+    });
+
+    test('sqrt computes square root', () => {
+      expect(run('sqrt(4)', ctx())).toBe(2);
+      expect(run('sqrt(9)', ctx())).toBe(3);
+      expect(run('sqrt(2)', ctx())).toBeCloseTo(1.414, 3);
+    });
+
+    test('sqrt with data path', () => {
+      expect(run('data.value |> sqrt', ctx({}, { value: 16 }))).toBe(4);
+    });
+
+    test('pow computes power', () => {
+      expect(run('pow(2, 3)', ctx())).toBe(8);
+      expect(run('pow(5, 2)', ctx())).toBe(25);
+      expect(run('pow(10, 0)', ctx())).toBe(1);
+    });
+
+    test('pow with data paths', () => {
+      expect(run('data.base |> pow(data.exp)', ctx({}, { base: 3, exp: 4 }))).toBe(81);
+    });
+
+    test('sin computes sine', () => {
+      expect(run('sin(0)', ctx())).toBe(0);
+      expect(run('sin(3.14159265359 / 2)', ctx())).toBeCloseTo(1, 5);
+    });
+
+    test('cos computes cosine', () => {
+      expect(run('cos(0)', ctx())).toBe(1);
+      expect(run('cos(3.14159265359)', ctx())).toBeCloseTo(-1, 5);
+    });
+
+    test('tan computes tangent', () => {
+      expect(run('tan(0)', ctx())).toBe(0);
+      expect(run('tan(3.14159265359 / 4)', ctx())).toBeCloseTo(1, 5);
+    });
+
+    test('log computes natural logarithm', () => {
+      expect(run('log(1)', ctx())).toBe(0);
+      expect(run('log(2.718281828459045)', ctx())).toBeCloseTo(1, 5);
+    });
+
+    test('log10 computes base-10 logarithm', () => {
+      expect(run('log10(1)', ctx())).toBe(0);
+      expect(run('log10(10)', ctx())).toBe(1);
+      expect(run('log10(100)', ctx())).toBe(2);
+    });
+
+    test('log2 computes base-2 logarithm', () => {
+      expect(run('log2(1)', ctx())).toBe(0);
+      expect(run('log2(2)', ctx())).toBe(1);
+      expect(run('log2(8)', ctx())).toBe(3);
+    });
+
+    test('exp computes exponential (e^x)', () => {
+      expect(run('exp(0)', ctx())).toBe(1);
+      expect(run('exp(1)', ctx())).toBeCloseTo(2.718281828459045, 5);
+      expect(run('exp(2)', ctx())).toBeCloseTo(7.389, 3);
+    });
+
+    test('chaining Math functions', () => {
+      expect(run('data.value |> sqrt |> round(2)', ctx({}, { value: 2 }))).toBeCloseTo(1.41, 2);
+    });
+  });
+
+  describe('Date functions', () => {
+    test('now returns current timestamp', () => {
+      const before = Date.now();
+      const result = run('now()', ctx());
+      const after = Date.now();
+      expect(typeof result).toBe('number');
+      expect(result).toBeGreaterThanOrEqual(before);
+      expect(result).toBeLessThanOrEqual(after);
+    });
+
+    test('fromdateiso8601 parses ISO 8601 date string', () => {
+      const dateStr = '2024-01-15T10:30:00.000Z';
+      const result = run(`fromdateiso8601("${dateStr}")`, ctx());
+      expect(result).toBe(Date.parse(dateStr));
+    });
+
+    test('fromdateiso8601 with data path', () => {
+      const dateStr = '2024-01-15T10:30:00.000Z';
+      const result = run('data.date |> fromdateiso8601', ctx({}, { date: dateStr }));
+      expect(result).toBe(Date.parse(dateStr));
+    });
+
+    test('fromdateiso8601 with invalid date returns error', () => {
+      const result = run('fromdateiso8601("not a date")', ctx());
+      expect(isExprError(result)).toBe(true);
+      expect((result as ExprError).error).toBe('TYPE_ERROR');
+    });
+
+    test('todateiso8601 converts timestamp to ISO 8601 string', () => {
+      const timestamp = 1705314600000;
+      const result = run(`todateiso8601(${timestamp})`, ctx());
+      expect(result).toBe(new Date(timestamp).toISOString());
+    });
+
+    test('todateiso8601 with data path', () => {
+      const timestamp = 1705314600000;
+      const result = run('data.timestamp |> todateiso8601', ctx({}, { timestamp }));
+      expect(result).toBe(new Date(timestamp).toISOString());
+    });
+
+    test('round-trip date conversion', () => {
+      const dateStr = '2024-01-15T10:30:00.000Z';
+      const result = run(`"${dateStr}" |> fromdateiso8601 |> todateiso8601`, ctx());
+      expect(result).toBe(dateStr);
+    });
+
+    test('now with date conversion', () => {
+      const result = run('now() |> todateiso8601', ctx());
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    });
+  });
 });

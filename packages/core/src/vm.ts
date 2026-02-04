@@ -377,6 +377,106 @@ const BUILTINS = new Map<string, BuiltinFn>([
       return v.slice(0, n);
     },
   ],
+  // Math functions
+  [
+    'random',
+    () => {
+      return Math.random();
+    },
+  ],
+  [
+    'sqrt',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'sqrt requires a number');
+      return Math.sqrt(v);
+    },
+  ],
+  [
+    'pow',
+    (v, exp) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'pow requires a number');
+      if (typeof exp !== 'number') return makeError('TYPE_ERROR', 'pow exponent must be a number');
+      return Math.pow(v, exp);
+    },
+  ],
+  [
+    'sin',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'sin requires a number');
+      return Math.sin(v);
+    },
+  ],
+  [
+    'cos',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'cos requires a number');
+      return Math.cos(v);
+    },
+  ],
+  [
+    'tan',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'tan requires a number');
+      return Math.tan(v);
+    },
+  ],
+  [
+    'log',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'log requires a number');
+      return Math.log(v);
+    },
+  ],
+  [
+    'log10',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'log10 requires a number');
+      return Math.log10(v);
+    },
+  ],
+  [
+    'log2',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'log2 requires a number');
+      return Math.log2(v);
+    },
+  ],
+  [
+    'exp',
+    (v) => {
+      if (typeof v !== 'number') return makeError('TYPE_ERROR', 'exp requires a number');
+      return Math.exp(v);
+    },
+  ],
+  // Date functions
+  [
+    'now',
+    () => {
+      return Date.now();
+    },
+  ],
+  [
+    'fromdateiso8601',
+    (v) => {
+      if (typeof v !== 'string') {
+        return makeError('TYPE_ERROR', 'fromdateiso8601 requires a string');
+      }
+      const timestamp = Date.parse(v);
+      if (Number.isNaN(timestamp)) {
+        return makeError('TYPE_ERROR', 'fromdateiso8601 requires a valid ISO 8601 date string');
+      }
+      return timestamp;
+    },
+  ],
+  [
+    'todateiso8601',
+    (v) => {
+      if (typeof v !== 'number') {
+        return makeError('TYPE_ERROR', 'todateiso8601 requires a number (timestamp)');
+      }
+      return new Date(v).toISOString();
+    },
+  ],
 ]);
 
 const HO_BUILTINS = new Map<string, HOBuiltinFn>([
