@@ -718,6 +718,125 @@ describe('integration', () => {
     });
   });
 
+  describe('spread operator', () => {
+    test('spread in array literal', () => {
+      expect(
+        run('[1, ...[2, 3], 4]', ctx()),
+      ).toEqual([1, 2, 3, 4]);
+    });
+
+    test('spread multiple arrays in array literal', () => {
+      expect(
+        run('[...[1, 2], ...[3, 4], 5]', ctx()),
+      ).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    test('spread in object literal', () => {
+      expect(
+        run('{ a: 1, ...{ b: 2, c: 3 }, d: 4 }', ctx()),
+      ).toEqual({ a: 1, b: 2, c: 3, d: 4 });
+    });
+
+    test('spread in object literal with property override', () => {
+      expect(
+        run('{ a: 1, b: 2, ...{ b: 3, c: 4 } }', ctx()),
+      ).toEqual({ a: 1, b: 3, c: 4 });
+    });
+
+    test('spread with data context', () => {
+      expect(
+        run('[0, ...data.values, 100]', ctx({}, { values: [1, 2, 3] })),
+      ).toEqual([0, 1, 2, 3, 100]);
+    });
+
+    test('max with spread operator', () => {
+      expect(
+        run('max(...data.values)', ctx({}, { values: [23.5, -15.8, 42.3, -8.1, 19.7] })),
+      ).toBe(42.3);
+    });
+
+    test('max with mixed args and spread', () => {
+      expect(
+        run('max(0, ...[1, 2, 3], 10)', ctx()),
+      ).toBe(10);
+    });
+
+    test('min with spread operator', () => {
+      expect(
+        run('min(...data.values)', ctx({}, { values: [23.5, -15.8, 42.3, -8.1, 19.7] })),
+      ).toBe(-15.8);
+    });
+
+    test('min with mixed args and spread', () => {
+      expect(
+        run('min(100, ...data.values, -50)', ctx({}, { values: [10, 20, 30] })),
+      ).toBe(-50);
+    });
+
+    test('add function with array', () => {
+      expect(
+        run('add(data.values)', ctx({}, { values: [1, 2, 3, 4, 5] })),
+      ).toBe(15);
+    });
+
+    test('flatten nested arrays with spread', () => {
+      expect(
+        run('[...[1, 2], ...[3, 4]]', ctx()),
+      ).toEqual([1, 2, 3, 4]);
+    });
+
+    test('concat arrays', () => {
+      expect(
+        run('concat([1, 2], [3, 4], [5, 6])', ctx()),
+      ).toEqual([1, 2, 3, 4, 5, 6]);
+    });
+
+    test('concat with spread operator', () => {
+      expect(
+        run('concat(...data.arrays)', ctx({}, { arrays: [[1, 2], [3, 4], [5, 6]] })),
+      ).toEqual([1, 2, 3, 4, 5, 6]);
+    });
+
+    test('concat mixed arrays and values', () => {
+      expect(
+        run('concat([1], 2, [3, 4])', ctx()),
+      ).toEqual([1, 2, 3, 4]);
+    });
+
+    test('spread in nested expressions', () => {
+      expect(
+        run('[...data.a, ...data.b]', ctx({}, { a: [1, 2], b: [3, 4] })),
+      ).toEqual([1, 2, 3, 4]);
+    });
+
+    test('complex object with math functions and spreads', () => {
+      const result = run(
+        '{ rounded: state.price |> round(2), total: data.values |> reduce((a, b) => a + b, 0) |> abs, maxValue: max(...data.values) }',
+        ctx(
+          { price: 123.456789 },
+          { values: [23.5, -15.8, 42.3, -8.1, 19.7] }
+        )
+      ) as { rounded: number; total: number; maxValue: number };
+
+      expect(result.rounded).toBe(123.46);
+      expect(result.total).toBeCloseTo(61.6, 1);
+      expect(result.maxValue).toBe(42.3);
+    });
+
+    test('spread in method call with join', () => {
+      expect(
+        run('["a", "b", "c"].join("-")', ctx()),
+      ).toBe('a-b-c');
+    });
+
+    test('multiple function calls with spreads', () => {
+      expect(
+        run('{ minVal: min(...data.values), maxVal: max(...data.values) }',
+          ctx({}, { values: [5, 2, 8, 1, 9] })),
+      ).toEqual({ minVal: 1, maxVal: 9 });
+    });
+  });
+
   describe('method call syntax (syntactic sugar)', () => {
     test('array.filter() works like array |> filter()', () => {
       expect(

@@ -311,20 +311,32 @@ export function compile(ast: ASTNode): BytecodeProgram {
         compileLogical(node.operator, node.left, node.right);
         break;
 
-      case 'Call':
+      case 'Call': {
+        let stackCount = 0;
         for (const arg of node.args) {
           compileNode(arg);
+          stackCount++;
+          if (arg.type === 'SpreadElement') {
+            stackCount++; // SPREAD adds a marker to the stack
+          }
         }
-        emit(Opcode.CALL, node.callee, node.args.length);
+        emit(Opcode.CALL, node.callee, stackCount);
         break;
+      }
 
-      case 'Pipe':
+      case 'Pipe': {
         compileNode(node.value);
+        let stackCount = 1; // The piped value
         for (const arg of node.args) {
           compileNode(arg);
+          stackCount++;
+          if (arg.type === 'SpreadElement') {
+            stackCount++; // SPREAD adds a marker to the stack
+          }
         }
-        emit(Opcode.CALL, node.callee, node.args.length + 1);
+        emit(Opcode.CALL, node.callee, stackCount);
         break;
+      }
 
       case 'ArrayLiteral':
         compileArrayLiteral(node.elements);

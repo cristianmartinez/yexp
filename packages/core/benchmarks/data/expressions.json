@@ -598,5 +598,77 @@
     "source": "!state.disabled",
     "category": "logical",
     "complexity": "simple"
+  },
+  {
+    "id": 100,
+    "source": "data.items.filter(.price > 100)",
+    "category": "method-call",
+    "complexity": "medium"
+  },
+  {
+    "id": 101,
+    "source": "data.items.map(.price)",
+    "category": "method-call",
+    "complexity": "medium"
+  },
+  {
+    "id": 102,
+    "source": "data.users.filter(.active).map(.name)",
+    "category": "method-call",
+    "complexity": "complex"
+  },
+  {
+    "id": 103,
+    "source": "[1, 2, 3].map(x => x * 2).filter(x => x > 3)",
+    "category": "method-call",
+    "complexity": "complex"
+  },
+  {
+    "id": 104,
+    "source": "data.items.filter(.active).map(.name).join(\", \")",
+    "category": "method-call",
+    "complexity": "complex"
+  },
+  {
+    "id": 105,
+    "source": "max(...data.items.map(.price))",
+    "category": "spread",
+    "complexity": "medium"
+  },
+  {
+    "id": 106,
+    "source": "min(...[1, 5, 3, 9, 2])",
+    "category": "spread",
+    "complexity": "simple"
+  },
+  {
+    "id": 107,
+    "source": "[...data.items[*].name, \"Extra\"]",
+    "category": "spread",
+    "complexity": "medium"
+  },
+  {
+    "id": 108,
+    "source": "{ maxPrice: max(...data.items.map(.price)), minPrice: min(...data.items.map(.price)) }",
+    "category": "spread",
+    "complexity": "complex"
+  },
+  {
+    "id": 109,
+    "source": "concat([1, 2], [3, 4], [5, 6])",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 110,
+    "source": "data.items.filter(.price > 100) |> map(.name)",
+    "category": "mixed-syntax",
+    "complexity": "medium"
+  },
+  {
+    "id": 111,
+    "source": "[1, 2, 3].filter(x => x > 1) |> reduce((a, b) => a + b, 0)",
+    "category": "mixed-syntax",
+    "complexity": "complex"
   }
 ]

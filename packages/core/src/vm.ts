@@ -182,6 +182,20 @@ const BUILTINS = new Map<string, BuiltinFn>([
     },
   ],
   [
+    'concat',
+    (...arrays) => {
+      const result: ExprValue[] = [];
+      for (const item of arrays) {
+        if (Array.isArray(item)) {
+          result.push(...item);
+        } else {
+          result.push(item);
+        }
+      }
+      return result;
+    },
+  ],
+  [
     'unique',
     (v) => {
       if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'unique requires an array');
@@ -1924,7 +1938,23 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
       case Opcode.CALL: {
         const name = instruction[1] as string;
         const argc = instruction[2] as number;
-        const args = stack.splice(stack.length - argc, argc) as ExprValue[];
+        const items = stack.splice(stack.length - argc, argc);
+
+        // Expand spread arguments
+        const args: ExprValue[] = [];
+        for (let i = 0; i < items.length; i++) {
+          if (items[i] === SPREAD_MARKER) {
+            i++;
+            const source = items[i] as ExprValue;
+            if (Array.isArray(source)) {
+              args.push(...source);
+            } else {
+              args.push(source);
+            }
+          } else {
+            args.push(items[i] as ExprValue);
+          }
+        }
 
         // Check higher-order builtins first (they need context)
         const hoFn = HO_BUILTINS.get(name);
