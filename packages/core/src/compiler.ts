@@ -1,4 +1,4 @@
-import type { ASTNode, BytecodeProgram, ExprValue, Instruction } from './types.js';
+import type { ASTNode, BytecodeProgram, ExprValue, Instruction, LambdaValue } from './types.js';
 import { Opcode } from './types.js';
 
 export class CompileError extends Error {
@@ -21,6 +21,11 @@ export function compile(ast: ASTNode): BytecodeProgram {
   }
 
   function addConstant(value: ExprValue): number {
+    // Don't deduplicate objects, arrays, or lambdas
+    if (typeof value === 'object' && value !== null) {
+      constants.push(value);
+      return constants.length - 1;
+    }
     const existing = constants.indexOf(value);
     if (existing !== -1) return existing;
     constants.push(value);
@@ -188,7 +193,21 @@ export function compile(ast: ASTNode): BytecodeProgram {
       case 'Append':
         compileAppend(node.target, node.value);
         break;
+
+      case 'Lambda':
+        compileLambda(node);
+        break;
     }
+  }
+
+  function compileLambda(node: { params: string[]; body: ASTNode }): void {
+    const subProgram = compile(node.body);
+    const lambdaValue: LambdaValue = {
+      __lambda: true,
+      program: subProgram,
+      params: node.params,
+    };
+    emit(Opcode.CONST, addConstant(lambdaValue as unknown as ExprValue));
   }
 
   function compileLogical(operator: '&&' | '||', left: ASTNode, right: ASTNode): void {

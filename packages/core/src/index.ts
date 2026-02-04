@@ -5,6 +5,7 @@ export {
   Opcode,
   TokenType,
   isExprError,
+  isLambdaValue,
   makeError,
   type ASTNode,
   type BytecodeProgram,
@@ -14,6 +15,8 @@ export {
   type ExprObject,
   type ExprValue,
   type Instruction,
+  type LambdaNode,
+  type LambdaValue,
   type Token,
 } from './types.js';
 export { evaluate } from './vm.js';

@@ -241,4 +241,37 @@ describe('parser', () => {
       expect(result.args).toHaveLength(2);
     });
   });
+
+  describe('lambdas', () => {
+    test('single-param arrow lambda', () => {
+      const result = p('(x) => x + 1') as any;
+      expect(result.type).toBe('Lambda');
+      expect(result.params).toEqual(['x']);
+      expect(result.body.type).toBe('BinaryOp');
+    });
+
+    test('multi-param arrow lambda', () => {
+      const result = p('(a, b) => a + b') as any;
+      expect(result.type).toBe('Lambda');
+      expect(result.params).toEqual(['a', 'b']);
+    });
+
+    test('zero-param arrow lambda', () => {
+      const result = p('() => 42') as any;
+      expect(result.type).toBe('Lambda');
+      expect(result.params).toEqual([]);
+    });
+
+    test('dot shorthand', () => {
+      const result = p('.price > 100') as any;
+      expect(result.type).toBe('Lambda');
+      expect(result.params).toEqual(['$it']);
+      expect(result.body.type).toBe('BinaryOp');
+    });
+
+    test('grouping still works', () => {
+      const result = p('(1 + 2)') as any;
+      expect(result.type).toBe('BinaryOp');
+    });
+  });
 });

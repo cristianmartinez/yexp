@@ -161,4 +161,16 @@ describe('lexer', () => {
       ]);
     });
   });
+
+  describe('arrow function', () => {
+    test('arrow token', () => {
+      const tokens = tokenize('=>');
+      expect(tokens.map((t) => t.value)).toEqual(['=>', '']);
+    });
+
+    test('lambda expression', () => {
+      const tokens = tokenize('(x) => x + 1');
+      expect(tokens.map((t) => t.value)).toEqual(['(', 'x', ')', '=>', 'x', '+', '1', '']);
+    });
+  });
 });

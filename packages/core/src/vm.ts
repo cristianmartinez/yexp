@@ -1,7 +1,26 @@
-import type { BytecodeProgram, ExecutionContext, ExprObject, ExprValue } from './types.js';
-import { Opcode, isExprError, makeError } from './types.js';
+import type {
+  BytecodeProgram,
+  ExecutionContext,
+  ExprObject,
+  ExprValue,
+  LambdaValue,
+} from './types.js';
+import { Opcode, isExprError, isLambdaValue, makeError } from './types.js';
 
 type BuiltinFn = (...args: ExprValue[]) => ExprValue;
+type HOBuiltinFn = (context: ExecutionContext, ...args: ExprValue[]) => ExprValue;
+
+function invokeLambda(
+  lambda: LambdaValue,
+  context: ExecutionContext,
+  args: ExprValue[],
+): ExprValue {
+  const lambdaContext: ExecutionContext = { ...context };
+  for (let i = 0; i < lambda.params.length; i++) {
+    (lambdaContext as Record<string, ExprValue>)[lambda.params[i]!] = args[i] ?? null;
+  }
+  return evaluate(lambda.program, lambdaContext);
+}
 
 const BUILTINS = new Map<string, BuiltinFn>([
   ['toString', (v) => String(v)],
@@ -101,6 +120,109 @@ const BUILTINS = new Map<string, BuiltinFn>([
       if (v === null) return 'null';
       if (Array.isArray(v)) return 'array';
       return typeof v;
+    },
+  ],
+]);
+
+const HO_BUILTINS = new Map<string, HOBuiltinFn>([
+  [
+    'filter',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'filter requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'filter requires a lambda');
+      return collection.filter((item) => {
+        const result = invokeLambda(lambda, ctx, [item]);
+        return isTruthy(result);
+      });
+    },
+  ],
+  [
+    'map',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'map requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'map requires a lambda');
+      return collection.map((item) => invokeLambda(lambda, ctx, [item]));
+    },
+  ],
+  [
+    'find',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'find requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'find requires a lambda');
+      for (const item of collection) {
+        if (isTruthy(invokeLambda(lambda, ctx, [item]))) return item;
+      }
+      return null;
+    },
+  ],
+  [
+    'reduce',
+    (ctx, collection, lambda, initial) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'reduce requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'reduce requires a lambda');
+      let acc = initial ?? null;
+      for (const item of collection) {
+        acc = invokeLambda(lambda, ctx, [acc, item]);
+      }
+      return acc;
+    },
+  ],
+  [
+    'every',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'every requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'every requires a lambda');
+      for (const item of collection) {
+        if (!isTruthy(invokeLambda(lambda, ctx, [item]))) return false;
+      }
+      return true;
+    },
+  ],
+  [
+    'some',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'some requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'some requires a lambda');
+      for (const item of collection) {
+        if (isTruthy(invokeLambda(lambda, ctx, [item]))) return true;
+      }
+      return false;
+    },
+  ],
+  [
+    'sort',
+    (ctx, collection, lambda?) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'sort requires an array');
+      const copy = [...collection];
+      if (!lambda || !isLambdaValue(lambda)) {
+        copy.sort((a, b) => {
+          if (typeof a === 'number' && typeof b === 'number') return a - b;
+          return String(a).localeCompare(String(b));
+        });
+        return copy;
+      }
+      copy.sort((a, b) => {
+        const result = invokeLambda(lambda, ctx, [a, b]);
+        return typeof result === 'number' ? result : 0;
+      });
+      return copy;
+    },
+  ],
+  [
+    'flatMap',
+    (ctx, collection, lambda) => {
+      if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'flatMap requires an array');
+      if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'flatMap requires a lambda');
+      const result: ExprValue[] = [];
+      for (const item of collection) {
+        const mapped = invokeLambda(lambda, ctx, [item]);
+        if (Array.isArray(mapped)) {
+          result.push(...mapped);
+        } else {
+          result.push(mapped);
+        }
+      }
+      return result;
     },
   ],
 ]);
@@ -417,6 +539,15 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         const name = instruction[1] as string;
         const argc = instruction[2] as number;
         const args = stack.splice(stack.length - argc, argc) as ExprValue[];
+
+        // Check higher-order builtins first (they need context)
+        const hoFn = HO_BUILTINS.get(name);
+        if (hoFn) {
+          const result = hoFn(context, ...args);
+          push(result);
+          break;
+        }
+
         const fn = BUILTINS.get(name);
         if (!fn) {
           return makeError('INVALID_INSTRUCTION', `Unknown function: ${name}`);

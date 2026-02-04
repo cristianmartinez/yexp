@@ -44,6 +44,9 @@ export enum TokenType {
   // Pipe
   PipeGreater = 'PipeGreater',
 
+  // Arrow
+  Arrow = 'Arrow',
+
   // Spread
   DotDotDot = 'DotDotDot',
 
@@ -86,7 +89,8 @@ export type ASTNode =
   | TemplateLiteralNode
   | AssignmentNode
   | UpdateNode
-  | AppendNode;
+  | AppendNode
+  | LambdaNode;
 
 export interface LiteralNode {
   type: 'Literal';
@@ -192,6 +196,12 @@ export interface AppendNode {
   value: ASTNode;
 }
 
+export interface LambdaNode {
+  type: 'Lambda';
+  params: string[];
+  body: ASTNode;
+}
+
 // ─── Opcodes ────────────────────────────────────────────────────────────────
 
 export enum Opcode {
@@ -259,7 +269,21 @@ export interface BytecodeProgram {
 
 // ─── Values & Errors ────────────────────────────────────────────────────────
 
-export type ExprValue = number | string | boolean | null | ExprValue[] | ExprObject | ExprError;
+export interface LambdaValue {
+  __lambda: true;
+  program: BytecodeProgram;
+  params: string[];
+}
+
+export type ExprValue =
+  | number
+  | string
+  | boolean
+  | null
+  | ExprValue[]
+  | ExprObject
+  | ExprError
+  | LambdaValue;
 
 export type ExprObject = { [key: string]: ExprValue };
 
@@ -280,6 +304,12 @@ export type ExprErrorType =
 
 export function isExprError(value: ExprValue): value is ExprError {
   return typeof value === 'object' && value !== null && 'error' in value && 'message' in value;
+}
+
+export function isLambdaValue(value: ExprValue): value is LambdaValue {
+  return (
+    typeof value === 'object' && value !== null && '__lambda' in value && value.__lambda === true
+  );
 }
 
 export function makeError(error: ExprErrorType, message: string): ExprError {

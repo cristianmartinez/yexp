@@ -178,4 +178,100 @@ describe('integration', () => {
       expect(run('state.a.b.c', ctx({}))).toBe(null);
     });
   });
+
+  describe('lambdas and higher-order functions', () => {
+    test('filter with arrow lambda', () => {
+      expect(
+        run('data.items |> filter((x) => x > 3)', ctx({}, { items: [1, 2, 3, 4, 5] })),
+      ).toEqual([4, 5]);
+    });
+
+    test('filter with dot shorthand', () => {
+      expect(
+        run(
+          'data.items |> filter(.price > 100)',
+          ctx({}, { items: [{ price: 50 }, { price: 150 }] }),
+        ),
+      ).toEqual([{ price: 150 }]);
+    });
+
+    test('map with arrow lambda', () => {
+      expect(run('data.items |> map((x) => x * 2)', ctx({}, { items: [1, 2, 3] }))).toEqual([
+        2, 4, 6,
+      ]);
+    });
+
+    test('map with dot shorthand', () => {
+      expect(
+        run('data.items |> map(.name)', ctx({}, { items: [{ name: 'Alice' }, { name: 'Bob' }] })),
+      ).toEqual(['Alice', 'Bob']);
+    });
+
+    test('find with lambda', () => {
+      expect(
+        run(
+          'data.items |> find(.name == "Bob")',
+          ctx({}, { items: [{ name: 'Alice' }, { name: 'Bob' }] }),
+        ),
+      ).toEqual({ name: 'Bob' });
+    });
+
+    test('reduce with lambda', () => {
+      expect(
+        run('data.items |> reduce((acc, x) => acc + x, 0)', ctx({}, { items: [1, 2, 3] })),
+      ).toBe(6);
+    });
+
+    test('every with lambda', () => {
+      expect(run('data.items |> every((x) => x > 0)', ctx({}, { items: [1, 2, 3] }))).toBe(true);
+      expect(run('data.items |> every((x) => x > 2)', ctx({}, { items: [1, 2, 3] }))).toBe(false);
+    });
+
+    test('some with lambda', () => {
+      expect(run('data.items |> some((x) => x > 2)', ctx({}, { items: [1, 2, 3] }))).toBe(true);
+      expect(run('data.items |> some((x) => x > 5)', ctx({}, { items: [1, 2, 3] }))).toBe(false);
+    });
+
+    test('sort with lambda', () => {
+      expect(run('data.items |> sort((a, b) => a - b)', ctx({}, { items: [3, 1, 2] }))).toEqual([
+        1, 2, 3,
+      ]);
+    });
+
+    test('sort without lambda', () => {
+      expect(run('data.items |> sort', ctx({}, { items: [3, 1, 2] }))).toEqual([1, 2, 3]);
+    });
+
+    test('flatMap with lambda', () => {
+      expect(run('data.items |> flatMap((x) => [x, x * 2])', ctx({}, { items: [1, 2] }))).toEqual([
+        1, 2, 2, 4,
+      ]);
+    });
+
+    test('chaining HOFs', () => {
+      expect(
+        run(
+          'data.items |> filter(.active) |> map(.name)',
+          ctx(
+            {},
+            {
+              items: [
+                { name: 'Alice', active: true },
+                { name: 'Bob', active: false },
+              ],
+            },
+          ),
+        ),
+      ).toEqual(['Alice']);
+    });
+
+    test('lambda with context access', () => {
+      expect(
+        run(
+          'data.items |> filter((x) => x > state.threshold)',
+          ctx({ threshold: 2 }, { items: [1, 2, 3, 4] }),
+        ),
+      ).toEqual([3, 4]);
+    });
+  });
 });

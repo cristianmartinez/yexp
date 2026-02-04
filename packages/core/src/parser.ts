@@ -7,6 +7,7 @@ import type {
   CallNode,
   IdentifierNode,
   IndexAccessNode,
+  LambdaNode,
   LiteralNode,
   LogicalOpNode,
   MemberAccessNode,
@@ -49,6 +50,7 @@ enum Prec {
 
 export function parse(tokens: Token[]): ASTNode {
   let pos = 0;
+  let inDotShorthand = false;
 
   function current(): Token {
     const token = tokens[pos];
@@ -116,7 +118,7 @@ export function parse(tokens: Token[]): ASTNode {
       case TokenType.Identifier:
         return parseIdentifier();
       case TokenType.LeftParen:
-        return parseGrouping();
+        return parseParenOrLambda();
       case TokenType.LeftBracket:
         return parseArrayLiteral();
       case TokenType.LeftBrace:
@@ -125,6 +127,8 @@ export function parse(tokens: Token[]): ASTNode {
         return parseUnary();
       case TokenType.Minus:
         return parseUnary();
+      case TokenType.Dot:
+        return inDotShorthand ? parseDotMemberAccess() : parseDotShorthand();
       case TokenType.DotDotDot:
         return parseSpread();
       case TokenType.TemplateNoSub:
@@ -164,11 +168,89 @@ export function parse(tokens: Token[]): ASTNode {
     return { type: 'Identifier', name: token.value };
   }
 
-  function parseGrouping(): ASTNode {
+  function parseParenOrLambda(): ASTNode {
+    const savedPos = pos;
     advance(); // skip (
+
+    // Empty parens - could be () => ... or error
+    if (peek() === TokenType.RightParen) {
+      advance(); // skip )
+      if (peek() === TokenType.Arrow) {
+        advance(); // skip =>
+        const body = parseExpression();
+        return { type: 'Lambda', params: [], body } as LambdaNode;
+      }
+      throw new ParseError('Empty parentheses', current().position);
+    }
+
+    // Try to parse as parameter list
+    if (peek() === TokenType.Identifier) {
+      const tentativeParams: string[] = [];
+      let looksLikeParams = true;
+
+      tentativeParams.push(current().value);
+      advance();
+
+      while (peek() === TokenType.Comma) {
+        advance(); // skip comma
+        if (peek() !== TokenType.Identifier) {
+          looksLikeParams = false;
+          break;
+        }
+        tentativeParams.push(current().value);
+        advance();
+      }
+
+      if (looksLikeParams && peek() === TokenType.RightParen) {
+        const afterParen = pos + 1;
+        if (afterParen < tokens.length && tokens[afterParen]?.type === TokenType.Arrow) {
+          advance(); // skip )
+          advance(); // skip =>
+          const body = parseExpression();
+          return { type: 'Lambda', params: tentativeParams, body } as LambdaNode;
+        }
+      }
+    }
+
+    // Not a lambda - backtrack and parse as grouping
+    pos = savedPos;
+    advance(); // skip ( again
     const expr = parseExpression();
     expect(TokenType.RightParen);
     return expr;
+  }
+
+  function parseDotShorthand(): LambdaNode {
+    inDotShorthand = true;
+    advance(); // skip .
+    const prop = expect(TokenType.Identifier);
+
+    let body: ASTNode = {
+      type: 'MemberAccess',
+      object: { type: 'Identifier', name: '$it' },
+      property: prop.value,
+    } as MemberAccessNode;
+
+    body = parsePostfix(body);
+
+    while (true) {
+      const prec = infixPrecedence(peek());
+      if (prec <= Prec.None) break;
+      body = parseInfix(body, prec);
+    }
+
+    inDotShorthand = false;
+    return { type: 'Lambda', params: ['$it'], body };
+  }
+
+  function parseDotMemberAccess(): MemberAccessNode {
+    advance(); // skip .
+    const prop = expect(TokenType.Identifier);
+    return {
+      type: 'MemberAccess',
+      object: { type: 'Identifier', name: '$it' },
+      property: prop.value,
+    };
   }
 
   function parseArrayLiteral(): ArrayLiteralNode {

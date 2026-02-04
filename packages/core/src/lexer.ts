@@ -244,6 +244,8 @@ export function tokenize(source: string): Token[] {
       case '=':
         if (match('=')) {
           addToken(TokenType.EqualEqual, '==', start);
+        } else if (match('>')) {
+          addToken(TokenType.Arrow, '=>', start);
         } else {
           addToken(TokenType.Equal, '=', start);
         }
