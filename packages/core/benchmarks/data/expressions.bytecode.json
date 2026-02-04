@@ -1,0 +1,1025 @@
+{
+  "0": {
+    "source": "data.user.name",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.user.name"
+      ],
+      "constants": [],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "1": {
+    "source": "state.count > 0",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "state.count"
+      ],
+      "constants": [
+        0
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "GT"
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "2": {
+    "source": "data.items[0].price",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.items[0].price"
+      ],
+      "constants": [],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "3": {
+    "source": "data.items[*].name",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.items"
+      ],
+      "constants": [
+        "name"
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "WILDCARD"
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "INDEX",
+          -1
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "4": {
+    "source": "data.users[*].email",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.users"
+      ],
+      "constants": [
+        "email"
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "WILDCARD"
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "INDEX",
+          -1
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "5": {
+    "source": "data.items[.price > 100]",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.items"
+      ],
+      "constants": [
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "$it.price"
+            ],
+            "constants": [
+              100
+            ],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "CONST",
+                0
+              ],
+              [
+                "GT"
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "$it"
+          ]
+        }
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CALL",
+          "filter",
+          2
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "6": {
+    "source": "data.users[.age > 18 && .active]",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.users"
+      ],
+      "constants": [
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "$it.age",
+              "$it.active"
+            ],
+            "constants": [
+              18,
+              false
+            ],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "CONST",
+                0
+              ],
+              [
+                "GT"
+              ],
+              [
+                "JUMP_IF_FALSE",
+                6
+              ],
+              [
+                "LOAD",
+                1
+              ],
+              [
+                "JUMP",
+                7
+              ],
+              [
+                "CONST",
+                1
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "$it"
+          ]
+        }
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CALL",
+          "filter",
+          2
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "7": {
+    "source": "data..name",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data"
+      ],
+      "constants": [
+        "name"
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "RECURSIVE_DESCENT"
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "8": {
+    "source": "data..users[*].email",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data"
+      ],
+      "constants": [
+        "users",
+        "email"
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "RECURSIVE_DESCENT"
+        ],
+        [
+          "WILDCARD"
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "INDEX",
+          -1
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "9": {
+    "source": "data.items |> filter(.price > 100)",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.items"
+      ],
+      "constants": [
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "$it.price"
+            ],
+            "constants": [
+              100
+            ],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "CONST",
+                0
+              ],
+              [
+                "GT"
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "$it"
+          ]
+        }
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CALL",
+          "filter",
+          2
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "10": {
+    "source": "data.items |> map(.price) |> add",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.items"
+      ],
+      "constants": [
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "$it.price"
+            ],
+            "constants": [],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "$it"
+          ]
+        }
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CALL",
+          "map",
+          2
+        ],
+        [
+          "CALL",
+          "add",
+          1
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "11": {
+    "source": "data.items |> filter(.active) |> map(.name) |> join(\", \")",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.items"
+      ],
+      "constants": [
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "$it.active"
+            ],
+            "constants": [],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "$it"
+          ]
+        },
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "$it.name"
+            ],
+            "constants": [],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "$it"
+          ]
+        },
+        ", "
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CALL",
+          "filter",
+          2
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "CALL",
+          "map",
+          2
+        ],
+        [
+          "CONST",
+          2
+        ],
+        [
+          "CALL",
+          "join",
+          2
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "12": {
+    "source": "state.user ? state.user.name : \"Guest\"",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "state.user",
+        "state.user.name"
+      ],
+      "constants": [
+        "Guest"
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "JUMP_IF_FALSE",
+          4
+        ],
+        [
+          "LOAD",
+          1
+        ],
+        [
+          "JUMP",
+          5
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "13": {
+    "source": "state.value ?? 0",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "state.value"
+      ],
+      "constants": [
+        null,
+        0
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "NEQ"
+        ],
+        [
+          "JUMP_IF_TRUE",
+          6
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "JUMP",
+          7
+        ],
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "14": {
+    "source": "state.user?.profile?.avatar",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "state.user"
+      ],
+      "constants": [
+        null,
+        "profile",
+        "avatar"
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "EQ"
+        ],
+        [
+          "JUMP_IF_TRUE",
+          8
+        ],
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "OPTIONAL_INDEX",
+          -1
+        ],
+        [
+          "JUMP",
+          9
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "EQ"
+        ],
+        [
+          "JUMP_IF_TRUE",
+          24
+        ],
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "EQ"
+        ],
+        [
+          "JUMP_IF_TRUE",
+          20
+        ],
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "OPTIONAL_INDEX",
+          -1
+        ],
+        [
+          "JUMP",
+          21
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CONST",
+          2
+        ],
+        [
+          "OPTIONAL_INDEX",
+          -1
+        ],
+        [
+          "JUMP",
+          25
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "15": {
+    "source": "`Hello, ${state.user.name}!`",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "state.user.name"
+      ],
+      "constants": [
+        "Hello, ",
+        "!"
+      ],
+      "code": [
+        [
+          "CONST",
+          0
+        ],
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "TO_STRING"
+        ],
+        [
+          "ADD"
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "ADD"
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "16": {
+    "source": "[...data.items, state.newItem]",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.items",
+        "state.newItem"
+      ],
+      "constants": [],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "SPREAD"
+        ],
+        [
+          "LOAD",
+          1
+        ],
+        [
+          "MAKE_ARRAY",
+          3
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "17": {
+    "source": "{ ...state.user, active: true }",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "state.user"
+      ],
+      "constants": [
+        "active",
+        true
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "SPREAD"
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "MAKE_OBJ",
+          2
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "18": {
+    "source": "state.items |> map((x) => x.price * x.qty) |> add",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "state.items"
+      ],
+      "constants": [
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "x.price",
+              "x.qty"
+            ],
+            "constants": [],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "LOAD",
+                1
+              ],
+              [
+                "MUL"
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "x"
+          ]
+        }
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CALL",
+          "map",
+          2
+        ],
+        [
+          "CALL",
+          "add",
+          1
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  },
+  "19": {
+    "source": "data.users |> filter((u) => u.age > 18 && u.active) |> map(.name)",
+    "bytecode": {
+      "version": 1,
+      "slots": [
+        "data.users"
+      ],
+      "constants": [
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "u.age",
+              "u.active"
+            ],
+            "constants": [
+              18,
+              false
+            ],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "CONST",
+                0
+              ],
+              [
+                "GT"
+              ],
+              [
+                "JUMP_IF_FALSE",
+                6
+              ],
+              [
+                "LOAD",
+                1
+              ],
+              [
+                "JUMP",
+                7
+              ],
+              [
+                "CONST",
+                1
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "u"
+          ]
+        },
+        {
+          "__lambda": true,
+          "program": {
+            "version": 1,
+            "slots": [
+              "$it.name"
+            ],
+            "constants": [],
+            "code": [
+              [
+                "LOAD",
+                0
+              ],
+              [
+                "RETURN"
+              ]
+            ]
+          },
+          "params": [
+            "$it"
+          ]
+        }
+      ],
+      "code": [
+        [
+          "LOAD",
+          0
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "CALL",
+          "filter",
+          2
+        ],
+        [
+          "CONST",
+          1
+        ],
+        [
+          "CALL",
+          "map",
+          2
+        ],
+        [
+          "RETURN"
+        ]
+      ]
+    }
+  }
+}

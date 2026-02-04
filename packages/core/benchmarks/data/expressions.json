@@ -1,0 +1,122 @@
+[
+  {
+    "id": 0,
+    "source": "data.user.name",
+    "category": "property-access",
+    "complexity": "simple"
+  },
+  {
+    "id": 1,
+    "source": "state.count > 0",
+    "category": "comparison",
+    "complexity": "simple"
+  },
+  {
+    "id": 2,
+    "source": "data.items[0].price",
+    "category": "index-access",
+    "complexity": "simple"
+  },
+  {
+    "id": 3,
+    "source": "data.items[*].name",
+    "category": "wildcard",
+    "complexity": "simple"
+  },
+  {
+    "id": 4,
+    "source": "data.users[*].email",
+    "category": "wildcard",
+    "complexity": "simple"
+  },
+  {
+    "id": 5,
+    "source": "data.items[.price > 100]",
+    "category": "predicate",
+    "complexity": "medium"
+  },
+  {
+    "id": 6,
+    "source": "data.users[.age > 18 && .active]",
+    "category": "predicate",
+    "complexity": "medium"
+  },
+  {
+    "id": 7,
+    "source": "data..name",
+    "category": "recursive-descent",
+    "complexity": "simple"
+  },
+  {
+    "id": 8,
+    "source": "data..users[*].email",
+    "category": "recursive-descent",
+    "complexity": "medium"
+  },
+  {
+    "id": 9,
+    "source": "data.items |> filter(.price > 100)",
+    "category": "pipe",
+    "complexity": "medium"
+  },
+  {
+    "id": 10,
+    "source": "data.items |> map(.price) |> add",
+    "category": "pipe",
+    "complexity": "medium"
+  },
+  {
+    "id": 11,
+    "source": "data.items |> filter(.active) |> map(.name) |> join(\", \")",
+    "category": "pipe",
+    "complexity": "complex"
+  },
+  {
+    "id": 12,
+    "source": "state.user ? state.user.name : \"Guest\"",
+    "category": "ternary",
+    "complexity": "simple"
+  },
+  {
+    "id": 13,
+    "source": "state.value ?? 0",
+    "category": "null-coalescing",
+    "complexity": "simple"
+  },
+  {
+    "id": 14,
+    "source": "state.user?.profile?.avatar",
+    "category": "optional-chaining",
+    "complexity": "simple"
+  },
+  {
+    "id": 15,
+    "source": "`Hello, ${state.user.name}!`",
+    "category": "template-literal",
+    "complexity": "simple"
+  },
+  {
+    "id": 16,
+    "source": "[...data.items, state.newItem]",
+    "category": "array-literal",
+    "complexity": "simple"
+  },
+  {
+    "id": 17,
+    "source": "{ ...state.user, active: true }",
+    "category": "object-literal",
+    "complexity": "simple"
+  },
+  {
+    "id": 18,
+    "source": "state.items |> map((x) => x.price * x.qty) |> add",
+    "category": "lambda",
+    "complexity": "complex"
+  },
+  {
+    "id": 19,
+    "source": "data.users |> filter((u) => u.age > 18 && u.active) |> map(.name)",
+    "category": "lambda",
+    "complexity": "complex"
+  }
+]

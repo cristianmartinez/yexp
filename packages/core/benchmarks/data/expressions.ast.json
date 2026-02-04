@@ -1,0 +1,632 @@
+{
+  "0": {
+    "source": "data.user.name",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "user"
+      },
+      "property": "name"
+    }
+  },
+  "1": {
+    "source": "state.count > 0",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": ">",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "count"
+      },
+      "right": {
+        "type": "Literal",
+        "value": 0,
+        "raw": "0"
+      }
+    }
+  },
+  "2": {
+    "source": "data.items[0].price",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "IndexAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        },
+        "index": {
+          "type": "Literal",
+          "value": 0,
+          "raw": "0"
+        }
+      },
+      "property": "price"
+    }
+  },
+  "3": {
+    "source": "data.items[*].name",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        }
+      },
+      "property": "name"
+    }
+  },
+  "4": {
+    "source": "data.users[*].email",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "users"
+        }
+      },
+      "property": "email"
+    }
+  },
+  "5": {
+    "source": "data.items[.price > 100]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "BinaryOp",
+          "operator": ">",
+          "left": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "price"
+          },
+          "right": {
+            "type": "Literal",
+            "value": 100,
+            "raw": "100"
+          }
+        }
+      }
+    }
+  },
+  "6": {
+    "source": "data.users[.age > 18 && .active]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "users"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "LogicalOp",
+          "operator": "&&",
+          "left": {
+            "type": "BinaryOp",
+            "operator": ">",
+            "left": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "age"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 18,
+              "raw": "18"
+            }
+          },
+          "right": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "active"
+          }
+        }
+      }
+    }
+  },
+  "7": {
+    "source": "data..name",
+    "ast": {
+      "type": "RecursiveDescent",
+      "object": {
+        "type": "Identifier",
+        "name": "data"
+      },
+      "property": "name",
+      "optional": false
+    }
+  },
+  "8": {
+    "source": "data..users[*].email",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "RecursiveDescent",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "users",
+          "optional": false
+        }
+      },
+      "property": "email"
+    }
+  },
+  "9": {
+    "source": "data.items |> filter(.price > 100)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "filter",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "$it"
+          ],
+          "body": {
+            "type": "BinaryOp",
+            "operator": ">",
+            "left": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "price"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 100,
+              "raw": "100"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "10": {
+    "source": "data.items |> map(.price) |> add",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        },
+        "callee": "map",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "price"
+            }
+          }
+        ]
+      },
+      "callee": "add",
+      "args": []
+    }
+  },
+  "11": {
+    "source": "data.items |> filter(.active) |> map(.name) |> join(\", \")",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "Pipe",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "items"
+          },
+          "callee": "filter",
+          "args": [
+            {
+              "type": "Lambda",
+              "params": [
+                "$it"
+              ],
+              "body": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "$it"
+                },
+                "property": "active"
+              }
+            }
+          ]
+        },
+        "callee": "map",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "name"
+            }
+          }
+        ]
+      },
+      "callee": "join",
+      "args": [
+        {
+          "type": "Literal",
+          "value": ", ",
+          "raw": "\", \""
+        }
+      ]
+    }
+  },
+  "12": {
+    "source": "state.user ? state.user.name : \"Guest\"",
+    "ast": {
+      "type": "Ternary",
+      "condition": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "user"
+      },
+      "consequent": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "user"
+        },
+        "property": "name"
+      },
+      "alternate": {
+        "type": "Literal",
+        "value": "Guest",
+        "raw": "\"Guest\""
+      }
+    }
+  },
+  "13": {
+    "source": "state.value ?? 0",
+    "ast": {
+      "type": "NullCoalescing",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "value"
+      },
+      "right": {
+        "type": "Literal",
+        "value": 0,
+        "raw": "0"
+      }
+    }
+  },
+  "14": {
+    "source": "state.user?.profile?.avatar",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "user"
+        },
+        "property": "profile",
+        "optional": true
+      },
+      "property": "avatar",
+      "optional": true
+    }
+  },
+  "15": {
+    "source": "`Hello, ${state.user.name}!`",
+    "ast": {
+      "type": "TemplateLiteral",
+      "parts": [
+        {
+          "type": "string",
+          "value": "Hello, "
+        },
+        {
+          "type": "expression",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            },
+            "property": "name"
+          }
+        },
+        {
+          "type": "string",
+          "value": "!"
+        }
+      ]
+    }
+  },
+  "16": {
+    "source": "[...data.items, state.newItem]",
+    "ast": {
+      "type": "ArrayLiteral",
+      "elements": [
+        {
+          "type": "SpreadElement",
+          "argument": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "items"
+          }
+        },
+        {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "newItem"
+        }
+      ]
+    }
+  },
+  "17": {
+    "source": "{ ...state.user, active: true }",
+    "ast": {
+      "type": "ObjectLiteral",
+      "properties": [
+        {
+          "key": "__spread__",
+          "value": {
+            "type": "SpreadElement",
+            "argument": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            }
+          },
+          "shorthand": false
+        },
+        {
+          "key": "active",
+          "value": {
+            "type": "Literal",
+            "value": true,
+            "raw": "true"
+          },
+          "shorthand": false
+        }
+      ]
+    }
+  },
+  "18": {
+    "source": "state.items |> map((x) => x.price * x.qty) |> add",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "items"
+        },
+        "callee": "map",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "x"
+            ],
+            "body": {
+              "type": "BinaryOp",
+              "operator": "*",
+              "left": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "x"
+                },
+                "property": "price"
+              },
+              "right": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "x"
+                },
+                "property": "qty"
+              }
+            }
+          }
+        ]
+      },
+      "callee": "add",
+      "args": []
+    }
+  },
+  "19": {
+    "source": "data.users |> filter((u) => u.age > 18 && u.active) |> map(.name)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "users"
+        },
+        "callee": "filter",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "u"
+            ],
+            "body": {
+              "type": "LogicalOp",
+              "operator": "&&",
+              "left": {
+                "type": "BinaryOp",
+                "operator": ">",
+                "left": {
+                  "type": "MemberAccess",
+                  "object": {
+                    "type": "Identifier",
+                    "name": "u"
+                  },
+                  "property": "age"
+                },
+                "right": {
+                  "type": "Literal",
+                  "value": 18,
+                  "raw": "18"
+                }
+              },
+              "right": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "u"
+                },
+                "property": "active"
+              }
+            }
+          }
+        ]
+      },
+      "callee": "map",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "$it"
+          ],
+          "body": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "name"
+          }
+        }
+      ]
+    }
+  }
+}
