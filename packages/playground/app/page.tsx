@@ -51,7 +51,7 @@ export default function PlaygroundPage() {
       </div>
 
       <Split
-        className="flex-1 flex flex-col"
+        className="flex-1 split split-vertical"
         direction="vertical"
         sizes={[25, 75]}
         minSize={[150, 400]}
@@ -77,7 +77,7 @@ export default function PlaygroundPage() {
 
         {/* Main content area */}
         <Split
-          className="flex"
+          className="flex-1 split split-horizontal"
           direction="horizontal"
           sizes={[33, 67]}
           minSize={[200, 300]}
@@ -98,7 +98,7 @@ export default function PlaygroundPage() {
 
           {/* Right panel: Result and Bytecode */}
           <Split
-            className="flex flex-col"
+            className="flex-1 split split-vertical"
             direction="vertical"
             sizes={result.bytecode ? [50, 50] : [100]}
             minSize={[200, 200]}
