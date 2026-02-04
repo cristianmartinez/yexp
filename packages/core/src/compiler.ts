@@ -295,12 +295,11 @@ export function compile(ast: ASTNode): BytecodeProgram {
 
   function compileLogical(operator: '&&' | '||', left: ASTNode, right: ASTNode): void {
     // CSE optimization: detect if both sides reference the same path
-    // Pattern: `path op1 val && path op2 val` where path is the same
+    // Pattern: `path op1 val && path op2 val` or `path op1 val || path op2 val`
     const leftPath = extractPathFromBinaryOp(left);
     const rightPath = extractPathFromBinaryOp(right);
 
     if (
-      operator === '&&' &&
       leftPath &&
       rightPath &&
       isSamePath(leftPath, rightPath) &&
@@ -309,6 +308,7 @@ export function compile(ast: ASTNode): BytecodeProgram {
     ) {
       // Optimized: load path once, DUP for both comparisons
       // e.g., `state.count >= 0 && state.count <= 100`
+      // or `state.count < 0 || state.count > 100`
 
       // Load path once
       compileNode(leftPath);
@@ -318,8 +318,9 @@ export function compile(ast: ASTNode): BytecodeProgram {
       compileNode(left.right); // right operand of left BinaryOp
       emitBinaryOp(left.operator);
 
-      // Short-circuit if false
-      const skipIndex = emit(Opcode.JUMP_IF_FALSE, 0);
+      // Short-circuit based on operator
+      const jumpOp = operator === '&&' ? Opcode.JUMP_IF_FALSE : Opcode.JUMP_IF_TRUE;
+      const skipIndex = emit(jumpOp, 0);
 
       // Second comparison (uses original value still on stack)
       compileNode(right.right); // right operand of right BinaryOp
@@ -327,12 +328,12 @@ export function compile(ast: ASTNode): BytecodeProgram {
 
       const doneIndex = emit(Opcode.JUMP, 0);
 
-      // Patch skip jump
-      const falseLabel = code.length;
-      emit(Opcode.CONST, addConstant(false));
+      // Patch skip jump (push short-circuit value)
+      const shortCircuitLabel = code.length;
+      emit(Opcode.CONST, addConstant(operator !== '&&'));
 
       const endLabel = code.length;
-      code[skipIndex] = [Opcode.JUMP_IF_FALSE, falseLabel];
+      code[skipIndex] = [jumpOp, shortCircuitLabel];
       code[doneIndex] = [Opcode.JUMP, endLabel];
     } else {
       // Standard compilation (no optimization)
@@ -355,6 +356,7 @@ export function compile(ast: ASTNode): BytecodeProgram {
 
   function emitBinaryOp(operator: string): void {
     switch (operator) {
+      // Comparison operators
       case '==':
         emit(Opcode.EQ);
         break;
@@ -373,6 +375,22 @@ export function compile(ast: ASTNode): BytecodeProgram {
       case '>=':
         emit(Opcode.GTE);
         break;
+      // Arithmetic operators
+      case '+':
+        emit(Opcode.ADD);
+        break;
+      case '-':
+        emit(Opcode.SUB);
+        break;
+      case '*':
+        emit(Opcode.MUL);
+        break;
+      case '/':
+        emit(Opcode.DIV);
+        break;
+      case '%':
+        emit(Opcode.MOD);
+        break;
     }
   }
 
@@ -381,19 +399,65 @@ export function compile(ast: ASTNode): BytecodeProgram {
     consequent: ASTNode;
     alternate: ASTNode;
   }): void {
-    compileNode(node.condition);
-    const jumpIfFalse = emit(Opcode.JUMP_IF_FALSE, 0); // placeholder
-    compileNode(node.consequent);
-    const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
+    // CSE optimization: detect if condition path is reused in branches
+    // Pattern: `path op val ? path * x : path * y`
+    const conditionPath = extractPathFromBinaryOp(node.condition);
+    const consequentPath = extractPathFromBinaryOp(node.consequent);
+    const alternatePath = extractPathFromBinaryOp(node.alternate);
 
-    // Alternate branch
-    const alternateLabel = code.length;
-    compileNode(node.alternate);
+    if (
+      conditionPath &&
+      consequentPath &&
+      alternatePath &&
+      isSamePath(conditionPath, consequentPath) &&
+      isSamePath(conditionPath, alternatePath) &&
+      node.condition.type === 'BinaryOp' &&
+      node.consequent.type === 'BinaryOp' &&
+      node.alternate.type === 'BinaryOp'
+    ) {
+      // Optimized: load path once, use for all three operations
+      // e.g., `state.value > 0 ? state.value * 2 : state.value * -1`
 
-    // Patch jumps
-    const endLabel = code.length;
-    code[jumpIfFalse] = [Opcode.JUMP_IF_FALSE, alternateLabel];
-    code[jumpToEnd] = [Opcode.JUMP, endLabel];
+      // Load path once
+      compileNode(conditionPath);
+
+      // DUP for condition
+      emit(Opcode.DUP);
+      compileNode(node.condition.right);
+      emitBinaryOp(node.condition.operator);
+
+      const jumpIfFalse = emit(Opcode.JUMP_IF_FALSE, 0);
+
+      // Consequent: use the cached path value
+      compileNode(node.consequent.right);
+      emitBinaryOp(node.consequent.operator);
+      const jumpToEnd = emit(Opcode.JUMP, 0);
+
+      // Alternate: use the cached path value
+      const alternateLabel = code.length;
+      compileNode(node.alternate.right);
+      emitBinaryOp(node.alternate.operator);
+
+      // Patch jumps
+      const endLabel = code.length;
+      code[jumpIfFalse] = [Opcode.JUMP_IF_FALSE, alternateLabel];
+      code[jumpToEnd] = [Opcode.JUMP, endLabel];
+    } else {
+      // Standard compilation (no optimization)
+      compileNode(node.condition);
+      const jumpIfFalse = emit(Opcode.JUMP_IF_FALSE, 0);
+      compileNode(node.consequent);
+      const jumpToEnd = emit(Opcode.JUMP, 0);
+
+      // Alternate branch
+      const alternateLabel = code.length;
+      compileNode(node.alternate);
+
+      // Patch jumps
+      const endLabel = code.length;
+      code[jumpIfFalse] = [Opcode.JUMP_IF_FALSE, alternateLabel];
+      code[jumpToEnd] = [Opcode.JUMP, endLabel];
+    }
   }
 
   function compileNullCoalescing(node: { left: ASTNode; right: ASTNode }): void {
