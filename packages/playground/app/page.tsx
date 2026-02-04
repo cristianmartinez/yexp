@@ -3,8 +3,6 @@
 import { useState, useMemo } from 'react';
 import { tokenize, parse, compile, evaluate } from '@vlot/core';
 import type { ExecutionContext } from '@vlot/core';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Code2, PlayCircle, Database, Binary, AlertCircle } from 'lucide-react';
 import { ExprEditor } from '@/components/expr-editor';
 import { JsonEditor } from '@/components/json-editor';
@@ -46,117 +44,97 @@ export default function PlaygroundPage() {
   }, [expression, parsedContext]);
 
   return (
-    <div className="min-h-screen p-6 md:p-8">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="min-h-screen flex flex-col">
+      <div className="px-6 py-4 border-b">
         <PageHeader currentPage="playground" />
-        <Separator />
+      </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Left Column: Input */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code2 className="w-5 h-5" />
-                  Expression
-                </CardTitle>
-                <CardDescription>Write your Vlot expression to evaluate</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 overflow-hidden">
-                <ExprEditor
-                  value={expression}
-                  onChange={setExpression}
-                  context={parsedContext}
-                  height="120px"
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5" />
-                  Context
-                </CardTitle>
-                <CardDescription>JSON data available to your expression</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 overflow-hidden">
-                <JsonEditor value={contextJSON} onChange={setContextJSON} height="300px" />
-              </CardContent>
-            </Card>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Main content area */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left panel: Context */}
+          <div className="w-1/3 border-r flex flex-col">
+            <div className="px-4 py-2 border-b bg-muted/50">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Database className="w-4 h-4" />
+                Context
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <JsonEditor value={contextJSON} onChange={setContextJSON} height="100%" />
+            </div>
           </div>
 
-          {/* Right Column: Output */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PlayCircle className="w-5 h-5" />
+          {/* Right panel: Result and Bytecode */}
+          <div className="flex-1 flex flex-col">
+            {/* Result panel */}
+            <div className="h-1/2 border-b flex flex-col">
+              <div className="px-4 py-2 border-b bg-muted/50">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <PlayCircle className="w-4 h-4" />
                   Result
-                </CardTitle>
-                <CardDescription>Evaluated output from your expression</CardDescription>
-              </CardHeader>
-              <CardContent>
+                </div>
+              </div>
+              <div className="flex-1 overflow-auto p-4">
                 {result.error ? (
-                  <div className="flex items-start gap-3 p-4 border border-destructive/50 rounded-md bg-destructive/10">
+                  <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
                     <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
                     <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
                       {result.error}
                     </pre>
                   </div>
                 ) : (
-                  <div className="rounded-md overflow-hidden border border-border">
-                    <JsonViewer value={result.value} height="200px" />
+                  <div className="h-full border">
+                    <JsonViewer value={result.value} height="100%" />
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
+            {/* Bytecode panel */}
             {result.bytecode && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Binary className="w-5 h-5" />
+              <div className="h-1/2 flex flex-col">
+                <div className="px-4 py-2 border-b bg-muted/50">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Binary className="w-4 h-4" />
                     Bytecode
-                  </CardTitle>
-                  <CardDescription>Compiled bytecode representation</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Instructions */}
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">Instructions</h4>
-                    <div className="font-mono text-xs space-y-1 max-h-[300px] overflow-y-auto p-3 bg-muted rounded-md">
-                      {result.bytecode.code.map((inst, i) => (
-                        <div key={i} className="flex gap-3">
-                          <span className="text-muted-foreground w-8 text-right">{i}:</span>
-                          <span className="text-primary font-medium">{inst.join(' ')}</span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
-
-                  {/* Slots */}
-                  {result.bytecode.slots.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2">Slots</h4>
-                      <pre className="text-xs font-mono p-3 bg-muted rounded-md">
-                        {result.bytecode.slots.join(', ')}
-                      </pre>
-                    </div>
-                  )}
-
-                  {/* Constants */}
-                  {result.bytecode.constants.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2">Constants</h4>
-                      <div className="rounded-md overflow-hidden border border-border">
-                        <JsonViewer value={result.bytecode.constants} height="150px" />
+                </div>
+                <div className="flex-1 overflow-auto p-4 space-y-4">
+                  <div className="font-mono text-xs space-y-1 max-h-[200px] overflow-y-auto p-3 bg-muted/50 border">
+                    {result.bytecode.code.map((inst, i) => (
+                      <div key={i} className="flex gap-3">
+                        <span className="text-muted-foreground w-8 text-right">{i}:</span>
+                        <span className="text-primary font-medium">{inst.join(' ')}</span>
                       </div>
+                    ))}
+                  </div>
+                  {result.bytecode.constants.length > 0 && (
+                    <div className="border">
+                      <JsonViewer value={result.bytecode.constants} height="150px" />
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
+          </div>
+        </div>
+
+        {/* Bottom panel: Expression input */}
+        <div className="border-t flex flex-col">
+          <div className="px-4 py-2 border-b bg-muted/50">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Code2 className="w-4 h-4" />
+              Expression
+            </div>
+          </div>
+          <div className="h-32">
+            <ExprEditor
+              value={expression}
+              onChange={setExpression}
+              context={parsedContext}
+              height="100%"
+            />
           </div>
         </div>
       </div>

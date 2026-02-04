@@ -234,26 +234,28 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
   };
 
   return (
-    <Editor
-      height={height}
-      language="vlot"
-      value={value}
-      onChange={(val) => onChange(val || '')}
-      onMount={handleEditorDidMount}
-      theme="vlot-dark"
-      options={{
-        minimap: { enabled: false },
-        fontSize: 14,
-        lineNumbers: 'off',
-        scrollBeyondLastLine: false,
-        automaticLayout: true,
-        wordWrap: 'on',
-        wrappingStrategy: 'advanced',
-        padding: { top: 8, bottom: 8 },
-        suggestOnTriggerCharacters: true,
-        quickSuggestions: true,
-        tabSize: 2,
-      }}
-    />
+    <div className="bg-[#1e1e1e] h-full">
+      <Editor
+        height={height}
+        language="vlot"
+        value={value}
+        onChange={(val) => onChange(val || '')}
+        onMount={handleEditorDidMount}
+        theme="vlot-dark"
+        options={{
+          minimap: { enabled: false },
+          fontSize: 14,
+          lineNumbers: 'off',
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
+          wordWrap: 'on',
+          wrappingStrategy: 'advanced',
+          padding: { top: 8, bottom: 8 },
+          suggestOnTriggerCharacters: true,
+          quickSuggestions: true,
+          tabSize: 2,
+        }}
+      />
+    </div>
   );
 }
