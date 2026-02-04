@@ -76,18 +76,21 @@ export function compile(ast: ASTNode): BytecodeProgram {
         break;
 
       case 'MemberAccess':
-        if (isPath(node)) {
+        if (node.optional) {
+          compileOptionalMemberAccess(node);
+        } else if (isPath(node)) {
           emit(Opcode.LOAD, addSlot(resolvePath(node)));
         } else {
           compileNode(node.object);
           emit(Opcode.CONST, addConstant(node.property));
-          // Dynamic member access via INDEX-like mechanism
-          emit(Opcode.INDEX, addConstant(node.property));
+          emit(Opcode.INDEX, -1); // dynamic index
         }
         break;
 
       case 'IndexAccess':
-        if (isPath(node) && node.index.type === 'Literal') {
+        if (node.optional) {
+          compileOptionalIndexAccess(node);
+        } else if (isPath(node) && node.index.type === 'Literal') {
           emit(Opcode.LOAD, addSlot(resolvePath(node)));
         } else {
           compileNode(node.object);
@@ -197,6 +200,14 @@ export function compile(ast: ASTNode): BytecodeProgram {
       case 'Lambda':
         compileLambda(node);
         break;
+
+      case 'Ternary':
+        compileTernary(node);
+        break;
+
+      case 'NullCoalescing':
+        compileNullCoalescing(node);
+        break;
     }
   }
 
@@ -225,6 +236,105 @@ export function compile(ast: ASTNode): BytecodeProgram {
     const endLabel = code.length;
     code[skipIndex] = [jumpOp, falseLabel];
     code[doneIndex] = [Opcode.JUMP, endLabel];
+  }
+
+  function compileTernary(node: {
+    condition: ASTNode;
+    consequent: ASTNode;
+    alternate: ASTNode;
+  }): void {
+    compileNode(node.condition);
+    const jumpIfFalse = emit(Opcode.JUMP_IF_FALSE, 0); // placeholder
+    compileNode(node.consequent);
+    const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
+
+    // Alternate branch
+    const alternateLabel = code.length;
+    compileNode(node.alternate);
+
+    // Patch jumps
+    const endLabel = code.length;
+    code[jumpIfFalse] = [Opcode.JUMP_IF_FALSE, alternateLabel];
+    code[jumpToEnd] = [Opcode.JUMP, endLabel];
+  }
+
+  function compileNullCoalescing(node: { left: ASTNode; right: ASTNode }): void {
+    compileNode(node.left);
+    // Duplicate value on stack for null check
+    emit(Opcode.CONST, addConstant(null));
+    emit(Opcode.NEQ);
+    const jumpIfNotNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
+
+    // Left is null, evaluate right
+    compileNode(node.right);
+    const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
+
+    // Left is not null, use it
+    const notNullLabel = code.length;
+    compileNode(node.left);
+
+    // Patch jumps
+    const endLabel = code.length;
+    code[jumpIfNotNull] = [Opcode.JUMP_IF_TRUE, notNullLabel];
+    code[jumpToEnd] = [Opcode.JUMP, endLabel];
+  }
+
+  function compileOptionalMemberAccess(node: {
+    object: ASTNode;
+    property: string;
+    optional?: boolean;
+  }): void {
+    // Check if object is null/undefined
+    compileNode(node.object);
+    emit(Opcode.CONST, addConstant(null));
+    emit(Opcode.EQ);
+    const jumpIfNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
+
+    // Not null - do optional access (returns null on error)
+    compileNode(node.object);
+    emit(Opcode.CONST, addConstant(node.property));
+    emit(Opcode.OPTIONAL_INDEX, -1); // dynamic index
+    const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
+
+    // Null branch - return null
+    const nullLabel = code.length;
+    emit(Opcode.CONST, addConstant(null));
+
+    // Patch jumps
+    const endLabel = code.length;
+    code[jumpIfNull] = [Opcode.JUMP_IF_TRUE, nullLabel];
+    code[jumpToEnd] = [Opcode.JUMP, endLabel];
+  }
+
+  function compileOptionalIndexAccess(node: {
+    object: ASTNode;
+    index: ASTNode;
+    optional?: boolean;
+  }): void {
+    // Check if object is null/undefined
+    compileNode(node.object);
+    emit(Opcode.CONST, addConstant(null));
+    emit(Opcode.EQ);
+    const jumpIfNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
+
+    // Not null - do optional index access (returns null on error)
+    compileNode(node.object);
+    if (node.index.type === 'Literal' && typeof node.index.value === 'number') {
+      emit(Opcode.OPTIONAL_INDEX, node.index.value);
+    } else {
+      compileNode(node.index);
+      emit(Opcode.OPTIONAL_INDEX, -1); // dynamic index
+    }
+    const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
+
+    // Null branch - return null
+    const nullLabel = code.length;
+    emit(Opcode.CONST, addConstant(null));
+
+    // Patch jumps
+    const endLabel = code.length;
+    code[jumpIfNull] = [Opcode.JUMP_IF_TRUE, nullLabel];
+    code[jumpToEnd] = [Opcode.JUMP, endLabel];
   }
 
   function compileArrayLiteral(elements: ASTNode[]): void {

@@ -889,19 +889,105 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
       }
 
       case Opcode.INDEX: {
-        const idx = instruction[1] as number;
-        const arr = pop();
-        if (isExprError(arr)) return arr;
-        if (!Array.isArray(arr)) {
-          return makeError('TYPE_ERROR', 'Cannot index non-array');
+        const staticIdx = instruction[1] as number;
+        let obj: ExprValue;
+        let idx: ExprValue;
+
+        // If staticIdx is -1, index is dynamic (pop from stack)
+        if (staticIdx === -1) {
+          idx = pop();
+          if (isExprError(idx)) return idx;
+          obj = pop();
+          if (isExprError(obj)) return obj;
+        } else {
+          obj = pop();
+          if (isExprError(obj)) return obj;
+          idx = staticIdx;
         }
-        if (idx < 0 || idx >= arr.length) {
-          return makeError(
-            'INDEX_OUT_OF_BOUNDS',
-            `Index ${idx} out of bounds (length ${arr.length})`,
-          );
+
+        // Handle array indexing
+        if (Array.isArray(obj)) {
+          if (typeof idx !== 'number') {
+            return makeError('TYPE_ERROR', 'Array index must be a number');
+          }
+          if (idx < 0 || idx >= obj.length) {
+            return makeError(
+              'INDEX_OUT_OF_BOUNDS',
+              `Index ${idx} out of bounds (length ${obj.length})`,
+            );
+          }
+          push(obj[idx]!);
+          break;
         }
-        push(arr[idx]!);
+
+        // Handle object property access
+        if (typeof obj === 'object' && obj !== null && !isExprError(obj) && !isLambdaValue(obj)) {
+          if (typeof idx === 'string' || typeof idx === 'number') {
+            const key = String(idx);
+            const result = (obj as ExprObject)[key];
+            push(result !== undefined ? result : null);
+            break;
+          }
+          return makeError('TYPE_ERROR', 'Object key must be a string or number');
+        }
+
+        return makeError('TYPE_ERROR', 'Cannot index non-object/non-array');
+      }
+
+      case Opcode.OPTIONAL_INDEX: {
+        const staticIdx = instruction[1] as number;
+        let obj: ExprValue;
+        let idx: ExprValue;
+
+        // If staticIdx is -1, index is dynamic (pop from stack)
+        if (staticIdx === -1) {
+          idx = pop();
+          if (isExprError(idx)) {
+            push(null);
+            break;
+          }
+          obj = pop();
+          if (isExprError(obj)) {
+            push(null);
+            break;
+          }
+        } else {
+          obj = pop();
+          if (isExprError(obj)) {
+            push(null);
+            break;
+          }
+          idx = staticIdx;
+        }
+
+        // Handle array indexing - return null on out-of-bounds
+        if (Array.isArray(obj)) {
+          if (typeof idx !== 'number') {
+            push(null);
+            break;
+          }
+          if (idx < 0 || idx >= obj.length) {
+            push(null);
+            break;
+          }
+          push(obj[idx]!);
+          break;
+        }
+
+        // Handle object property access - return null if property doesn't exist
+        if (typeof obj === 'object' && obj !== null && !isExprError(obj) && !isLambdaValue(obj)) {
+          if (typeof idx === 'string' || typeof idx === 'number') {
+            const key = String(idx);
+            const result = (obj as ExprObject)[key];
+            push(result !== undefined ? result : null);
+            break;
+          }
+          push(null);
+          break;
+        }
+
+        // Not an object or array - return null
+        push(null);
         break;
       }
 

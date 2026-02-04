@@ -11,12 +11,14 @@ import type {
   LiteralNode,
   LogicalOpNode,
   MemberAccessNode,
+  NullCoalescingNode,
   ObjectLiteralNode,
   ObjectProperty,
   PipeNode,
   SpreadElementNode,
   TemplateLiteralNode,
   TemplatePart,
+  TernaryNode,
   Token,
   UnaryOpNode,
   UpdateNode,
@@ -37,15 +39,17 @@ export class ParseError extends Error {
 enum Prec {
   None = 0,
   Assignment = 1, // =, <<
-  Or = 2, // ||
-  And = 3, // &&
-  Equality = 4, // == !=
-  Comparison = 5, // < > <= >=
-  Addition = 6, // + -
-  Multiplication = 7, // * / %
-  Pipe = 8, // |>
-  Unary = 9, // ! - ...
-  Call = 10, // member access, index, call
+  Ternary = 2, // ? :
+  NullCoalescing = 3, // ??
+  Or = 4, // ||
+  And = 5, // &&
+  Equality = 6, // == !=
+  Comparison = 7, // < > <= >=
+  Addition = 8, // + -
+  Multiplication = 9, // * / %
+  Pipe = 10, // |>
+  Unary = 11, // ! - ...
+  Call = 12, // member access, index, call
 }
 
 export function parse(tokens: Token[]): ASTNode {
@@ -347,7 +351,24 @@ export function parse(tokens: Token[]): ASTNode {
   function parsePostfix(expr: ASTNode): ASTNode {
     let node = expr;
     while (true) {
-      if (peek() === TokenType.Dot) {
+      if (peek() === TokenType.QuestionDot) {
+        advance();
+        // Check if it's ?.[expr] or ?.prop
+        if (peek() === TokenType.LeftBracket) {
+          advance(); // skip [
+          const index = parseExpression();
+          expect(TokenType.RightBracket);
+          node = { type: 'IndexAccess', object: node, index, optional: true } as IndexAccessNode;
+        } else {
+          const prop = expect(TokenType.Identifier);
+          node = {
+            type: 'MemberAccess',
+            object: node,
+            property: prop.value,
+            optional: true,
+          } as MemberAccessNode;
+        }
+      } else if (peek() === TokenType.Dot) {
         advance();
         const prop = expect(TokenType.Identifier);
         node = { type: 'MemberAccess', object: node, property: prop.value } as MemberAccessNode;
@@ -402,6 +423,10 @@ export function parse(tokens: Token[]): ASTNode {
       case TokenType.Equal:
       case TokenType.LessLess:
         return Prec.Assignment;
+      case TokenType.Question:
+        return Prec.Ternary;
+      case TokenType.QuestionQuestion:
+        return Prec.NullCoalescing;
       case TokenType.PipePipe:
         return Prec.Or;
       case TokenType.AmpersandAmpersand:
@@ -436,6 +461,10 @@ export function parse(tokens: Token[]): ASTNode {
         return parseAssignment(left);
       case TokenType.LessLess:
         return parseAppend(left);
+      case TokenType.Question:
+        return parseTernary(left);
+      case TokenType.QuestionQuestion:
+        return parseNullCoalescing(left, prec);
       case TokenType.PipePipe:
       case TokenType.AmpersandAmpersand:
         return parseLogical(left, token, prec);
@@ -497,6 +526,18 @@ export function parse(tokens: Token[]): ASTNode {
   function parseAppend(target: ASTNode): AppendNode {
     const value = parseExpression(Prec.Assignment);
     return { type: 'Append', target, value };
+  }
+
+  function parseTernary(condition: ASTNode): TernaryNode {
+    const consequent = parseExpression(Prec.Assignment);
+    expect(TokenType.Colon);
+    const alternate = parseExpression(Prec.Assignment);
+    return { type: 'Ternary', condition, consequent, alternate };
+  }
+
+  function parseNullCoalescing(left: ASTNode, prec: Prec): NullCoalescingNode {
+    const right = parseExpression(prec);
+    return { type: 'NullCoalescing', left, right };
   }
 
   // ─── Parse ──────────────────────────────────────────────────────────────

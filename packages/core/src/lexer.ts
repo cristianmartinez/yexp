@@ -273,6 +273,15 @@ export function tokenize(source: string): Token[] {
           throw new LexerError(`Unexpected character '|'`, start);
         }
         break;
+      case '?':
+        if (match('?')) {
+          addToken(TokenType.QuestionQuestion, '??', start);
+        } else if (match('.')) {
+          addToken(TokenType.QuestionDot, '?.', start);
+        } else {
+          addToken(TokenType.Question, '?', start);
+        }
+        break;
       case '.':
         if (source[pos] === '.' && source[pos + 1] === '.') {
           pos += 2;

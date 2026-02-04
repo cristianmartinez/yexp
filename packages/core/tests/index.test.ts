@@ -576,4 +576,104 @@ describe('integration', () => {
       );
     });
   });
+
+  describe('ternary operator', () => {
+    test('returns consequent when condition is true', () => {
+      expect(run('true ? 1 : 2', ctx())).toBe(1);
+    });
+
+    test('returns alternate when condition is false', () => {
+      expect(run('false ? 1 : 2', ctx())).toBe(2);
+    });
+
+    test('evaluates condition from data', () => {
+      expect(run('data.age >= 18 ? "adult" : "minor"', ctx({}, { age: 20 }))).toBe('adult');
+      expect(run('data.age >= 18 ? "adult" : "minor"', ctx({}, { age: 15 }))).toBe('minor');
+    });
+
+    test('nested ternary operators', () => {
+      expect(
+        run('data.score > 90 ? "A" : data.score > 80 ? "B" : "C"', ctx({}, { score: 95 })),
+      ).toBe('A');
+      expect(
+        run('data.score > 90 ? "A" : data.score > 80 ? "B" : "C"', ctx({}, { score: 85 })),
+      ).toBe('B');
+      expect(
+        run('data.score > 90 ? "A" : data.score > 80 ? "B" : "C"', ctx({}, { score: 70 })),
+      ).toBe('C');
+    });
+
+    test('with complex expressions', () => {
+      expect(run('data.x > 0 ? data.x * 2 : data.x * -1', ctx({}, { x: 5 }))).toBe(10);
+      expect(run('data.x > 0 ? data.x * 2 : data.x * -1', ctx({}, { x: -5 }))).toBe(5);
+    });
+  });
+
+  describe('null coalescing operator', () => {
+    test('returns left when not null', () => {
+      expect(run('data.value ?? 42', ctx({}, { value: 10 }))).toBe(10);
+    });
+
+    test('returns right when left is null', () => {
+      expect(run('data.value ?? 42', ctx({}, { value: null }))).toBe(42);
+    });
+
+    test('with string values', () => {
+      expect(run('data.name ?? "anonymous"', ctx({}, { name: 'Alice' }))).toBe('Alice');
+      expect(run('data.name ?? "anonymous"', ctx({}, { name: null }))).toBe('anonymous');
+    });
+
+    test('chained null coalescing', () => {
+      expect(run('data.a ?? data.b ?? data.c', ctx({}, { a: null, b: 20, c: 30 }))).toBe(20);
+      expect(run('data.a ?? data.b ?? data.c', ctx({}, { a: null, b: null, c: 30 }))).toBe(30);
+      expect(run('data.a ?? data.b ?? data.c', ctx({}, { a: 10, b: null, c: null }))).toBe(10);
+    });
+
+    test('with zero and empty string (should return them, not fallback)', () => {
+      expect(run('data.value ?? 42', ctx({}, { value: 0 }))).toBe(0);
+      expect(run('data.value ?? "default"', ctx({}, { value: '' }))).toBe('');
+      expect(run('data.value ?? true', ctx({}, { value: false }))).toBe(false);
+    });
+  });
+
+  describe('optional chaining', () => {
+    test('member access with non-null object', () => {
+      expect(run('data.user?.name', ctx({}, { user: { name: 'Alice' } }))).toBe('Alice');
+    });
+
+    test('member access with null object returns null', () => {
+      expect(run('data.user?.name', ctx({}, { user: null }))).toBe(null);
+    });
+
+    test('chained optional member access', () => {
+      expect(run('data.user?.address?.city', ctx({}, { user: { address: { city: 'NYC' } } }))).toBe(
+        'NYC',
+      );
+      expect(run('data.user?.address?.city', ctx({}, { user: { address: null } }))).toBe(null);
+      expect(run('data.user?.address?.city', ctx({}, { user: null }))).toBe(null);
+    });
+
+    test('optional index access with non-null array', () => {
+      expect(run('data.items?.[0]', ctx({}, { items: [1, 2, 3] }))).toBe(1);
+    });
+
+    test('optional index access with null array returns null', () => {
+      expect(run('data.items?.[0]', ctx({}, { items: null }))).toBe(null);
+    });
+
+    test('mixed optional chaining with member and index access', () => {
+      expect(
+        run('data.users?.[0]?.name', ctx({}, { users: [{ name: 'Alice' }, { name: 'Bob' }] })),
+      ).toBe('Alice');
+      expect(run('data.users?.[0]?.name', ctx({}, { users: null }))).toBe(null);
+      expect(run('data.users?.[0]?.name', ctx({}, { users: [] }))).toBe(null);
+    });
+
+    test('optional chaining with null coalescing', () => {
+      expect(run('data.user?.name ?? "anonymous"', ctx({}, { user: { name: 'Alice' } }))).toBe(
+        'Alice',
+      );
+      expect(run('data.user?.name ?? "anonymous"', ctx({}, { user: null }))).toBe('anonymous');
+    });
+  });
 });

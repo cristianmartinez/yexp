@@ -50,6 +50,11 @@ export enum TokenType {
   // Spread
   DotDotDot = 'DotDotDot',
 
+  // Conditional
+  Question = 'Question',
+  QuestionQuestion = 'QuestionQuestion',
+  QuestionDot = 'QuestionDot',
+
   // Punctuation
   Dot = 'Dot',
   Comma = 'Comma',
@@ -90,7 +95,9 @@ export type ASTNode =
   | AssignmentNode
   | UpdateNode
   | AppendNode
-  | LambdaNode;
+  | LambdaNode
+  | TernaryNode
+  | NullCoalescingNode;
 
 export interface LiteralNode {
   type: 'Literal';
@@ -107,12 +114,14 @@ export interface MemberAccessNode {
   type: 'MemberAccess';
   object: ASTNode;
   property: string;
+  optional?: boolean;
 }
 
 export interface IndexAccessNode {
   type: 'IndexAccess';
   object: ASTNode;
   index: ASTNode;
+  optional?: boolean;
 }
 
 export interface BinaryOpNode {
@@ -202,6 +211,19 @@ export interface LambdaNode {
   body: ASTNode;
 }
 
+export interface TernaryNode {
+  type: 'Ternary';
+  condition: ASTNode;
+  consequent: ASTNode;
+  alternate: ASTNode;
+}
+
+export interface NullCoalescingNode {
+  type: 'NullCoalescing';
+  left: ASTNode;
+  right: ASTNode;
+}
+
 // ─── Opcodes ────────────────────────────────────────────────────────────────
 
 export enum Opcode {
@@ -241,6 +263,7 @@ export enum Opcode {
 
   // Access
   INDEX = 'INDEX',
+  OPTIONAL_INDEX = 'OPTIONAL_INDEX',
 
   // Function calls
   CALL = 'CALL',
