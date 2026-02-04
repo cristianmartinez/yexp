@@ -2044,7 +2044,7 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
   return makeError('INVALID_INSTRUCTION', 'Program ended without RETURN');
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
+// Helpers
 
 function isTruthy(value: ExprValue): boolean {
   if (value === null || value === false) return false;

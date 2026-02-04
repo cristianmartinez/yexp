@@ -95,7 +95,7 @@ export function parse(tokens: Token[]): ASTNode {
     return false;
   }
 
-  // ─── Entry ──────────────────────────────────────────────────────────────
+  // Entry
 
   function parseExpression(minPrec: Prec = Prec.None): ASTNode {
     let left = parsePrefix();
@@ -110,7 +110,7 @@ export function parse(tokens: Token[]): ASTNode {
     return left;
   }
 
-  // ─── Prefix (atoms + unary) ─────────────────────────────────────────────
+  // Prefix (atoms + unary)
 
   function parsePrefix(): ASTNode {
     switch (peek()) {
@@ -350,7 +350,7 @@ export function parse(tokens: Token[]): ASTNode {
     return { type: 'TemplateLiteral', parts };
   }
 
-  // ─── Postfix ────────────────────────────────────────────────────────────
+  // Postfix
 
   function parsePostfix(expr: ASTNode): ASTNode {
     let node = expr;
@@ -503,7 +503,7 @@ export function parse(tokens: Token[]): ASTNode {
     } as CallNode;
   }
 
-  // ─── Infix ──────────────────────────────────────────────────────────────
+  // Infix
 
   function infixPrecedence(type: TokenType): Prec {
     switch (type) {
@@ -644,7 +644,7 @@ export function parse(tokens: Token[]): ASTNode {
     return { type: 'NullCoalescing', left, right };
   }
 
-  // ─── Parse ──────────────────────────────────────────────────────────────
+  // Parse
 
   const result = parseExpression();
   if (peek() !== TokenType.EOF) {

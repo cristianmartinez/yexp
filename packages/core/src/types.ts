@@ -1,4 +1,4 @@
-// ─── Token Types ────────────────────────────────────────────────────────────
+// Token Types
 
 export enum TokenType {
   // Literals
@@ -81,7 +81,7 @@ export interface Token {
   position: number;
 }
 
-// ─── AST Node Types ─────────────────────────────────────────────────────────
+// AST Node Types
 
 export type ASTNode =
   | LiteralNode
@@ -252,7 +252,7 @@ export interface NullCoalescingNode {
   right: ASTNode;
 }
 
-// ─── Opcodes ────────────────────────────────────────────────────────────────
+// Opcodes
 
 export enum Opcode {
   // Constants & loading (0-9)
@@ -350,7 +350,7 @@ export enum Opcode {
   RETURN = 200,
 }
 
-// ─── Bytecode ───────────────────────────────────────────────────────────────
+// Bytecode
 
 export type Instruction = [Opcode, ...unknown[]];
 
@@ -361,7 +361,7 @@ export interface BytecodeProgram {
   code: Instruction[];
 }
 
-// ─── Values & Errors ────────────────────────────────────────────────────────
+// Values & Errors
 
 export interface LambdaValue {
   __lambda: true;
@@ -410,7 +410,7 @@ export function makeError(error: ExprErrorType, message: string): ExprError {
   return { error, message };
 }
 
-// ─── Execution Context ──────────────────────────────────────────────────────
+// Execution Context
 
 export interface ExecutionContext {
   state: Record<string, ExprValue>;
