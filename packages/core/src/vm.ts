@@ -899,6 +899,15 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         break;
       }
 
+      case Opcode.DUP: {
+        if (stack.length === 0) {
+          return makeError('STACK_UNDERFLOW', 'Cannot duplicate empty stack');
+        }
+        const value = stack[stack.length - 1]!;
+        push(value);
+        break;
+      }
+
       case Opcode.ADD: {
         const b = pop();
         const a = pop();

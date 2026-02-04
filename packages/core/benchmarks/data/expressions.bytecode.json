@@ -644,6 +644,9 @@
           0
         ],
         [
+          "DUP"
+        ],
+        [
           "CONST",
           0
         ],
@@ -653,10 +656,6 @@
         [
           "JUMP_IF_TRUE",
           8
-        ],
-        [
-          "LOAD",
-          0
         ],
         [
           "CONST",
@@ -675,19 +674,7 @@
           0
         ],
         [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          24
-        ],
-        [
-          "LOAD",
-          0
+          "DUP"
         ],
         [
           "CONST",
@@ -698,27 +685,7 @@
         ],
         [
           "JUMP_IF_TRUE",
-          20
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          21
-        ],
-        [
-          "CONST",
-          0
+          16
         ],
         [
           "CONST",
@@ -730,7 +697,7 @@
         ],
         [
           "JUMP",
-          25
+          17
         ],
         [
           "CONST",
@@ -2759,6 +2726,9 @@
           0
         ],
         [
+          "DUP"
+        ],
+        [
           "CONST",
           0
         ],
@@ -2768,10 +2738,6 @@
         [
           "JUMP_IF_TRUE",
           8
-        ],
-        [
-          "LOAD",
-          0
         ],
         [
           "CONST",
@@ -2790,6 +2756,39 @@
           0
         ],
         [
+          "DUP"
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "EQ"
+        ],
+        [
+          "JUMP_IF_TRUE",
+          16
+        ],
+        [
+          "CONST",
+          2
+        ],
+        [
+          "OPTIONAL_INDEX",
+          -1
+        ],
+        [
+          "JUMP",
+          17
+        ],
+        [
+          "CONST",
+          0
+        ],
+        [
+          "DUP"
+        ],
+        [
           "CONST",
           0
         ],
@@ -2801,43 +2800,8 @@
           24
         ],
         [
-          "LOAD",
-          0
-        ],
-        [
           "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          20
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          21
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "CONST",
-          2
+          3
         ],
         [
           "OPTIONAL_INDEX",
@@ -2856,135 +2820,11 @@
           0
         ],
         [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          56
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          36
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          37
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          52
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          48
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          49
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "CONST",
-          2
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          53
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "CONST",
-          3
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          57
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
           "NEQ"
         ],
         [
           "JUMP_IF_TRUE",
-          62
+          30
         ],
         [
           "CONST",
@@ -2992,11 +2832,14 @@
         ],
         [
           "JUMP",
-          119
+          55
         ],
         [
           "LOAD",
           0
+        ],
+        [
+          "DUP"
         ],
         [
           "CONST",
@@ -3007,11 +2850,7 @@
         ],
         [
           "JUMP_IF_TRUE",
-          70
-        ],
-        [
-          "LOAD",
-          0
+          38
         ],
         [
           "CONST",
@@ -3023,26 +2862,14 @@
         ],
         [
           "JUMP",
-          71
+          39
         ],
         [
           "CONST",
           0
         ],
         [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          86
-        ],
-        [
-          "LOAD",
-          0
+          "DUP"
         ],
         [
           "CONST",
@@ -3053,27 +2880,7 @@
         ],
         [
           "JUMP_IF_TRUE",
-          82
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          83
-        ],
-        [
-          "CONST",
-          0
+          46
         ],
         [
           "CONST",
@@ -3085,26 +2892,14 @@
         ],
         [
           "JUMP",
-          87
+          47
         ],
         [
           "CONST",
           0
         ],
         [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          118
-        ],
-        [
-          "LOAD",
-          0
+          "DUP"
         ],
         [
           "CONST",
@@ -3115,89 +2910,7 @@
         ],
         [
           "JUMP_IF_TRUE",
-          98
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          99
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          114
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "EQ"
-        ],
-        [
-          "JUMP_IF_TRUE",
-          110
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "CONST",
-          1
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          111
-        ],
-        [
-          "CONST",
-          0
-        ],
-        [
-          "CONST",
-          2
-        ],
-        [
-          "OPTIONAL_INDEX",
-          -1
-        ],
-        [
-          "JUMP",
-          115
-        ],
-        [
-          "CONST",
-          0
+          54
         ],
         [
           "CONST",
@@ -3209,7 +2922,7 @@
         ],
         [
           "JUMP",
-          119
+          55
         ],
         [
           "CONST",

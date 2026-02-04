@@ -256,6 +256,7 @@ export enum Opcode {
   // Constants & loading
   CONST = 'CONST',
   LOAD = 'LOAD',
+  DUP = 'DUP', // Duplicate top stack value
 
   // Arithmetic
   ADD = 'ADD',

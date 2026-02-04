@@ -337,19 +337,21 @@ export function compile(ast: ASTNode): BytecodeProgram {
     property: string;
     optional?: boolean;
   }): void {
-    // Check if object is null/undefined
+    // Compile object once and duplicate for null check
     compileNode(node.object);
+    emit(Opcode.DUP); // Duplicate object value on stack
+
+    // Check if duplicated value is null/undefined
     emit(Opcode.CONST, addConstant(null));
     emit(Opcode.EQ);
     const jumpIfNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
 
-    // Not null - do optional access (returns null on error)
-    compileNode(node.object);
+    // Not null - do optional access using original value (still on stack)
     emit(Opcode.CONST, addConstant(node.property));
     emit(Opcode.OPTIONAL_INDEX, -1); // dynamic index
     const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
 
-    // Null branch - return null
+    // Null branch - pop the null value and push null result
     const nullLabel = code.length;
     emit(Opcode.CONST, addConstant(null));
 
@@ -364,14 +366,16 @@ export function compile(ast: ASTNode): BytecodeProgram {
     index: ASTNode;
     optional?: boolean;
   }): void {
-    // Check if object is null/undefined
+    // Compile object once and duplicate for null check
     compileNode(node.object);
+    emit(Opcode.DUP); // Duplicate object value on stack
+
+    // Check if duplicated value is null/undefined
     emit(Opcode.CONST, addConstant(null));
     emit(Opcode.EQ);
     const jumpIfNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
 
-    // Not null - do optional index access (returns null on error)
-    compileNode(node.object);
+    // Not null - do optional index access using original value (still on stack)
     if (node.index.type === 'Literal' && typeof node.index.value === 'number') {
       emit(Opcode.OPTIONAL_INDEX, node.index.value);
     } else {
@@ -380,7 +384,7 @@ export function compile(ast: ASTNode): BytecodeProgram {
     }
     const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
 
-    // Null branch - return null
+    // Null branch - pop the null value and push null result
     const nullLabel = code.length;
     emit(Opcode.CONST, addConstant(null));
 
