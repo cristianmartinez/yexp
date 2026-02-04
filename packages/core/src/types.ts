@@ -257,6 +257,7 @@ export enum Opcode {
   CONST = 'CONST',
   LOAD = 'LOAD',
   DUP = 'DUP', // Duplicate top stack value
+  POP = 'POP', // Pop and discard top stack value
 
   // Arithmetic
   ADD = 'ADD',

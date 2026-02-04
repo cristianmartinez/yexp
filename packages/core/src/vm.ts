@@ -908,6 +908,14 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
         break;
       }
 
+      case Opcode.POP: {
+        if (stack.length === 0) {
+          return makeError('STACK_UNDERFLOW', 'Cannot pop from empty stack');
+        }
+        pop();
+        break;
+      }
+
       case Opcode.ADD: {
         const b = pop();
         const a = pop();

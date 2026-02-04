@@ -312,19 +312,23 @@ export function compile(ast: ASTNode): BytecodeProgram {
   }
 
   function compileNullCoalescing(node: { left: ASTNode; right: ASTNode }): void {
+    // Compile left side once
     compileNode(node.left);
-    // Duplicate value on stack for null check
+
+    // Duplicate value for null check
+    emit(Opcode.DUP);
     emit(Opcode.CONST, addConstant(null));
     emit(Opcode.NEQ);
     const jumpIfNotNull = emit(Opcode.JUMP_IF_TRUE, 0); // placeholder
 
-    // Left is null, evaluate right
+    // Left is null: pop the null and evaluate right
+    emit(Opcode.POP); // Remove the null value
     compileNode(node.right);
     const jumpToEnd = emit(Opcode.JUMP, 0); // placeholder
 
-    // Left is not null, use it
+    // Left is not null: use the duplicated value already on stack
     const notNullLabel = code.length;
-    compileNode(node.left);
+    // Value is already on stack from DUP, no need to recompile
 
     // Patch jumps
     const endLabel = code.length;

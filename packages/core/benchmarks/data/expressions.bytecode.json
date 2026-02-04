@@ -598,6 +598,9 @@
           0
         ],
         [
+          "DUP"
+        ],
+        [
           "CONST",
           0
         ],
@@ -606,7 +609,10 @@
         ],
         [
           "JUMP_IF_TRUE",
-          6
+          8
+        ],
+        [
+          "POP"
         ],
         [
           "CONST",
@@ -614,11 +620,7 @@
         ],
         [
           "JUMP",
-          7
-        ],
-        [
-          "LOAD",
-          0
+          8
         ],
         [
           "RETURN"
@@ -2679,6 +2681,9 @@
           "theme"
         ],
         [
+          "DUP"
+        ],
+        [
           "CONST",
           0
         ],
@@ -2687,7 +2692,10 @@
         ],
         [
           "JUMP_IF_TRUE",
-          9
+          11
+        ],
+        [
+          "POP"
         ],
         [
           "CONST",
@@ -2695,23 +2703,7 @@
         ],
         [
           "JUMP",
-          13
-        ],
-        [
-          "LOAD",
-          0
-        ],
-        [
-          "OPTIONAL_CHAIN_GET",
-          "profile"
-        ],
-        [
-          "OPTIONAL_CHAIN_GET",
-          "settings"
-        ],
-        [
-          "OPTIONAL_CHAIN_GET",
-          "theme"
+          11
         ],
         [
           "RETURN"
