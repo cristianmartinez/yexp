@@ -41,18 +41,19 @@ export class ParseError extends Error {
 // Precedence levels (higher = tighter binding)
 enum Prec {
   None = 0,
-  Assignment = 1, // =, <<
-  Ternary = 2, // ? :
-  NullCoalescing = 3, // ??
-  Or = 4, // ||
-  And = 5, // &&
-  Equality = 6, // == !=
-  Comparison = 7, // < > <= >=
-  Addition = 8, // + -
-  Multiplication = 9, // * / %
-  Pipe = 10, // |>
-  Unary = 11, // ! - ...
-  Call = 12, // member access, index, call
+  Lambda = 1, // =>
+  Assignment = 2, // =, <<
+  Ternary = 3, // ? :
+  NullCoalescing = 4, // ??
+  Or = 5, // ||
+  And = 6, // &&
+  Equality = 7, // == !=
+  Comparison = 8, // < > <= >=
+  Addition = 9, // + -
+  Multiplication = 10, // * / %
+  Pipe = 11, // |>
+  Unary = 12, // ! - ...
+  Call = 13, // member access, index, call
 }
 
 export function parse(tokens: Token[]): ASTNode {
@@ -471,7 +472,8 @@ export function parse(tokens: Token[]): ASTNode {
     advance(); // skip (
     const args: ASTNode[] = [];
     while (peek() !== TokenType.RightParen && peek() !== TokenType.EOF) {
-      args.push(parseExpression(Prec.Assignment));
+      // Use None precedence to allow all expressions including lambdas
+      args.push(parseExpression());
       if (!match(TokenType.Comma)) break;
     }
     expect(TokenType.RightParen);
@@ -486,6 +488,8 @@ export function parse(tokens: Token[]): ASTNode {
 
   function infixPrecedence(type: TokenType): Prec {
     switch (type) {
+      case TokenType.Arrow:
+        return Prec.Lambda;
       case TokenType.Equal:
       case TokenType.LessLess:
         return Prec.Assignment;
@@ -523,6 +527,8 @@ export function parse(tokens: Token[]): ASTNode {
     const token = advance();
 
     switch (token.type) {
+      case TokenType.Arrow:
+        return parseArrowLambda(left);
       case TokenType.Equal:
         return parseAssignment(left);
       case TokenType.LessLess:
@@ -566,7 +572,8 @@ export function parse(tokens: Token[]): ASTNode {
     const args: ASTNode[] = [];
     if (match(TokenType.LeftParen)) {
       while (peek() !== TokenType.RightParen && peek() !== TokenType.EOF) {
-        args.push(parseExpression(Prec.Assignment));
+        // Use None precedence to allow all expressions including lambdas
+        args.push(parseExpression());
         if (!match(TokenType.Comma)) break;
       }
       expect(TokenType.RightParen);
@@ -592,6 +599,19 @@ export function parse(tokens: Token[]): ASTNode {
   function parseAppend(target: ASTNode): AppendNode {
     const value = parseExpression(Prec.Assignment);
     return { type: 'Append', target, value };
+  }
+
+  function parseArrowLambda(left: ASTNode): LambdaNode {
+    // Left side must be an identifier (single parameter)
+    if (left.type !== 'Identifier') {
+      throw new ParseError(
+        'Arrow function parameter must be an identifier',
+        current().position,
+      );
+    }
+    const params = [left.name];
+    const body = parseExpression(Prec.Lambda);
+    return { type: 'Lambda', params, body };
   }
 
   function parseTernary(condition: ASTNode): TernaryNode {

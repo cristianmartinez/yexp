@@ -281,6 +281,31 @@ describe('integration', () => {
         ),
       ).toEqual([3, 4]);
     });
+
+    test('single-parameter arrow function without parens', () => {
+      expect(run('data.items |> map(x => x * 2)', ctx({}, { items: [1, 2, 3] }))).toEqual([
+        2, 4, 6,
+      ]);
+      expect(run('data.items |> filter(x => x > 2)', ctx({}, { items: [1, 2, 3, 4] }))).toEqual([
+        3, 4,
+      ]);
+    });
+
+    test('single-parameter arrow with member access', () => {
+      expect(
+        run(
+          'data.items |> map(x => x.name) |> filter(x => x.length > 3)',
+          ctx({}, { items: [{ name: 'Alice' }, { name: 'Bob' }, { name: 'Charlie' }] }),
+        ),
+      ).toEqual(['Alice', 'Charlie']);
+    });
+
+    test('single-parameter arrow in regular function call', () => {
+      expect(run('map(data.items, x => x * 2)', ctx({}, { items: [1, 2, 3] }))).toEqual([2, 4, 6]);
+      expect(run('filter(data.items, x => x > 2)', ctx({}, { items: [1, 2, 3, 4] }))).toEqual([
+        3, 4,
+      ]);
+    });
   });
 
   describe('array functions', () => {

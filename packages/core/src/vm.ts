@@ -1532,6 +1532,28 @@ export function evaluate(program: BytecodeProgram, context: ExecutionContext): E
           return makeError('TYPE_ERROR', 'Object key must be a string or number');
         }
 
+        // Handle string indexing and property access
+        if (typeof obj === 'string') {
+          if (typeof idx === 'string') {
+            // Access string properties like length
+            const result = (obj as any)[idx];
+            push(result !== undefined ? result : null);
+            break;
+          }
+          if (typeof idx === 'number') {
+            // Access string character by index
+            if (idx < 0 || idx >= obj.length) {
+              return makeError(
+                'INDEX_OUT_OF_BOUNDS',
+                `Index ${idx} out of bounds (length ${obj.length})`,
+              );
+            }
+            push(obj[idx]!);
+            break;
+          }
+          return makeError('TYPE_ERROR', 'String index must be a string or number');
+        }
+
         return makeError('TYPE_ERROR', 'Cannot index non-object/non-array');
       }
 
@@ -1972,6 +1994,16 @@ function resolvePath(context: ExecutionContext, path: string): ExprValue {
     } else if (Array.isArray(current)) {
       // Check if it's a string property first (like "length")
       if (part in current) {
+        current = (current as any)[part] ?? null;
+      } else {
+        // Try numeric index
+        const idx = Number(part);
+        if (Number.isNaN(idx)) return null;
+        current = current[idx] ?? null;
+      }
+    } else if (typeof current === 'string') {
+      // Strings have properties like length and can be indexed
+      if (part in String.prototype || part === 'length') {
         current = (current as any)[part] ?? null;
       } else {
         // Try numeric index

@@ -43,8 +43,82 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
 
       // Set tokenizer for syntax highlighting
       monaco.languages.setMonarchTokensProvider('expr', {
+        keywords: [
+          'true',
+          'false',
+          'null',
+          'undefined',
+        ],
+        builtins: [
+          // String functions
+          'toString',
+          'toUpperCase',
+          'toLowerCase',
+          'trim',
+          'split',
+          'replace',
+          'match',
+          'startsWith',
+          'endsWith',
+          'includes',
+          'indexOf',
+          'slice',
+          'substring',
+          'charAt',
+          'charCodeAt',
+          'repeat',
+          'padStart',
+          'padEnd',
+          // Number functions
+          'round',
+          'floor',
+          'ceil',
+          'abs',
+          'min',
+          'max',
+          'sqrt',
+          'pow',
+          'sign',
+          // Array functions
+          'length',
+          'map',
+          'filter',
+          'reduce',
+          'find',
+          'findIndex',
+          'some',
+          'every',
+          'join',
+          'reverse',
+          'sort',
+          'concat',
+          'push',
+          'pop',
+          'shift',
+          'unshift',
+          'flat',
+          'flatMap',
+          // Object functions
+          'keys',
+          'values',
+          'entries',
+          'hasOwnProperty',
+          // Type checking
+          'typeof',
+          'isArray',
+          'isObject',
+          'isString',
+          'isNumber',
+          'isBoolean',
+          'isNull',
+          'isUndefined',
+        ],
+        contextVars: ['data', 'state', 'env', '$', '$$'],
         tokenizer: {
           root: [
+            // Context variables (special highlighting)
+            [/\$\$?/, 'variable.predefined'],
+            [/\b(data|state|env)\b/, 'variable.predefined'],
             // Numbers
             [/\d+(\.\d+)?/, 'number'],
             // Strings
@@ -53,13 +127,28 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
             [/"/, 'string', '@string_double'],
             [/'/, 'string', '@string_single'],
             // Keywords
-            [/\b(true|false|null|undefined)\b/, 'keyword'],
-            // Operators
-            [/[+\-*/%<>=!&|?:]+/, 'operator'],
+            [/\b(?:true|false|null|undefined)\b/, 'keyword'],
+            // Builtin functions
+            [
+              /\b(?:toString|toUpperCase|toLowerCase|trim|split|replace|match|startsWith|endsWith|includes|indexOf|slice|substring|charAt|charCodeAt|repeat|padStart|padEnd|round|floor|ceil|abs|min|max|sqrt|pow|sign|length|map|filter|reduce|find|findIndex|some|every|join|reverse|sort|concat|push|pop|shift|unshift|flat|flatMap|keys|values|entries|hasOwnProperty|typeof|isArray|isObject|isString|isNumber|isBoolean|isNull|isUndefined)\b/,
+              'support.function',
+            ],
+            // Pipe operator
+            [/\|>/, 'keyword.operator'],
+            // Arrow function
+            [/=>/, 'keyword.operator'],
+            // Logical operators
+            [/&&|\|\|/, 'keyword.operator'],
+            // Comparison operators
+            [/[<>]=?|[!=]=/, 'keyword.operator'],
+            // Arithmetic operators
+            [/[+\-*/%]/, 'keyword.operator'],
+            // Other operators
+            [/[?:!]/, 'keyword.operator'],
             // Delimiters
             [/[{}()\[\]]/, '@brackets'],
             [/[,.]/, 'delimiter'],
-            // Identifiers
+            // Identifiers (must be last)
             [/[a-zA-Z_]\w*/, 'identifier'],
           ],
           string_double: [
@@ -73,6 +162,23 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
             [/'/, 'string', '@pop'],
           ],
         },
+      });
+
+      // Define custom theme for Expr
+      monaco.editor.defineTheme('expr-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: 'keyword', foreground: 'C586C0', fontStyle: 'bold' },
+          { token: 'keyword.operator', foreground: 'D4D4D4', fontStyle: 'bold' },
+          { token: 'support.function', foreground: 'DCDCAA' },
+          { token: 'variable.predefined', foreground: '4FC1FF', fontStyle: 'italic' },
+          { token: 'number', foreground: 'B5CEA8' },
+          { token: 'string', foreground: 'CE9178' },
+          { token: 'string.escape', foreground: 'D7BA7D' },
+          { token: 'identifier', foreground: '9CDCFE' },
+        ],
+        colors: {},
       });
 
       // Register completion provider for autocompletion
@@ -134,7 +240,7 @@ export function ExprEditor({ value, onChange, context = {}, height = '120px' }: 
       value={value}
       onChange={(val) => onChange(val || '')}
       onMount={handleEditorDidMount}
-      theme="vs-dark"
+      theme="expr-dark"
       options={{
         minimap: { enabled: false },
         fontSize: 14,
