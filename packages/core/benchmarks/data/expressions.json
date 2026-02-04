@@ -118,5 +118,485 @@
     "source": "data.users |> filter((u) => u.age > 18 && u.active) |> map(.name)",
     "category": "lambda",
     "complexity": "complex"
+  },
+  {
+    "id": 20,
+    "source": "state.count + 10",
+    "category": "arithmetic",
+    "complexity": "simple"
+  },
+  {
+    "id": 21,
+    "source": "data.items[0].price * data.items[0].qty",
+    "category": "arithmetic",
+    "complexity": "medium"
+  },
+  {
+    "id": 22,
+    "source": "(state.value + 100) * 0.8 - 20",
+    "category": "arithmetic",
+    "complexity": "medium"
+  },
+  {
+    "id": 23,
+    "source": "state.active && state.enabled",
+    "category": "logical",
+    "complexity": "simple"
+  },
+  {
+    "id": 24,
+    "source": "!state.disabled || state.override",
+    "category": "logical",
+    "complexity": "simple"
+  },
+  {
+    "id": 25,
+    "source": "(state.count > 0 && state.active) || state.force",
+    "category": "logical",
+    "complexity": "medium"
+  },
+  {
+    "id": 26,
+    "source": "data.items |> length",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 27,
+    "source": "data.items |> first",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 28,
+    "source": "data.items |> last",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 29,
+    "source": "data.items |> reverse",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 30,
+    "source": "data.items |> sortBy(.price)",
+    "category": "builtin-array",
+    "complexity": "medium"
+  },
+  {
+    "id": 31,
+    "source": "data.items |> unique",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 32,
+    "source": "data.items |> groupBy(.category)",
+    "category": "builtin-collection",
+    "complexity": "medium"
+  },
+  {
+    "id": 33,
+    "source": "data.items |> find(.active)",
+    "category": "builtin-collection",
+    "complexity": "medium"
+  },
+  {
+    "id": 34,
+    "source": "data.items |> some(.price > 100)",
+    "category": "builtin-collection",
+    "complexity": "medium"
+  },
+  {
+    "id": 35,
+    "source": "data.items |> every(.active)",
+    "category": "builtin-collection",
+    "complexity": "medium"
+  },
+  {
+    "id": 36,
+    "source": "data.user |> keys",
+    "category": "builtin-object",
+    "complexity": "simple"
+  },
+  {
+    "id": 37,
+    "source": "data.user |> values",
+    "category": "builtin-object",
+    "complexity": "simple"
+  },
+  {
+    "id": 38,
+    "source": "data.user.name |> upper",
+    "category": "builtin-string",
+    "complexity": "simple"
+  },
+  {
+    "id": 39,
+    "source": "data.user.name |> lower",
+    "category": "builtin-string",
+    "complexity": "simple"
+  },
+  {
+    "id": 40,
+    "source": "\"hello,world\" |> split(\",\")",
+    "category": "builtin-string",
+    "complexity": "simple"
+  },
+  {
+    "id": 41,
+    "source": "data.user.name |> startsWith(\"A\")",
+    "category": "builtin-string",
+    "complexity": "simple"
+  },
+  {
+    "id": 42,
+    "source": "state.value |> abs",
+    "category": "builtin-math",
+    "complexity": "simple"
+  },
+  {
+    "id": 43,
+    "source": "state.value |> ceil",
+    "category": "builtin-math",
+    "complexity": "simple"
+  },
+  {
+    "id": 44,
+    "source": "state.value |> floor",
+    "category": "builtin-math",
+    "complexity": "simple"
+  },
+  {
+    "id": 45,
+    "source": "state.value |> round",
+    "category": "builtin-math",
+    "complexity": "simple"
+  },
+  {
+    "id": 46,
+    "source": "[1, 5, 3, 9, 2] |> min",
+    "category": "builtin-math",
+    "complexity": "simple"
+  },
+  {
+    "id": 47,
+    "source": "[1, 5, 3, 9, 2] |> max",
+    "category": "builtin-math",
+    "complexity": "simple"
+  },
+  {
+    "id": 48,
+    "source": "data.items[-1].name",
+    "category": "negative-index",
+    "complexity": "simple"
+  },
+  {
+    "id": 49,
+    "source": "data.users[-2].email",
+    "category": "negative-index",
+    "complexity": "simple"
+  },
+  {
+    "id": 50,
+    "source": "`${state.user.name} (${state.user.age} years old)`",
+    "category": "template-literal",
+    "complexity": "medium"
+  },
+  {
+    "id": 51,
+    "source": "`Total: $${data.items |> map(.price) |> add}`",
+    "category": "template-literal",
+    "complexity": "complex"
+  },
+  {
+    "id": 52,
+    "source": "[...data.items[*].name, \"Extra\"]",
+    "category": "array-literal",
+    "complexity": "medium"
+  },
+  {
+    "id": 53,
+    "source": "[1, 2, 3] |> map((x) => x * 2)",
+    "category": "lambda",
+    "complexity": "simple"
+  },
+  {
+    "id": 54,
+    "source": "data.items |> reduce((acc, x) => acc + x.price, 0)",
+    "category": "lambda",
+    "complexity": "complex"
+  },
+  {
+    "id": 55,
+    "source": "data.users[.age > 18][*].name",
+    "category": "predicate",
+    "complexity": "complex"
+  },
+  {
+    "id": 56,
+    "source": "data..items[.active][*].name",
+    "category": "recursive-descent",
+    "complexity": "complex"
+  },
+  {
+    "id": 57,
+    "source": "data.items |> filter(.price > 50) |> sortBy(.price) |> reverse |> first",
+    "category": "pipe",
+    "complexity": "complex"
+  },
+  {
+    "id": 58,
+    "source": "data.items |> groupBy(.category) |> keys",
+    "category": "pipe",
+    "complexity": "complex"
+  },
+  {
+    "id": 59,
+    "source": "state.value > 0 ? state.value * 2 : state.value * -1",
+    "category": "ternary",
+    "complexity": "medium"
+  },
+  {
+    "id": 60,
+    "source": "state.user?.profile?.settings?.theme ?? \"default\"",
+    "category": "optional-chaining",
+    "complexity": "medium"
+  },
+  {
+    "id": 61,
+    "source": "{ name: state.user.name, email: state.user.email, active: true }",
+    "category": "object-literal",
+    "complexity": "medium"
+  },
+  {
+    "id": 62,
+    "source": "{ ...state.user, ...state.profile, updated: true }",
+    "category": "object-literal",
+    "complexity": "medium"
+  },
+  {
+    "id": 63,
+    "source": "data.items[0].tags[*] |> join(\", \")",
+    "category": "wildcard",
+    "complexity": "medium"
+  },
+  {
+    "id": 64,
+    "source": "data.users |> filter((u) => u.age > 21) |> sortBy((u) => u.name) |> map((u) => u.email)",
+    "category": "lambda",
+    "complexity": "complex"
+  },
+  {
+    "id": 65,
+    "source": "state.count >= 0 && state.count <= 100",
+    "category": "comparison",
+    "complexity": "medium"
+  },
+  {
+    "id": 66,
+    "source": "data.items |> map(.price * .qty) |> add",
+    "category": "pipe",
+    "complexity": "medium"
+  },
+  {
+    "id": 67,
+    "source": "[[1, 2], [3, 4], [5, 6]] |> flatten",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 68,
+    "source": "data.items |> map(.tags) |> flatten |> unique",
+    "category": "pipe",
+    "complexity": "complex"
+  },
+  {
+    "id": 69,
+    "source": "data.users[.email |> endsWith(\"@example.com\")]",
+    "category": "predicate",
+    "complexity": "complex"
+  },
+  {
+    "id": 70,
+    "source": "data.items[0]",
+    "category": "index-access",
+    "complexity": "simple"
+  },
+  {
+    "id": 71,
+    "source": "data.items[2]",
+    "category": "index-access",
+    "complexity": "simple"
+  },
+  {
+    "id": 72,
+    "source": "data.items[-1]",
+    "category": "index-access",
+    "complexity": "simple"
+  },
+  {
+    "id": 73,
+    "source": "data.items[1].tags[0]",
+    "category": "index-access",
+    "complexity": "medium"
+  },
+  {
+    "id": 74,
+    "source": "data.items[.qty > 1]",
+    "category": "predicate",
+    "complexity": "simple"
+  },
+  {
+    "id": 75,
+    "source": "data.items[.price < 100]",
+    "category": "predicate",
+    "complexity": "simple"
+  },
+  {
+    "id": 76,
+    "source": "data.items[.price >= 50 && .price <= 150]",
+    "category": "predicate",
+    "complexity": "medium"
+  },
+  {
+    "id": 77,
+    "source": "data.items[.name == \"Item 1\"]",
+    "category": "predicate",
+    "complexity": "simple"
+  },
+  {
+    "id": 78,
+    "source": "data.items[.active != false]",
+    "category": "predicate",
+    "complexity": "simple"
+  },
+  {
+    "id": 79,
+    "source": "data.users[.age < 18 || .age > 65]",
+    "category": "predicate",
+    "complexity": "medium"
+  },
+  {
+    "id": 80,
+    "source": "data.items[*][0]",
+    "category": "wildcard",
+    "complexity": "medium"
+  },
+  {
+    "id": 81,
+    "source": "data.users[*].posts[*].title",
+    "category": "wildcard",
+    "complexity": "complex"
+  },
+  {
+    "id": 82,
+    "source": "data..price |> add",
+    "category": "recursive-descent",
+    "complexity": "medium"
+  },
+  {
+    "id": 83,
+    "source": "data..items[*]",
+    "category": "recursive-descent",
+    "complexity": "medium"
+  },
+  {
+    "id": 84,
+    "source": "100 % 7",
+    "category": "arithmetic",
+    "complexity": "simple"
+  },
+  {
+    "id": 85,
+    "source": "state.count / 2",
+    "category": "arithmetic",
+    "complexity": "simple"
+  },
+  {
+    "id": 86,
+    "source": "state.value - 50",
+    "category": "arithmetic",
+    "complexity": "simple"
+  },
+  {
+    "id": 87,
+    "source": "state.a == state.b",
+    "category": "comparison",
+    "complexity": "simple"
+  },
+  {
+    "id": 88,
+    "source": "state.a != state.b",
+    "category": "comparison",
+    "complexity": "simple"
+  },
+  {
+    "id": 89,
+    "source": "state.a <= state.b",
+    "category": "comparison",
+    "complexity": "simple"
+  },
+  {
+    "id": 90,
+    "source": "state.a >= state.b",
+    "category": "comparison",
+    "complexity": "simple"
+  },
+  {
+    "id": 91,
+    "source": "data.items |> slice(0, 5)",
+    "category": "builtin-array",
+    "complexity": "medium"
+  },
+  {
+    "id": 92,
+    "source": "data.items |> slice(2)",
+    "category": "builtin-array",
+    "complexity": "simple"
+  },
+  {
+    "id": 93,
+    "source": "data.user |> pick([\"name\", \"email\"])",
+    "category": "builtin-object",
+    "complexity": "medium"
+  },
+  {
+    "id": 94,
+    "source": "data.user |> omit([\"password\", \"secret\"])",
+    "category": "builtin-object",
+    "complexity": "medium"
+  },
+  {
+    "id": 95,
+    "source": "\"   hello world   \" |> trim",
+    "category": "builtin-string",
+    "complexity": "simple"
+  },
+  {
+    "id": 96,
+    "source": "\"hello world\" |> replace(\"world\", \"universe\")",
+    "category": "builtin-string",
+    "complexity": "medium"
+  },
+  {
+    "id": 97,
+    "source": "data.items |> map(.price) |> avg",
+    "category": "builtin-math",
+    "complexity": "medium"
+  },
+  {
+    "id": 98,
+    "source": "data.items |> map(.qty) |> sum",
+    "category": "builtin-math",
+    "complexity": "medium"
+  },
+  {
+    "id": 99,
+    "source": "!state.disabled",
+    "category": "logical",
+    "complexity": "simple"
   }
 ]

@@ -628,5 +628,2519 @@
         }
       ]
     }
+  },
+  "20": {
+    "source": "state.count + 10",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "+",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "count"
+      },
+      "right": {
+        "type": "Literal",
+        "value": 10,
+        "raw": "10"
+      }
+    }
+  },
+  "21": {
+    "source": "data.items[0].price * data.items[0].qty",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "*",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "IndexAccess",
+          "object": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "items"
+          },
+          "index": {
+            "type": "Literal",
+            "value": 0,
+            "raw": "0"
+          }
+        },
+        "property": "price"
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "IndexAccess",
+          "object": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "items"
+          },
+          "index": {
+            "type": "Literal",
+            "value": 0,
+            "raw": "0"
+          }
+        },
+        "property": "qty"
+      }
+    }
+  },
+  "22": {
+    "source": "(state.value + 100) * 0.8 - 20",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "-",
+      "left": {
+        "type": "BinaryOp",
+        "operator": "*",
+        "left": {
+          "type": "BinaryOp",
+          "operator": "+",
+          "left": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "state"
+            },
+            "property": "value"
+          },
+          "right": {
+            "type": "Literal",
+            "value": 100,
+            "raw": "100"
+          }
+        },
+        "right": {
+          "type": "Literal",
+          "value": 0.8,
+          "raw": "0.8"
+        }
+      },
+      "right": {
+        "type": "Literal",
+        "value": 20,
+        "raw": "20"
+      }
+    }
+  },
+  "23": {
+    "source": "state.active && state.enabled",
+    "ast": {
+      "type": "LogicalOp",
+      "operator": "&&",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "active"
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "enabled"
+      }
+    }
+  },
+  "24": {
+    "source": "!state.disabled || state.override",
+    "ast": {
+      "type": "LogicalOp",
+      "operator": "||",
+      "left": {
+        "type": "UnaryOp",
+        "operator": "!",
+        "operand": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "disabled"
+        }
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "override"
+      }
+    }
+  },
+  "25": {
+    "source": "(state.count > 0 && state.active) || state.force",
+    "ast": {
+      "type": "LogicalOp",
+      "operator": "||",
+      "left": {
+        "type": "LogicalOp",
+        "operator": "&&",
+        "left": {
+          "type": "BinaryOp",
+          "operator": ">",
+          "left": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "state"
+            },
+            "property": "count"
+          },
+          "right": {
+            "type": "Literal",
+            "value": 0,
+            "raw": "0"
+          }
+        },
+        "right": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "active"
+        }
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "force"
+      }
+    }
+  },
+  "26": {
+    "source": "data.items |> length",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "length",
+      "args": []
+    }
+  },
+  "27": {
+    "source": "data.items |> first",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "first",
+      "args": []
+    }
+  },
+  "28": {
+    "source": "data.items |> last",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "last",
+      "args": []
+    }
+  },
+  "29": {
+    "source": "data.items |> reverse",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "reverse",
+      "args": []
+    }
+  },
+  "30": {
+    "source": "data.items |> sortBy(.price)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "sortBy",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "$it"
+          ],
+          "body": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "price"
+          }
+        }
+      ]
+    }
+  },
+  "31": {
+    "source": "data.items |> unique",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "unique",
+      "args": []
+    }
+  },
+  "32": {
+    "source": "data.items |> groupBy(.category)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "groupBy",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "$it"
+          ],
+          "body": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "category"
+          }
+        }
+      ]
+    }
+  },
+  "33": {
+    "source": "data.items |> find(.active)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "find",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "$it"
+          ],
+          "body": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "active"
+          }
+        }
+      ]
+    }
+  },
+  "34": {
+    "source": "data.items |> some(.price > 100)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "some",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "$it"
+          ],
+          "body": {
+            "type": "BinaryOp",
+            "operator": ">",
+            "left": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "price"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 100,
+              "raw": "100"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "35": {
+    "source": "data.items |> every(.active)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "every",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "$it"
+          ],
+          "body": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "active"
+          }
+        }
+      ]
+    }
+  },
+  "36": {
+    "source": "data.user |> keys",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "user"
+      },
+      "callee": "keys",
+      "args": []
+    }
+  },
+  "37": {
+    "source": "data.user |> values",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "user"
+      },
+      "callee": "values",
+      "args": []
+    }
+  },
+  "38": {
+    "source": "data.user.name |> upper",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "user"
+        },
+        "property": "name"
+      },
+      "callee": "upper",
+      "args": []
+    }
+  },
+  "39": {
+    "source": "data.user.name |> lower",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "user"
+        },
+        "property": "name"
+      },
+      "callee": "lower",
+      "args": []
+    }
+  },
+  "40": {
+    "source": "\"hello,world\" |> split(\",\")",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Literal",
+        "value": "hello,world",
+        "raw": "\"hello,world\""
+      },
+      "callee": "split",
+      "args": [
+        {
+          "type": "Literal",
+          "value": ",",
+          "raw": "\",\""
+        }
+      ]
+    }
+  },
+  "41": {
+    "source": "data.user.name |> startsWith(\"A\")",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "user"
+        },
+        "property": "name"
+      },
+      "callee": "startsWith",
+      "args": [
+        {
+          "type": "Literal",
+          "value": "A",
+          "raw": "\"A\""
+        }
+      ]
+    }
+  },
+  "42": {
+    "source": "state.value |> abs",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "value"
+      },
+      "callee": "abs",
+      "args": []
+    }
+  },
+  "43": {
+    "source": "state.value |> ceil",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "value"
+      },
+      "callee": "ceil",
+      "args": []
+    }
+  },
+  "44": {
+    "source": "state.value |> floor",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "value"
+      },
+      "callee": "floor",
+      "args": []
+    }
+  },
+  "45": {
+    "source": "state.value |> round",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "value"
+      },
+      "callee": "round",
+      "args": []
+    }
+  },
+  "46": {
+    "source": "[1, 5, 3, 9, 2] |> min",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "ArrayLiteral",
+        "elements": [
+          {
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          },
+          {
+            "type": "Literal",
+            "value": 5,
+            "raw": "5"
+          },
+          {
+            "type": "Literal",
+            "value": 3,
+            "raw": "3"
+          },
+          {
+            "type": "Literal",
+            "value": 9,
+            "raw": "9"
+          },
+          {
+            "type": "Literal",
+            "value": 2,
+            "raw": "2"
+          }
+        ]
+      },
+      "callee": "min",
+      "args": []
+    }
+  },
+  "47": {
+    "source": "[1, 5, 3, 9, 2] |> max",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "ArrayLiteral",
+        "elements": [
+          {
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          },
+          {
+            "type": "Literal",
+            "value": 5,
+            "raw": "5"
+          },
+          {
+            "type": "Literal",
+            "value": 3,
+            "raw": "3"
+          },
+          {
+            "type": "Literal",
+            "value": 9,
+            "raw": "9"
+          },
+          {
+            "type": "Literal",
+            "value": 2,
+            "raw": "2"
+          }
+        ]
+      },
+      "callee": "max",
+      "args": []
+    }
+  },
+  "48": {
+    "source": "data.items[-1].name",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "IndexAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        },
+        "index": {
+          "type": "UnaryOp",
+          "operator": "-",
+          "operand": {
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          }
+        }
+      },
+      "property": "name"
+    }
+  },
+  "49": {
+    "source": "data.users[-2].email",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "IndexAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "users"
+        },
+        "index": {
+          "type": "UnaryOp",
+          "operator": "-",
+          "operand": {
+            "type": "Literal",
+            "value": 2,
+            "raw": "2"
+          }
+        }
+      },
+      "property": "email"
+    }
+  },
+  "50": {
+    "source": "`${state.user.name} (${state.user.age} years old)`",
+    "ast": {
+      "type": "TemplateLiteral",
+      "parts": [
+        {
+          "type": "expression",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            },
+            "property": "name"
+          }
+        },
+        {
+          "type": "string",
+          "value": " ("
+        },
+        {
+          "type": "expression",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            },
+            "property": "age"
+          }
+        },
+        {
+          "type": "string",
+          "value": " years old)"
+        }
+      ]
+    }
+  },
+  "51": {
+    "source": "`Total: $${data.items |> map(.price) |> add}`",
+    "ast": {
+      "type": "TemplateLiteral",
+      "parts": [
+        {
+          "type": "string",
+          "value": "Total: $"
+        },
+        {
+          "type": "expression",
+          "value": {
+            "type": "Pipe",
+            "value": {
+              "type": "Pipe",
+              "value": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "data"
+                },
+                "property": "items"
+              },
+              "callee": "map",
+              "args": [
+                {
+                  "type": "Lambda",
+                  "params": [
+                    "$it"
+                  ],
+                  "body": {
+                    "type": "MemberAccess",
+                    "object": {
+                      "type": "Identifier",
+                      "name": "$it"
+                    },
+                    "property": "price"
+                  }
+                }
+              ]
+            },
+            "callee": "add",
+            "args": []
+          }
+        }
+      ]
+    }
+  },
+  "52": {
+    "source": "[...data.items[*].name, \"Extra\"]",
+    "ast": {
+      "type": "ArrayLiteral",
+      "elements": [
+        {
+          "type": "SpreadElement",
+          "argument": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "WildcardIndex",
+              "object": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "data"
+                },
+                "property": "items"
+              }
+            },
+            "property": "name"
+          }
+        },
+        {
+          "type": "Literal",
+          "value": "Extra",
+          "raw": "\"Extra\""
+        }
+      ]
+    }
+  },
+  "53": {
+    "source": "[1, 2, 3] |> map((x) => x * 2)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "ArrayLiteral",
+        "elements": [
+          {
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          },
+          {
+            "type": "Literal",
+            "value": 2,
+            "raw": "2"
+          },
+          {
+            "type": "Literal",
+            "value": 3,
+            "raw": "3"
+          }
+        ]
+      },
+      "callee": "map",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "x"
+          ],
+          "body": {
+            "type": "BinaryOp",
+            "operator": "*",
+            "left": {
+              "type": "Identifier",
+              "name": "x"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 2,
+              "raw": "2"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "54": {
+    "source": "data.items |> reduce((acc, x) => acc + x.price, 0)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "reduce",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "acc",
+            "x"
+          ],
+          "body": {
+            "type": "BinaryOp",
+            "operator": "+",
+            "left": {
+              "type": "Identifier",
+              "name": "acc"
+            },
+            "right": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "x"
+              },
+              "property": "price"
+            }
+          }
+        },
+        {
+          "type": "Literal",
+          "value": 0,
+          "raw": "0"
+        }
+      ]
+    }
+  },
+  "55": {
+    "source": "data.users[.age > 18][*].name",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "PredicateIndex",
+          "object": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "users"
+          },
+          "predicate": {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "BinaryOp",
+              "operator": ">",
+              "left": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "$it"
+                },
+                "property": "age"
+              },
+              "right": {
+                "type": "Literal",
+                "value": 18,
+                "raw": "18"
+              }
+            }
+          }
+        }
+      },
+      "property": "name"
+    }
+  },
+  "56": {
+    "source": "data..items[.active][*].name",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "PredicateIndex",
+          "object": {
+            "type": "RecursiveDescent",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "items",
+            "optional": false
+          },
+          "predicate": {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "active"
+            }
+          }
+        }
+      },
+      "property": "name"
+    }
+  },
+  "57": {
+    "source": "data.items |> filter(.price > 50) |> sortBy(.price) |> reverse |> first",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "Pipe",
+          "value": {
+            "type": "Pipe",
+            "value": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "data"
+              },
+              "property": "items"
+            },
+            "callee": "filter",
+            "args": [
+              {
+                "type": "Lambda",
+                "params": [
+                  "$it"
+                ],
+                "body": {
+                  "type": "BinaryOp",
+                  "operator": ">",
+                  "left": {
+                    "type": "MemberAccess",
+                    "object": {
+                      "type": "Identifier",
+                      "name": "$it"
+                    },
+                    "property": "price"
+                  },
+                  "right": {
+                    "type": "Literal",
+                    "value": 50,
+                    "raw": "50"
+                  }
+                }
+              }
+            ]
+          },
+          "callee": "sortBy",
+          "args": [
+            {
+              "type": "Lambda",
+              "params": [
+                "$it"
+              ],
+              "body": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "$it"
+                },
+                "property": "price"
+              }
+            }
+          ]
+        },
+        "callee": "reverse",
+        "args": []
+      },
+      "callee": "first",
+      "args": []
+    }
+  },
+  "58": {
+    "source": "data.items |> groupBy(.category) |> keys",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        },
+        "callee": "groupBy",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "category"
+            }
+          }
+        ]
+      },
+      "callee": "keys",
+      "args": []
+    }
+  },
+  "59": {
+    "source": "state.value > 0 ? state.value * 2 : state.value * -1",
+    "ast": {
+      "type": "Ternary",
+      "condition": {
+        "type": "BinaryOp",
+        "operator": ">",
+        "left": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "value"
+        },
+        "right": {
+          "type": "Literal",
+          "value": 0,
+          "raw": "0"
+        }
+      },
+      "consequent": {
+        "type": "BinaryOp",
+        "operator": "*",
+        "left": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "value"
+        },
+        "right": {
+          "type": "Literal",
+          "value": 2,
+          "raw": "2"
+        }
+      },
+      "alternate": {
+        "type": "BinaryOp",
+        "operator": "*",
+        "left": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "value"
+        },
+        "right": {
+          "type": "UnaryOp",
+          "operator": "-",
+          "operand": {
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          }
+        }
+      }
+    }
+  },
+  "60": {
+    "source": "state.user?.profile?.settings?.theme ?? \"default\"",
+    "ast": {
+      "type": "NullCoalescing",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            },
+            "property": "profile",
+            "optional": true
+          },
+          "property": "settings",
+          "optional": true
+        },
+        "property": "theme",
+        "optional": true
+      },
+      "right": {
+        "type": "Literal",
+        "value": "default",
+        "raw": "\"default\""
+      }
+    }
+  },
+  "61": {
+    "source": "{ name: state.user.name, email: state.user.email, active: true }",
+    "ast": {
+      "type": "ObjectLiteral",
+      "properties": [
+        {
+          "key": "name",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            },
+            "property": "name"
+          },
+          "shorthand": false
+        },
+        {
+          "key": "email",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            },
+            "property": "email"
+          },
+          "shorthand": false
+        },
+        {
+          "key": "active",
+          "value": {
+            "type": "Literal",
+            "value": true,
+            "raw": "true"
+          },
+          "shorthand": false
+        }
+      ]
+    }
+  },
+  "62": {
+    "source": "{ ...state.user, ...state.profile, updated: true }",
+    "ast": {
+      "type": "ObjectLiteral",
+      "properties": [
+        {
+          "key": "__spread__",
+          "value": {
+            "type": "SpreadElement",
+            "argument": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "user"
+            }
+          },
+          "shorthand": false
+        },
+        {
+          "key": "__spread__",
+          "value": {
+            "type": "SpreadElement",
+            "argument": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "state"
+              },
+              "property": "profile"
+            }
+          },
+          "shorthand": false
+        },
+        {
+          "key": "updated",
+          "value": {
+            "type": "Literal",
+            "value": true,
+            "raw": "true"
+          },
+          "shorthand": false
+        }
+      ]
+    }
+  },
+  "63": {
+    "source": "data.items[0].tags[*] |> join(\", \")",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "IndexAccess",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "data"
+              },
+              "property": "items"
+            },
+            "index": {
+              "type": "Literal",
+              "value": 0,
+              "raw": "0"
+            }
+          },
+          "property": "tags"
+        }
+      },
+      "callee": "join",
+      "args": [
+        {
+          "type": "Literal",
+          "value": ", ",
+          "raw": "\", \""
+        }
+      ]
+    }
+  },
+  "64": {
+    "source": "data.users |> filter((u) => u.age > 21) |> sortBy((u) => u.name) |> map((u) => u.email)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "Pipe",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "users"
+          },
+          "callee": "filter",
+          "args": [
+            {
+              "type": "Lambda",
+              "params": [
+                "u"
+              ],
+              "body": {
+                "type": "BinaryOp",
+                "operator": ">",
+                "left": {
+                  "type": "MemberAccess",
+                  "object": {
+                    "type": "Identifier",
+                    "name": "u"
+                  },
+                  "property": "age"
+                },
+                "right": {
+                  "type": "Literal",
+                  "value": 21,
+                  "raw": "21"
+                }
+              }
+            }
+          ]
+        },
+        "callee": "sortBy",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "u"
+            ],
+            "body": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "u"
+              },
+              "property": "name"
+            }
+          }
+        ]
+      },
+      "callee": "map",
+      "args": [
+        {
+          "type": "Lambda",
+          "params": [
+            "u"
+          ],
+          "body": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "u"
+            },
+            "property": "email"
+          }
+        }
+      ]
+    }
+  },
+  "65": {
+    "source": "state.count >= 0 && state.count <= 100",
+    "ast": {
+      "type": "LogicalOp",
+      "operator": "&&",
+      "left": {
+        "type": "BinaryOp",
+        "operator": ">=",
+        "left": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "count"
+        },
+        "right": {
+          "type": "Literal",
+          "value": 0,
+          "raw": "0"
+        }
+      },
+      "right": {
+        "type": "BinaryOp",
+        "operator": "<=",
+        "left": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "state"
+          },
+          "property": "count"
+        },
+        "right": {
+          "type": "Literal",
+          "value": 100,
+          "raw": "100"
+        }
+      }
+    }
+  },
+  "66": {
+    "source": "data.items |> map(.price * .qty) |> add",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        },
+        "callee": "map",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "BinaryOp",
+              "operator": "*",
+              "left": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "$it"
+                },
+                "property": "price"
+              },
+              "right": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "$it"
+                },
+                "property": "qty"
+              }
+            }
+          }
+        ]
+      },
+      "callee": "add",
+      "args": []
+    }
+  },
+  "67": {
+    "source": "[[1, 2], [3, 4], [5, 6]] |> flatten",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "ArrayLiteral",
+        "elements": [
+          {
+            "type": "ArrayLiteral",
+            "elements": [
+              {
+                "type": "Literal",
+                "value": 1,
+                "raw": "1"
+              },
+              {
+                "type": "Literal",
+                "value": 2,
+                "raw": "2"
+              }
+            ]
+          },
+          {
+            "type": "ArrayLiteral",
+            "elements": [
+              {
+                "type": "Literal",
+                "value": 3,
+                "raw": "3"
+              },
+              {
+                "type": "Literal",
+                "value": 4,
+                "raw": "4"
+              }
+            ]
+          },
+          {
+            "type": "ArrayLiteral",
+            "elements": [
+              {
+                "type": "Literal",
+                "value": 5,
+                "raw": "5"
+              },
+              {
+                "type": "Literal",
+                "value": 6,
+                "raw": "6"
+              }
+            ]
+          }
+        ]
+      },
+      "callee": "flatten",
+      "args": []
+    }
+  },
+  "68": {
+    "source": "data.items |> map(.tags) |> flatten |> unique",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "Pipe",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "items"
+          },
+          "callee": "map",
+          "args": [
+            {
+              "type": "Lambda",
+              "params": [
+                "$it"
+              ],
+              "body": {
+                "type": "MemberAccess",
+                "object": {
+                  "type": "Identifier",
+                  "name": "$it"
+                },
+                "property": "tags"
+              }
+            }
+          ]
+        },
+        "callee": "flatten",
+        "args": []
+      },
+      "callee": "unique",
+      "args": []
+    }
+  },
+  "69": {
+    "source": "data.users[.email |> endsWith(\"@example.com\")]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "users"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "Pipe",
+          "value": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "email"
+          },
+          "callee": "endsWith",
+          "args": [
+            {
+              "type": "Literal",
+              "value": "@example.com",
+              "raw": "\"@example.com\""
+            }
+          ]
+        }
+      }
+    }
+  },
+  "70": {
+    "source": "data.items[0]",
+    "ast": {
+      "type": "IndexAccess",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "index": {
+        "type": "Literal",
+        "value": 0,
+        "raw": "0"
+      }
+    }
+  },
+  "71": {
+    "source": "data.items[2]",
+    "ast": {
+      "type": "IndexAccess",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "index": {
+        "type": "Literal",
+        "value": 2,
+        "raw": "2"
+      }
+    }
+  },
+  "72": {
+    "source": "data.items[-1]",
+    "ast": {
+      "type": "IndexAccess",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "index": {
+        "type": "UnaryOp",
+        "operator": "-",
+        "operand": {
+          "type": "Literal",
+          "value": 1,
+          "raw": "1"
+        }
+      }
+    }
+  },
+  "73": {
+    "source": "data.items[1].tags[0]",
+    "ast": {
+      "type": "IndexAccess",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "IndexAccess",
+          "object": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "data"
+            },
+            "property": "items"
+          },
+          "index": {
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          }
+        },
+        "property": "tags"
+      },
+      "index": {
+        "type": "Literal",
+        "value": 0,
+        "raw": "0"
+      }
+    }
+  },
+  "74": {
+    "source": "data.items[.qty > 1]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "BinaryOp",
+          "operator": ">",
+          "left": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "qty"
+          },
+          "right": {
+            "type": "Literal",
+            "value": 1,
+            "raw": "1"
+          }
+        }
+      }
+    }
+  },
+  "75": {
+    "source": "data.items[.price < 100]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "BinaryOp",
+          "operator": "<",
+          "left": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "price"
+          },
+          "right": {
+            "type": "Literal",
+            "value": 100,
+            "raw": "100"
+          }
+        }
+      }
+    }
+  },
+  "76": {
+    "source": "data.items[.price >= 50 && .price <= 150]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "LogicalOp",
+          "operator": "&&",
+          "left": {
+            "type": "BinaryOp",
+            "operator": ">=",
+            "left": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "price"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 50,
+              "raw": "50"
+            }
+          },
+          "right": {
+            "type": "BinaryOp",
+            "operator": "<=",
+            "left": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "price"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 150,
+              "raw": "150"
+            }
+          }
+        }
+      }
+    }
+  },
+  "77": {
+    "source": "data.items[.name == \"Item 1\"]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "BinaryOp",
+          "operator": "==",
+          "left": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "name"
+          },
+          "right": {
+            "type": "Literal",
+            "value": "Item 1",
+            "raw": "\"Item 1\""
+          }
+        }
+      }
+    }
+  },
+  "78": {
+    "source": "data.items[.active != false]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "BinaryOp",
+          "operator": "!=",
+          "left": {
+            "type": "MemberAccess",
+            "object": {
+              "type": "Identifier",
+              "name": "$it"
+            },
+            "property": "active"
+          },
+          "right": {
+            "type": "Literal",
+            "value": false,
+            "raw": "false"
+          }
+        }
+      }
+    }
+  },
+  "79": {
+    "source": "data.users[.age < 18 || .age > 65]",
+    "ast": {
+      "type": "PredicateIndex",
+      "object": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "users"
+      },
+      "predicate": {
+        "type": "Lambda",
+        "params": [
+          "$it"
+        ],
+        "body": {
+          "type": "LogicalOp",
+          "operator": "||",
+          "left": {
+            "type": "BinaryOp",
+            "operator": "<",
+            "left": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "age"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 18,
+              "raw": "18"
+            }
+          },
+          "right": {
+            "type": "BinaryOp",
+            "operator": ">",
+            "left": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "age"
+            },
+            "right": {
+              "type": "Literal",
+              "value": 65,
+              "raw": "65"
+            }
+          }
+        }
+      }
+    }
+  },
+  "80": {
+    "source": "data.items[*][0]",
+    "ast": {
+      "type": "IndexAccess",
+      "object": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        }
+      },
+      "index": {
+        "type": "Literal",
+        "value": 0,
+        "raw": "0"
+      }
+    }
+  },
+  "81": {
+    "source": "data.users[*].posts[*].title",
+    "ast": {
+      "type": "MemberAccess",
+      "object": {
+        "type": "WildcardIndex",
+        "object": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "WildcardIndex",
+            "object": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "data"
+              },
+              "property": "users"
+            }
+          },
+          "property": "posts"
+        }
+      },
+      "property": "title"
+    }
+  },
+  "82": {
+    "source": "data..price |> add",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "RecursiveDescent",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "price",
+        "optional": false
+      },
+      "callee": "add",
+      "args": []
+    }
+  },
+  "83": {
+    "source": "data..items[*]",
+    "ast": {
+      "type": "WildcardIndex",
+      "object": {
+        "type": "RecursiveDescent",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items",
+        "optional": false
+      }
+    }
+  },
+  "84": {
+    "source": "100 % 7",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "%",
+      "left": {
+        "type": "Literal",
+        "value": 100,
+        "raw": "100"
+      },
+      "right": {
+        "type": "Literal",
+        "value": 7,
+        "raw": "7"
+      }
+    }
+  },
+  "85": {
+    "source": "state.count / 2",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "/",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "count"
+      },
+      "right": {
+        "type": "Literal",
+        "value": 2,
+        "raw": "2"
+      }
+    }
+  },
+  "86": {
+    "source": "state.value - 50",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "-",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "value"
+      },
+      "right": {
+        "type": "Literal",
+        "value": 50,
+        "raw": "50"
+      }
+    }
+  },
+  "87": {
+    "source": "state.a == state.b",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "==",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "a"
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "b"
+      }
+    }
+  },
+  "88": {
+    "source": "state.a != state.b",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "!=",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "a"
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "b"
+      }
+    }
+  },
+  "89": {
+    "source": "state.a <= state.b",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": "<=",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "a"
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "b"
+      }
+    }
+  },
+  "90": {
+    "source": "state.a >= state.b",
+    "ast": {
+      "type": "BinaryOp",
+      "operator": ">=",
+      "left": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "a"
+      },
+      "right": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "b"
+      }
+    }
+  },
+  "91": {
+    "source": "data.items |> slice(0, 5)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "slice",
+      "args": [
+        {
+          "type": "Literal",
+          "value": 0,
+          "raw": "0"
+        },
+        {
+          "type": "Literal",
+          "value": 5,
+          "raw": "5"
+        }
+      ]
+    }
+  },
+  "92": {
+    "source": "data.items |> slice(2)",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "items"
+      },
+      "callee": "slice",
+      "args": [
+        {
+          "type": "Literal",
+          "value": 2,
+          "raw": "2"
+        }
+      ]
+    }
+  },
+  "93": {
+    "source": "data.user |> pick([\"name\", \"email\"])",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "user"
+      },
+      "callee": "pick",
+      "args": [
+        {
+          "type": "ArrayLiteral",
+          "elements": [
+            {
+              "type": "Literal",
+              "value": "name",
+              "raw": "\"name\""
+            },
+            {
+              "type": "Literal",
+              "value": "email",
+              "raw": "\"email\""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "94": {
+    "source": "data.user |> omit([\"password\", \"secret\"])",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "data"
+        },
+        "property": "user"
+      },
+      "callee": "omit",
+      "args": [
+        {
+          "type": "ArrayLiteral",
+          "elements": [
+            {
+              "type": "Literal",
+              "value": "password",
+              "raw": "\"password\""
+            },
+            {
+              "type": "Literal",
+              "value": "secret",
+              "raw": "\"secret\""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "95": {
+    "source": "\"   hello world   \" |> trim",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Literal",
+        "value": "   hello world   ",
+        "raw": "\"   hello world   \""
+      },
+      "callee": "trim",
+      "args": []
+    }
+  },
+  "96": {
+    "source": "\"hello world\" |> replace(\"world\", \"universe\")",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Literal",
+        "value": "hello world",
+        "raw": "\"hello world\""
+      },
+      "callee": "replace",
+      "args": [
+        {
+          "type": "Literal",
+          "value": "world",
+          "raw": "\"world\""
+        },
+        {
+          "type": "Literal",
+          "value": "universe",
+          "raw": "\"universe\""
+        }
+      ]
+    }
+  },
+  "97": {
+    "source": "data.items |> map(.price) |> avg",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        },
+        "callee": "map",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "price"
+            }
+          }
+        ]
+      },
+      "callee": "avg",
+      "args": []
+    }
+  },
+  "98": {
+    "source": "data.items |> map(.qty) |> sum",
+    "ast": {
+      "type": "Pipe",
+      "value": {
+        "type": "Pipe",
+        "value": {
+          "type": "MemberAccess",
+          "object": {
+            "type": "Identifier",
+            "name": "data"
+          },
+          "property": "items"
+        },
+        "callee": "map",
+        "args": [
+          {
+            "type": "Lambda",
+            "params": [
+              "$it"
+            ],
+            "body": {
+              "type": "MemberAccess",
+              "object": {
+                "type": "Identifier",
+                "name": "$it"
+              },
+              "property": "qty"
+            }
+          }
+        ]
+      },
+      "callee": "sum",
+      "args": []
+    }
+  },
+  "99": {
+    "source": "!state.disabled",
+    "ast": {
+      "type": "UnaryOp",
+      "operator": "!",
+      "operand": {
+        "type": "MemberAccess",
+        "object": {
+          "type": "Identifier",
+          "name": "state"
+        },
+        "property": "disabled"
+      }
+    }
   }
 }
