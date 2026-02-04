@@ -53,7 +53,7 @@ export default function PlaygroundPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image src="/vlot-logo.svg" alt="Vlot" width={40} height={40} className="dark:invert" />
-            <h1 className="text-4xl font-bold">Vlot Playground</h1>
+            <h1 className="text-sm font-bold text-primary">VLOT</h1>
           </div>
           <div className="flex gap-2">
             <Button variant="default" className="gap-2">
@@ -68,10 +68,6 @@ export default function PlaygroundPage() {
             </Button>
           </div>
         </div>
-        <p className="text-muted-foreground">
-          Explore and test Vlot expressions with real-time evaluation and bytecode inspection
-        </p>
-
         <Separator />
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
