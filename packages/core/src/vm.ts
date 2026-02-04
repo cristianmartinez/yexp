@@ -356,6 +356,123 @@ const BUILTINS = new Map<string, BuiltinFn>([
     },
   ],
   [
+    'split',
+    (v, delimiter) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'split requires a string');
+      if (typeof delimiter !== 'string') {
+        return makeError('TYPE_ERROR', 'split requires a string delimiter');
+      }
+      return v.split(delimiter);
+    },
+  ],
+  [
+    'replace',
+    (v, search, replacement) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'replace requires a string');
+      if (typeof search !== 'string') {
+        return makeError('TYPE_ERROR', 'replace requires a string search value');
+      }
+      if (typeof replacement !== 'string') {
+        return makeError('TYPE_ERROR', 'replace requires a string replacement value');
+      }
+      return v.replace(search, replacement);
+    },
+  ],
+  [
+    'replaceAll',
+    (v, search, replacement) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'replaceAll requires a string');
+      if (typeof search !== 'string') {
+        return makeError('TYPE_ERROR', 'replaceAll requires a string search value');
+      }
+      if (typeof replacement !== 'string') {
+        return makeError('TYPE_ERROR', 'replaceAll requires a string replacement value');
+      }
+      return v.replaceAll(search, replacement);
+    },
+  ],
+  [
+    'slice',
+    (v, start, end) => {
+      if (typeof v === 'string') {
+        if (typeof start !== 'number') {
+          return makeError('TYPE_ERROR', 'slice requires a number for start');
+        }
+        return v.slice(start, end !== undefined && typeof end === 'number' ? end : undefined);
+      }
+      if (Array.isArray(v)) {
+        if (typeof start !== 'number') {
+          return makeError('TYPE_ERROR', 'slice requires a number for start');
+        }
+        return v.slice(start, end !== undefined && typeof end === 'number' ? end : undefined);
+      }
+      return makeError('TYPE_ERROR', 'slice requires a string or array');
+    },
+  ],
+  [
+    'substring',
+    (v, start, end) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'substring requires a string');
+      if (typeof start !== 'number') {
+        return makeError('TYPE_ERROR', 'substring requires a number for start');
+      }
+      return v.substring(start, end !== undefined && typeof end === 'number' ? end : undefined);
+    },
+  ],
+  [
+    'trim',
+    (v) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'trim requires a string');
+      return v.trim();
+    },
+  ],
+  [
+    'trimStart',
+    (v) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'trimStart requires a string');
+      return v.trimStart();
+    },
+  ],
+  [
+    'trimEnd',
+    (v) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'trimEnd requires a string');
+      return v.trimEnd();
+    },
+  ],
+  [
+    'padStart',
+    (v, length, fillString) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'padStart requires a string');
+      if (typeof length !== 'number') {
+        return makeError('TYPE_ERROR', 'padStart requires a number for length');
+      }
+      const fill = typeof fillString === 'string' ? fillString : ' ';
+      return v.padStart(length, fill);
+    },
+  ],
+  [
+    'padEnd',
+    (v, length, fillString) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'padEnd requires a string');
+      if (typeof length !== 'number') {
+        return makeError('TYPE_ERROR', 'padEnd requires a number for length');
+      }
+      const fill = typeof fillString === 'string' ? fillString : ' ';
+      return v.padEnd(length, fill);
+    },
+  ],
+  [
+    'repeat',
+    (v, count) => {
+      if (typeof v !== 'string') return makeError('TYPE_ERROR', 'repeat requires a string');
+      if (typeof count !== 'number') {
+        return makeError('TYPE_ERROR', 'repeat requires a number for count');
+      }
+      return v.repeat(count);
+    },
+  ],
+  [
     'first',
     (v) => {
       if (!Array.isArray(v)) return makeError('TYPE_ERROR', 'first requires an array');

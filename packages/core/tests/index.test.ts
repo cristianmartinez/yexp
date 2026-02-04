@@ -474,6 +474,14 @@ describe('integration', () => {
   });
 
   describe('string functions', () => {
+    test('single quote strings work', () => {
+      expect(run("'hello world'", ctx())).toBe('hello world');
+    });
+
+    test('single and double quotes are equivalent', () => {
+      expect(run("'hello'", ctx())).toBe(run('"hello"', ctx()));
+    });
+
     test('join with separator', () => {
       expect(run('data.items |> join(", ")', ctx({}, { items: ['a', 'b', 'c'] }))).toBe('a, b, c');
     });
@@ -536,6 +544,78 @@ describe('integration', () => {
 
     test('rindex returns null when not found', () => {
       expect(run('"hello world" |> rindex("foo")', ctx())).toBe(null);
+    });
+
+    test('split splits string by delimiter', () => {
+      expect(run('"a,b,c" |> split(",")', ctx())).toEqual(['a', 'b', 'c']);
+    });
+
+    test('split with space delimiter', () => {
+      expect(run('"hello world test" |> split(" ")', ctx())).toEqual(['hello', 'world', 'test']);
+    });
+
+    test('replace replaces first occurrence', () => {
+      expect(run('"hello world hello" |> replace("hello", "hi")', ctx())).toBe('hi world hello');
+    });
+
+    test('replaceAll replaces all occurrences', () => {
+      expect(run('"hello world hello" |> replaceAll("hello", "hi")', ctx())).toBe('hi world hi');
+    });
+
+    test('slice extracts substring', () => {
+      expect(run('"hello world" |> slice(0, 5)', ctx())).toBe('hello');
+    });
+
+    test('slice with negative indices', () => {
+      expect(run('"hello world" |> slice(-5)', ctx())).toBe('world');
+    });
+
+    test('slice works on arrays', () => {
+      expect(run('data.items |> slice(1, 3)', ctx({}, { items: [1, 2, 3, 4, 5] }))).toEqual([2, 3]);
+    });
+
+    test('substring extracts substring', () => {
+      expect(run('"hello world" |> substring(6, 11)', ctx())).toBe('world');
+    });
+
+    test('substring with only start', () => {
+      expect(run('"hello world" |> substring(6)', ctx())).toBe('world');
+    });
+
+    test('trim removes whitespace', () => {
+      expect(run('"  hello  " |> trim', ctx())).toBe('hello');
+    });
+
+    test('trimStart removes leading whitespace', () => {
+      expect(run('"  hello  " |> trimStart', ctx())).toBe('hello  ');
+    });
+
+    test('trimEnd removes trailing whitespace', () => {
+      expect(run('"  hello  " |> trimEnd', ctx())).toBe('  hello');
+    });
+
+    test('padStart pads string to length', () => {
+      expect(run('"5" |> padStart(3, "0")', ctx())).toBe('005');
+    });
+
+    test('padStart with default fill character', () => {
+      expect(run('"hi" |> padStart(5)', ctx())).toBe('   hi');
+    });
+
+    test('padEnd pads string to length', () => {
+      expect(run('"5" |> padEnd(3, "0")', ctx())).toBe('500');
+    });
+
+    test('padEnd with default fill character', () => {
+      expect(run('"hi" |> padEnd(5)', ctx())).toBe('hi   ');
+    });
+
+    test('repeat repeats string n times', () => {
+      expect(run('"abc" |> repeat(3)', ctx())).toBe('abcabcabc');
+    });
+
+    test('repeat with zero count', () => {
+      expect(run('"abc" |> repeat(0)', ctx())).toBe('');
     });
   });
 
