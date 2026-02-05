@@ -11,7 +11,6 @@
 
 import { readFileSync } from 'fs';
 import { tokenize, parse, compile, evaluate } from '@jext/core';
-import type { ExecutionContext } from '@jext/core';
 
 interface Options {
   compact?: boolean;
@@ -67,24 +66,28 @@ OPTIONS:
   -v, --version   Show version
 
 EXAMPLES:
-  # Property access
-  echo '{"name": "Alice", "age": 30}' | jext 'name'
+  # Property access (jq-style with '.')
+  echo '{"name": "Alice", "age": 30}' | jext '.name'
   # Output: "Alice"
 
   # Array operations
-  echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | jext 'users[0].name'
+  echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | jext '.users[0].name'
   # Output: "Alice"
 
   # Filter and map
-  jext 'users.filter(u => u.age > 25).map(u => u.name)' data.json
+  jext '.users.filter(u => u.age > 25).map(u => u.name)' data.json
 
   # Arithmetic
-  echo '{"price": 100}' | jext 'price * 1.1'
+  echo '{"price": 100}' | jext '.price * 1.1'
   # Output: 110
 
-  # Template strings
-  echo '{"name": "Alice"}' | jext '\`Hello, \${name}!\`'
+  # Template strings (use '$' to access input)
+  echo '{"name": "Alice"}' | jext '\`Hello, \${$.name}!\`'
   # Output: "Hello, Alice!"
+
+  # Access input explicitly with '$'
+  echo '{"name": "Alice"}' | jext '$.name'
+  # Output: "Alice"
 
 PERFORMANCE:
   Jext is optimized for speed (2-6x faster than JSONata)
@@ -161,25 +164,15 @@ async function main() {
     // Parse JSON
     const inputData = JSON.parse(inputJson);
 
-    // CLI mode: automatically prepend 'data.' if expression doesn't use it
-    // This makes `name` work like jq instead of requiring `data.name`
-    let finalExpression = expression;
     if (!expression) {
       throw new Error('Expression is required');
     }
 
-    const needsDataPrefix =
-      !expression.startsWith('data.') &&
-      !expression.startsWith('data[') &&
-      !expression.startsWith('state.') &&
-      !expression.startsWith('env.') &&
-      !expression.startsWith('`') && // Template string
-      !expression.startsWith('[') && // Array literal or index
-      !expression.startsWith('{') && // Object literal
-      !/^[\d\-]/.test(expression); // Number literal
-
-    if (needsDataPrefix) {
-      finalExpression = `data.${expression}`;
+    // CLI mode: Support jq-style '.' prefix as alias for root ($)
+    // This makes '.name' work like jq: transform to '$.name'
+    let finalExpression = expression;
+    if (expression.startsWith('.')) {
+      finalExpression = `$${expression}`;
     }
 
     // Compile and evaluate expression
@@ -187,13 +180,8 @@ async function main() {
     const ast = parse(tokens);
     const program = compile(ast);
 
-    const context: ExecutionContext = {
-      data: inputData,
-      state: {},
-      env: {},
-    };
-
-    const result = evaluate(program, context);
+    // Use new API: pass input directly instead of wrapping in context
+    const result = evaluate(program, inputData);
 
     // Output result
     console.log(formatOutput(result, options));

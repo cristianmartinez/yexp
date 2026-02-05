@@ -413,8 +413,8 @@ export function makeError(error: ExprErrorType, message: string): ExprError {
 // Execution Context
 
 export interface ExecutionContext {
-  state: Record<string, ExprValue>;
-  data: Record<string, ExprValue>;
-  env: Record<string, ExprValue>;
-  [key: string]: Record<string, ExprValue>;
+  root: ExprValue; // The main input (accessible via . or $)
+  context?: ExprValue; // Optional auxiliary context
+  env?: ExprValue; // Optional environment
+  [key: string]: ExprValue | undefined; // Lambda parameters and other dynamic slots
 }

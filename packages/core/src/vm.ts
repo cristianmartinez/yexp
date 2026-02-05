@@ -876,13 +876,52 @@ type StackValue = ExprValue | typeof SPREAD_MARKER;
 export interface EvaluateOptions {
   /** Optional callback invoked after each instruction for debugging/visualization */
   onStep?: (state: { ip: number; stack: readonly ExprValue[] }) => void;
+  /** Optional auxiliary context data */
+  context?: ExprValue;
+  /** Optional environment variables */
+  env?: ExprValue;
 }
 
+// Overload signatures for backward compatibility
+export function evaluate(
+  program: BytecodeProgram,
+  input: ExprValue,
+  options?: EvaluateOptions,
+): ExprValue;
 export function evaluate(
   program: BytecodeProgram,
   context: ExecutionContext,
+  options?: Omit<EvaluateOptions, 'context' | 'env'>,
+): ExprValue;
+export function evaluate(
+  program: BytecodeProgram,
+  inputOrContext: ExprValue | ExecutionContext,
   options?: EvaluateOptions,
 ): ExprValue {
+  // Detect old vs new API
+  let context: ExecutionContext;
+  let evalOptions: { onStep?: (state: { ip: number; stack: readonly ExprValue[] }) => void };
+
+  if (
+    typeof inputOrContext === 'object' &&
+    inputOrContext !== null &&
+    !Array.isArray(inputOrContext) &&
+    ('data' in inputOrContext || 'state' in inputOrContext || 'env' in inputOrContext)
+  ) {
+    // Old API: ExecutionContext passed directly
+    context = inputOrContext as ExecutionContext;
+    evalOptions = options ?? {};
+  } else {
+    // New API: input + options
+    context = {
+      root: inputOrContext as ExprValue,
+      context: options?.context,
+      env: options?.env,
+    };
+    evalOptions = {
+      onStep: options?.onStep,
+    };
+  }
   const stack: StackValue[] = [];
   const { code, constants, slots: slotPaths } = program;
 
@@ -890,7 +929,7 @@ export function evaluate(
   const slotValues: ExprValue[] = slotPaths.map((path) => resolvePath(context, path));
 
   let ip = 0;
-  const { onStep } = options ?? {};
+  const { onStep } = evalOptions;
 
   function push(value: StackValue): void {
     stack.push(value);
@@ -2077,8 +2116,32 @@ function isTruthy(value: ExprValue): boolean {
 
 function resolvePath(context: ExecutionContext, path: string): ExprValue {
   const parts = parsePath(path);
-  let current: ExprValue = context as unknown as ExprValue;
+  let current: ExprValue;
 
+  // Handle virtual slots: $, $context, $env
+  if (parts.length > 0) {
+    const firstPart = parts[0]!;
+    if (firstPart === '$') {
+      // $ maps to context.root
+      current = context.root;
+      parts.shift(); // Remove first part
+    } else if (firstPart === '$context') {
+      // $context maps to context.context
+      current = context.context ?? null;
+      parts.shift();
+    } else if (firstPart === '$env') {
+      // $env maps to context.env
+      current = context.env ?? null;
+      parts.shift();
+    } else {
+      // Regular path - start from context object
+      current = context as unknown as ExprValue;
+    }
+  } else {
+    current = context as unknown as ExprValue;
+  }
+
+  // Navigate remaining path
   for (const part of parts) {
     // Security: Block access to dangerous keys
     if (isDangerousKey(part)) {

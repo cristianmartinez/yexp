@@ -18,29 +18,33 @@ npm link
 ## Usage
 
 ```bash
-# Basic property access
-echo '{"name": "Alice", "age": 30}' | jext 'name'
+# Basic property access (jq-style with '.')
+echo '{"name": "Alice", "age": 30}' | jext '.name'
 # Output: "Alice"
 
 # Array indexing
-echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | jext 'users[0].name'
+echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | jext '.users[0].name'
 # Output: "Alice"
 
 # From file
-jext 'users[0].name' data.json
+jext '.users[0].name' data.json
 
 # Filter and map
 echo '{"users": [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]}' | \
-  jext 'users.filter(u => u.age > 25).map(u => u.name)'
+  jext '.users.filter(u => u.age > 25).map(u => u.name)'
 # Output: ["Alice"]
 
 # Arithmetic
-echo '{"price": 100, "tax": 0.1}' | jext 'price * (1 + tax)'
+echo '{"price": 100, "tax": 0.1}' | jext '.price * (1 + .tax)'
 # Output: 110
 
-# Template strings (use data. prefix inside expressions)
-echo '{"name": "Alice"}' | jext '`Hello, ${data.name}!`'
+# Template strings (use '$' to access input)
+echo '{"name": "Alice"}' | jext '`Hello, ${$.name}!`'
 # Output: "Hello, Alice!"
+
+# Access input explicitly with '$'
+echo '{"name": "Alice"}' | jext '$.name'
+# Output: "Alice"
 ```
 
 ## Options
@@ -66,7 +70,9 @@ echo '{"items": [{"price": 10}, {"price": 20}]}' | \
 
 ### Extract Nested Data
 ```bash
-jext 'data.orders[0].items.map(i => i.name)' orders.json
+jext '$.orders[0].items.map(i => i.name)' orders.json
+# Or use jq-style leading dot:
+jext '.orders[0].items.map(i => i.name)' orders.json
 ```
 
 ### Conditional Logic

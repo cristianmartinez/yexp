@@ -259,9 +259,7 @@ export default function HomePage() {
                 height={24}
                 className="dark:invert"
               />
-              <span className="text-sm text-muted-foreground">
-                Jext Expression Language
-              </span>
+              <span className="text-sm text-muted-foreground">Jext Expression Language</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <Link href="/docs" className="hover:text-primary transition-colors">

@@ -86,7 +86,7 @@ const jextProgram1 = compile(parse(tokenize(jextExpr1)));
 test1Results.push(
   benchmark('Jext', () => {
     evaluate(jextProgram1, { data: testData, state: {}, env: {} });
-  })
+  }),
 );
 
 // JSONata
@@ -94,7 +94,7 @@ const jsonataExpr1 = jsonata('users[0].name');
 test1Results.push(
   benchmark('JSONata', () => {
     jsonataExpr1.evaluate(testData);
-  })
+  }),
 );
 
 // jq
@@ -114,7 +114,7 @@ const jextProgram2 = compile(parse(tokenize(jextExpr2)));
 test2Results.push(
   benchmark('Jext', () => {
     evaluate(jextProgram2, { data: testData, state: {}, env: {} });
-  })
+  }),
 );
 
 // JSONata
@@ -122,7 +122,7 @@ const jsonataExpr2 = jsonata('users[age > 28]');
 test2Results.push(
   benchmark('JSONata', () => {
     jsonataExpr2.evaluate(testData);
-  })
+  }),
 );
 
 // jq
@@ -142,7 +142,7 @@ const jextProgram3 = compile(parse(tokenize(jextExpr3)));
 test3Results.push(
   benchmark('Jext', () => {
     evaluate(jextProgram3, { data: testData, state: {}, env: {} });
-  })
+  }),
 );
 
 // JSONata
@@ -150,7 +150,7 @@ const jsonataExpr3 = jsonata('users.name');
 test3Results.push(
   benchmark('JSONata', () => {
     jsonataExpr3.evaluate(testData);
-  })
+  }),
 );
 
 // jq
@@ -170,7 +170,7 @@ const jextProgram4 = compile(parse(tokenize(jextExpr4)));
 test4Results.push(
   benchmark('Jext', () => {
     evaluate(jextProgram4, { data: testData, state: {}, env: {} });
-  })
+  }),
 );
 
 // JSONata
@@ -178,12 +178,12 @@ const jsonataExpr4 = jsonata('users[city="NYC"].score');
 test4Results.push(
   benchmark('JSONata', () => {
     jsonataExpr4.evaluate(testData);
-  })
+  }),
 );
 
 // jq
 test4Results.push(
-  benchmarkJq('jq', '.users | map(select(.city == "NYC")) | map(.score)', testData)
+  benchmarkJq('jq', '.users | map(select(.city == "NYC")) | map(.score)', testData),
 );
 
 printResults(test4Results);
@@ -200,7 +200,7 @@ const jextProgram5 = compile(parse(tokenize(jextExpr5)));
 test5Results.push(
   benchmark('Jext', () => {
     evaluate(jextProgram5, { data: testData, state: {}, env: {} });
-  })
+  }),
 );
 
 // JSONata
@@ -208,7 +208,7 @@ const jsonataExpr5 = jsonata('users[0].score * 1.1 + 10');
 test5Results.push(
   benchmark('JSONata', () => {
     jsonataExpr5.evaluate(testData);
-  })
+  }),
 );
 
 // jq
