@@ -24,9 +24,61 @@ const codeExamples = [
   'env.API_URL + "/users/" + userId',
 ];
 
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+
+function ScrambleText({
+  text,
+  className = '',
+  delay = 0,
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+}) {
+  const [displayText, setDisplayText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [started, setStarted] = useState(delay === 0);
+
+  useEffect(() => {
+    if (delay === 0) return;
+    const startTimeout = setTimeout(() => setStarted(true), delay);
+    return () => clearTimeout(startTimeout);
+  }, [delay]);
+
+  useEffect(() => {
+    if (!started) return;
+    if (currentIndex >= text.length) {
+      setDisplayText(text);
+      return;
+    }
+
+    const scrambleInterval = setInterval(() => {
+      setDisplayText(() => {
+        const locked = text.slice(0, currentIndex);
+        const random = CHARS[Math.floor(Math.random() * CHARS.length)];
+        return locked + random + text.slice(currentIndex + 1);
+      });
+    }, 50);
+
+    const lockTimeout = setTimeout(() => {
+      clearInterval(scrambleInterval);
+      setDisplayText(text.slice(0, currentIndex + 1) + text.slice(currentIndex + 1));
+      setCurrentIndex((prev) => prev + 1);
+    }, 100 + Math.random() * 200);
+
+    return () => {
+      clearInterval(scrambleInterval);
+      clearTimeout(lockTimeout);
+    };
+  }, [currentIndex, text, started]);
+
+  return <span className={className}>{displayText || text}</span>;
+}
+
 export default function HomePage() {
   const [currentExample, setCurrentExample] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,6 +90,11 @@ export default function HomePage() {
     }, 3000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Trigger scramble effect on mount
+  useEffect(() => {
+    setKey((prev) => prev + 1);
   }, []);
 
   return (
@@ -82,10 +139,15 @@ export default function HomePage() {
             <span>Powerful expression language for JavaScript</span>
           </div>
 
-          <h1 className="text-6xl md:text-7xl font-bold tracking-tight animate-fade-in-up">
-            Write expressions,
+          <h1 className="text-6xl md:text-7xl font-bold tracking-tight">
+            <ScrambleText key={`line1-${key}`} text="Write expressions," />
             <br />
-            <span className="text-primary">not code</span>
+            <ScrambleText
+              key={`line2-${key}`}
+              text="not code"
+              className="text-primary"
+              delay={2800}
+            />
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up animation-delay-200">
