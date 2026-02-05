@@ -164,6 +164,10 @@ async function main() {
     // CLI mode: automatically prepend 'data.' if expression doesn't use it
     // This makes `name` work like jq instead of requiring `data.name`
     let finalExpression = expression;
+    if (!expression) {
+      throw new Error('Expression is required');
+    }
+
     const needsDataPrefix =
       !expression.startsWith('data.') &&
       !expression.startsWith('data[') &&
