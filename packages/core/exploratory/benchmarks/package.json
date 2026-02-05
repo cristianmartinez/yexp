@@ -1,0 +1,14 @@
+{
+  "name": "@jext/benchmarks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bench": "bun run benchmark.ts"
+  },
+  "dependencies": {
+    "jsonata": "^2.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  }
+}
