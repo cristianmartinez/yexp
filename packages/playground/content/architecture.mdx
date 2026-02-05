@@ -55,9 +55,9 @@ Immutable values referenced by instructions:
 
 ### 2. Slots
 Pre-resolved paths from the execution context:
-- `data.items`
-- `state.count`
-- `env.API_URL`
+- `$.items`
+- `$context.userId`
+- `$env.API_URL`
 
 Slots are resolved **once** at execution start for performance.
 
@@ -72,17 +72,21 @@ Array of instructions that execute sequentially:
 
 ## Execution Context
 
-All expressions run with three namespaces:
+Expressions access data through special variables:
+
+- **`$`** - Main input data
+- **`$context`** - Auxiliary context (optional)
+- **`$env`** - Environment configuration (optional)
 
 ```javascript
-{
-  data: { ... },   // Immutable input data
-  state: { ... },  // Mutable application state
-  env: { ... }     // Environment configuration
+const input = { items: [...] }
+const options = {
+  context: { userId: 'usr_123' },
+  env: { API_URL: 'https://api.example.com' }
 }
-```
 
-The VM can read from all three, but only mutate `state` (via assignment operations).
+evaluate(program, input, options)
+```
 
 ## Instruction Set
 
@@ -192,7 +196,7 @@ Range comparisons optimize to single instruction:
 ### Slot Pre-Resolution
 Variable paths resolve once at execution start:
 
-**Slow:** Parse `"data.items.price"` on every access
+**Slow:** Parse `"$.items.price"` on every access
 **Fast:** Resolve to slot index, access by array lookup
 
 ## Security Model
@@ -247,16 +251,16 @@ Higher-order functions receive the execution context to invoke lambdas with prop
 
 Expression:
 ```javascript
-data.items.filter(x => x.price < 100)
+$.items.filter(x => x.price < 100)
 ```
 
 **Compiled Bytecode:**
 ```
 Main Program:
   constants: [<lambda>, 100]
-  slots: ["data.items"]
+  slots: ["$.items"]
   code:
-    LOAD 0              // Load data.items
+    LOAD 0              // Load $.items
     CONST 0             // Push lambda
     CALL filter 2       // filter(items, lambda)
     RETURN
@@ -272,7 +276,7 @@ Lambda Program:
 ```
 
 **Execution Flow:**
-1. VM loads `data.items` from context
+1. VM loads `$.items` from input
 2. VM calls `filter()` with items and lambda
 3. For each item, `filter()`:
    - Creates context with `x` = item

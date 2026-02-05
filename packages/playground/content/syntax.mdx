@@ -17,17 +17,17 @@ If you know JavaScript, you already know most of Jext. The rest is just syntacti
 ## Property Access
 
 ```javascript
-data.user.name
-data.user?.profile?.avatar  // Optional chaining
+$.user.name
+$.user?.profile?.avatar  // Optional chaining
 ```
 
 ## Array Indexing
 
 ```javascript
-data.items[0]
-data.items[-1]              // Negative indexing
-data.items[.price > 100]    // Predicate filtering
-data.items[*].name          // Wildcard (map all)
+$.items[0]
+$.items[-1]              // Negative indexing
+$.items[.price > 100]    // Predicate filtering
+$.items[*].name          // Wildcard (map all)
 ```
 
 ## Operators
@@ -81,43 +81,43 @@ x => x > 5              // Single param (no parens)
 
 ### Method Call Syntax
 ```javascript
-data.items.filter(x => x > 5)
-data.items.map(x => x * 2)
-data.users.filter(.active).map(.name)
+$.items.filter(x => x > 5)
+$.items.map(x => x * 2)
+$.users.filter(.active).map(.name)
 ```
 
 ### Pipe Operator
 ```javascript
-data.items |> filter(x => x > 5)
-data.items |> map(x => x * 2) |> reduce((a, b) => a + b, 0)
+$.items |> filter(x => x > 5)
+$.items |> map(x => x * 2) |> reduce((a, b) => a + b, 0)
 ```
 
 ### Mixed Syntax
 ```javascript
-data.items.filter(x => x > 5) |> map(x => x * 2)
+$.items.filter(x => x > 5) |> map(x => x * 2)
 ```
 
 ## Template Literals
 
 ```javascript
-`Hello, ${data.user.name}!`
-`Total: $${data.cart |> reduce((sum, item) => sum + item.price, 0)}`
+`Hello, ${$.user.name}!`
+`Total: $${$.cart |> reduce((sum, item) => sum + item.price, 0)}`
 ```
 
 ## Object Literals
 
 ```javascript
 { name: "Alice", age: 25 }
-{ ...data.defaults, ...state.overrides }
-{ count: data.items |> length, total: data.items |> add }
+{ ...$.defaults, ...$context.overrides }
+{ count: $.items |> length, total: $.items |> add }
 ```
 
 ## Spread Operator
 
 ```javascript
-[...data.items, newItem]
+[...$.items, newItem]
 { ...obj1, ...obj2, extra: "value" }
-max(...data.values)
+max(...$.values)
 concat(...arrays)
 ```
 

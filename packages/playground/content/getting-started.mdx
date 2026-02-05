@@ -17,39 +17,37 @@ bun add @jext/core
 ```typescript
 import { run } from '@jext/core'
 
-// Create an execution context
-const context = {
-  state: {},
-  data: {
-    products: [
-      { name: 'Laptop', price: 999 },
-      { name: 'Mouse', price: 25 },
-      { name: 'Keyboard', price: 75 }
-    ]
-  },
-  env: {}
+// Prepare your input data
+const input = {
+  products: [
+    { name: 'Laptop', price: 999 },
+    { name: 'Mouse', price: 25 },
+    { name: 'Keyboard', price: 75 }
+  ]
 }
 
-// Evaluate an expression
-const result = run('data.products.filter(p => p.price < 100)', context)
+// Evaluate an expression (use $ to access input)
+const result = run('$.products.filter(p => p.price < 100)', input)
 console.log(result)
 // Output: [{ name: 'Mouse', price: 25 }, { name: 'Keyboard', price: 75 }]
 ```
 
-## Execution Context
+## Context Access
 
-Every expression runs with three namespaces:
+Jext provides three ways to access data in expressions:
 
-- **`state`** - Mutable application state
-- **`data`** - Immutable input data
-- **`env`** - Environment variables/configuration
+- **`$`** - Access the main input data
+- **`$context`** - Access auxiliary context (optional)
+- **`$env`** - Access environment variables (optional)
 
 ```typescript
-const context = {
-  state: { count: 0, user: { name: 'Alice' } },
-  data: { items: [1, 2, 3] },
+const input = { items: [1, 2, 3] }
+const options = {
+  context: { userId: 'usr_123' },
   env: { API_URL: 'https://api.example.com' }
 }
+
+run('$.items.length', input, options)  // 3
 ```
 
 ## Compilation & Execution
@@ -57,14 +55,14 @@ const context = {
 For better performance, compile expressions once and reuse:
 
 ```typescript
-import { compileExpr, evaluate } from '@jext/core'
+import { tokenize, parse, compile, evaluate } from '@jext/core'
 
 // Compile to bytecode
-const program = compileExpr('data.items |> filter(x => x > 2)')
+const program = compile(parse(tokenize('$.items |> filter(x => x > 2)')))
 
 // Execute multiple times (fast!)
-const result1 = evaluate(program, context1)
-const result2 = evaluate(program, context2)
+const result1 = evaluate(program, input1)
+const result2 = evaluate(program, input2)
 ```
 
 ## Next Steps
