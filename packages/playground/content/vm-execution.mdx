@@ -1,4 +1,4 @@
-import { VMExecutionDemo } from '../components/vm-execution-demo'
+import { VMExecutionExamples } from '../components/vm-execution-examples'
 
 export const metadata = {
   title: 'VM Execution Visualizer',
@@ -12,162 +12,73 @@ An interactive visualization showing how Jext's stack-based virtual machine exec
 ## How It Works
 
 The Jext VM is a **stack-based virtual machine** that:
-1. Reads bytecode instructions sequentially
-2. Uses an **instruction pointer (IP)** to track position
-3. Manages a **stack** for intermediate values
-4. Supports **jumps** for control flow (conditionals, loops)
+1. **Reads bytecode** instructions sequentially
+2. **Instruction Pointer (IP)** tracks current position
+3. **Stack** holds intermediate values (LIFO - Last In, First Out)
+4. **Jumps** enable control flow (conditionals, loops, lambdas)
 
-## Try It Out!
+## Interactive Examples
 
-Enter any Jext expression below and watch how the VM executes it step-by-step:
+Select an example below to see how different expressions execute step-by-step:
 
-<VMExecutionDemo
-  initialExpression="1 + 2 * 3"
-/>
+<VMExecutionExamples />
 
-## Simple Arithmetic
+## What to Watch For
 
-Try changing the expression above to see how different operations work. Here are some examples to try:
+### Jump Instructions
+Watch the IP jump around when:
+- **Conditionals** (`? :`) - Jump based on condition
+- **Logical operators** (`&&`, `||`) - Short-circuit evaluation
+- **Lambdas** - Jump into function, execute, jump back
 
-- `1 + 2 * 3` - See operator precedence in action
-- `(1 + 2) * 3` - Watch how parentheses change evaluation order
-- `5 - 3 + 2` - Left-to-right evaluation
-- `-10 + 5` - Unary negation
+### Stack Operations
+See how the stack changes:
+- **Binary operations** - Pop 2 values, push 1 result
+- **Array/object construction** - Pop multiple values, push collection
+- **Function calls** - Pop arguments, push return value
+- **Spread operators** - Flatten and merge collections
 
-## Conditional Jumps
+### Complex Patterns
+- **Pipelines** - Chain operations left-to-right
+- **Template literals** - Evaluate expressions within strings
+- **Optional chaining** - Safe navigation with null checks
 
-Try a ternary operator to see how the VM uses jump instructions:
+## Controls
 
-<VMExecutionDemo
-  initialExpression="data.x > 10 ? 'big' : 'small'"
-  initialContext={`{
-  "data": { "x": 15 },
-  "state": {},
-  "env": {}
-}`}
-/>
+**Playback:**
+- **Play/Pause** ▶️ - Auto-step through execution (500ms per step)
+- **Step Forward** ⏭️ - Execute next instruction
+- **Step Backward** ⏮️ - Go back one step
+- **Reset** 🔄 - Start from beginning
 
-**Jump Instructions** - Watch the instruction pointer (IP) jump around:
-- `JUMP_IF_FALSE` - Jump if condition is false
-- `JUMP_IF_TRUE` - Jump if condition is true
-- `JUMP` - Unconditional jump
+**Customization:**
+- Switch to **Expression** tab to modify code
+- Switch to **Context** tab to change data/state/env
+- Changes instantly compile and restart execution
 
-The IP doesn't just increment - it can jump forward or backward based on the bytecode!
+## Understanding the Panels
 
-## Complex Expression
+### Left: Bytecode Instructions
+- **Blue highlight** = current instruction executing
+- **Gray text** = already executed
+- **Format**: `[index] OPCODE arguments`
+- **Jump targets** show `-> index` for control flow
 
-Watch a real-world example that combines multiple features - filtering, mapping, and string templates:
+### Right: Stack
+- **Bottom-up display** (top of stack at bottom)
+- **Animations** when values pushed/popped
+- **Index labels** `[0]`, `[1]`, etc. from bottom
+- **Result** appears when execution completes
 
-<VMExecutionDemo
-  initialExpression="data.users |> filter(u => u.age >= 18 && u.active) |> map(u => `${u.name} (${u.age})`) |> join(', ')"
-  initialContext={`{
-  "data": {
-    "users": [
-      { "name": "Alice", "age": 25, "active": true },
-      { "name": "Bob", "age": 17, "active": true },
-      { "name": "Carol", "age": 30, "active": false },
-      { "name": "Dave", "age": 22, "active": true }
-    ]
-  },
-  "state": {},
-  "env": {}
-}`}
-/>
+## Try Your Own!
 
-**What's Happening:**
-1. `filter` - Creates lambda, evaluates condition for each user
-2. Multiple `JUMP` instructions - For each lambda invocation
-3. `map` - Another lambda with template literal evaluation
-4. `join` - Final transformation to string
-5. Stack grows/shrinks as lambdas execute
+Type any Jext expression and see how it executes. The visualizer supports:
+- ✅ All arithmetic, comparison, and logical operators
+- ✅ Arrays, objects, and spread operators
+- ✅ Template literals and string operations
+- ✅ Conditionals and control flow
+- ✅ Lambdas and higher-order functions
+- ✅ Property access and optional chaining
+- ✅ Pipes and method chaining
 
-Watch the IP jump into and out of lambda functions!
-
-## Object Construction with Spread
-
-See how objects and arrays are built on the stack:
-
-<VMExecutionDemo
-  initialExpression="{ ...data.defaults, name: data.user.name, score: data.scores[0] * 2, status: data.active ? 'online' : 'offline' }"
-  initialContext={`{
-  "data": {
-    "defaults": { "color": "blue", "size": "medium" },
-    "user": { "name": "Alice" },
-    "scores": [45, 38, 42],
-    "active": true
-  },
-  "state": {},
-  "env": {}
-}`}
-/>
-
-**Stack Mechanics:**
-- Values are pushed in reverse order (right to left)
-- `SPREAD` operator flattens objects
-- `MAKE_OBJ` pops all values and constructs object
-- Each property evaluation pushes 2 values (key, value)
-
-## More Examples to Try
-
-**Array Operations:**
-```
-[1, 2, 3][1]
-```
-
-**Object Access with Optional Chaining:**
-```
-data.user?.profile?.avatar ?? "default.png"
-```
-
-**Logical Operations:**
-```
-data.age > 18 && data.verified
-```
-
-**String Template:**
-```
-`Hello ${data.name}, you have ${data.items.length} items`
-```
-
-**Nested Ternary (Complex Control Flow):**
-```
-data.score >= 90 ? "A" : data.score >= 80 ? "B" : data.score >= 70 ? "C" : "F"
-```
-
-**Recursive Descent (Deep Property Access):**
-```
-data..price[. > 100]
-```
-
-## Stack Operations
-
-The stack is a **LIFO (Last In, First Out)** data structure:
-
-- **Push**: Add value to top of stack
-- **Pop**: Remove and return top value
-- **Binary ops**: Pop two values, push result
-- **Unary ops**: Pop one value, push result
-
-## How to Use
-
-1. **Enter Expression** - Type any Jext expression in the editor
-2. **Set Context** - Switch to the Context tab to add data/state/env
-3. **Watch Execution** - The bytecode and stack update in real-time
-4. **Control Playback:**
-   - Click **Play** to auto-step through execution
-   - Use **Step Forward/Backward** to manually control
-   - **Reset** to start over
-
-## Understanding the Visualization
-
-**Left Panel - Bytecode Instructions:**
-- Blue highlight shows current instruction
-- Dimmed text shows already-executed instructions
-- Jump targets show where control flow goes
-
-**Right Panel - Stack:**
-- Shows current stack state (top at bottom)
-- Values animate in/out as they're pushed/popped
-- Final result appears when execution completes
-
-This is a **stack-based VM** - all operations work through the stack. No registers, just push and pop!
+**Stack-based architecture** = No registers, just push and pop!
