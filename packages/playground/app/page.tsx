@@ -10,10 +10,8 @@ import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 import { PageHeader } from '@/components/page-header';
 import { ExamplesPanel } from '@/components/examples-panel';
-import { VMExecutionPlayer } from '@/components/vm-execution-player';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import {
   Sheet,
   SheetContent,
@@ -89,57 +87,10 @@ export default function PlaygroundPage() {
     }
   }, [expression, parsedContext]);
 
-  // Demo expression for VM player
-  const demoExpression = 'data.items |> filter(.price < 100) |> map(.name) |> join(", ")';
-  const demoContext = useMemo(
-    () => ({
-      state: {},
-      data: {
-        items: [
-          { name: 'Laptop', price: 999 },
-          { name: 'Mouse', price: 25 },
-          { name: 'Keyboard', price: 75 },
-          { name: 'Monitor', price: 350 },
-          { name: 'USB Cable', price: 12 },
-        ],
-      },
-      env: {},
-    }),
-    [],
-  );
-
-  const demoProgram = useMemo(() => {
-    try {
-      const tokens = tokenize(demoExpression);
-      const ast = parse(tokens);
-      return compile(ast);
-    } catch {
-      return null;
-    }
-  }, []);
-
   return (
     <div className="h-screen flex flex-col">
       <div className="px-6 py-4 border-b">
         <PageHeader currentPage="playground" />
-      </div>
-
-      {/* VM Execution Demo */}
-      <div className="px-6 py-4 border-b bg-muted/30">
-        <Card className="p-6">
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">VM Execution Visualizer</h3>
-              <p className="text-sm text-muted-foreground">
-                Watch how expressions execute step-by-step in the bytecode virtual machine
-              </p>
-              <div className="mt-3 p-3 bg-muted/50 rounded font-mono text-sm border">
-                {demoExpression}
-              </div>
-            </div>
-            {demoProgram && <VMExecutionPlayer program={demoProgram} context={demoContext} />}
-          </div>
-        </Card>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
