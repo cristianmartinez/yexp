@@ -10,7 +10,8 @@
   "types": "./dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "build:bin": "bun build src/index.ts --compile --outfile dist/jext",
     "dev": "bun run src/index.ts",
     "test": "bun test"
   },
