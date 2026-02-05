@@ -58,7 +58,7 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
   const canStepForward = stepper.canStepForward();
   const canStepBackward = stepper.canStepBackward();
 
-  const forceUpdate = () => setRenderCounter(c => c + 1);
+  const forceUpdate = () => setRenderCounter((c) => c + 1);
 
   // Reset stepper when program changes
   useEffect(() => {
@@ -129,14 +129,17 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
     if (args.length === 0) return opcodeName;
 
     // Format special cases
-    if (opcode === 0) { // CONST
+    if (opcode === 0) {
+      // CONST
       return `${opcodeName} ${formatValue(args[0])}`;
     }
-    if (opcode === 1) { // LOAD
+    if (opcode === 1) {
+      // LOAD
       const slotPath = program.slots?.[args[0]] || '?';
       return `${opcodeName} [${args[0]}] (${slotPath})`;
     }
-    if (opcode === 40 || opcode === 41 || opcode === 42) { // JUMP instructions
+    if (opcode === 40 || opcode === 41 || opcode === 42) {
+      // JUMP instructions
       return `${opcodeName} -> ${args[0]}`;
     }
 
@@ -148,12 +151,7 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
       {/* Controls */}
       <Card className="p-4">
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleReset}
-            disabled={isPlaying}
-          >
+          <Button size="sm" variant="outline" onClick={handleReset} disabled={isPlaying}>
             <RotateCcw className="h-4 w-4" />
           </Button>
           <Button
@@ -169,11 +167,7 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
             onClick={handlePlayPause}
             disabled={currentStep.state.done && !canStepForward}
           >
-            {isPlaying ? (
-              <Pause className="h-4 w-4" />
-            ) : (
-              <Play className="h-4 w-4" />
-            )}
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
           <Button
             size="sm"
@@ -205,11 +199,13 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
                     isCurrent
                       ? 'bg-blue-500/20 border-l-2 border-blue-500 font-bold'
                       : isPast
-                      ? 'text-muted-foreground/50'
-                      : ''
+                        ? 'text-muted-foreground/50'
+                        : ''
                   }`}
                 >
-                  <span className="text-muted-foreground mr-2">{index.toString().padStart(3, '0')}</span>
+                  <span className="text-muted-foreground mr-2">
+                    {index.toString().padStart(3, '0')}
+                  </span>
                   {formatInstruction(instruction)}
                 </div>
               );
@@ -231,7 +227,8 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
                     className="px-3 py-2 bg-secondary/50 rounded border-l-2 border-green-500 font-mono text-xs animate-in slide-in-from-bottom"
                   >
                     <div className="text-muted-foreground text-[10px] mb-1">
-                      [{currentStep.state.stack.length - 1 - index}] {index === currentStep.state.stack.length - 1 && '← top'}
+                      [{currentStep.state.stack.length - 1 - index}]{' '}
+                      {index === currentStep.state.stack.length - 1 && '← top'}
                     </div>
                     <div className="break-all">{formatValue(value)}</div>
                   </div>

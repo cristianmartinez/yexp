@@ -3,5 +3,5 @@ export default {
   'getting-started': 'Getting Started',
   syntax: 'Syntax Reference',
   architecture: 'Architecture',
-  'vm-execution': 'VM Execution Visualizer'
-}
+  'vm-execution': 'VM Execution Visualizer',
+};

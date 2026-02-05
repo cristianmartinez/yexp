@@ -43,12 +43,7 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
 
       // Set tokenizer for syntax highlighting
       monaco.languages.setMonarchTokensProvider('jext', {
-        keywords: [
-          'true',
-          'false',
-          'null',
-          'undefined',
-        ],
+        keywords: ['true', 'false', 'null', 'undefined'],
         builtins: [
           // String functions
           'toString',

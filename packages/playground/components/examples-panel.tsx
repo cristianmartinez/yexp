@@ -10,10 +10,13 @@ interface ExamplesPanelProps {
 
 export function ExamplesPanel({ selectedId, onSelectExample }: ExamplesPanelProps) {
   // Group examples by category
-  const examplesByCategory = categories.reduce((acc, category) => {
-    acc[category] = examples.filter((ex) => ex.category === category);
-    return acc;
-  }, {} as Record<string, Example[]>);
+  const examplesByCategory = categories.reduce(
+    (acc, category) => {
+      acc[category] = examples.filter((ex) => ex.category === category);
+      return acc;
+    },
+    {} as Record<string, Example[]>,
+  );
 
   return (
     <div className="h-full overflow-auto">

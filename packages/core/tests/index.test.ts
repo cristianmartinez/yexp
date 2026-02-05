@@ -127,6 +127,47 @@ describe('integration', () => {
     });
   });
 
+  describe('array indexing', () => {
+    test('positive array indexing', () => {
+      expect(run('data.items[0]', ctx({}, { items: [10, 20, 30] }))).toBe(10);
+      expect(run('data.items[1]', ctx({}, { items: [10, 20, 30] }))).toBe(20);
+      expect(run('data.items[2]', ctx({}, { items: [10, 20, 30] }))).toBe(30);
+    });
+
+    test('negative array indexing', () => {
+      expect(run('data.items[-1]', ctx({}, { items: [10, 20, 30] }))).toBe(30);
+      expect(run('data.items[-2]', ctx({}, { items: [10, 20, 30] }))).toBe(20);
+      expect(run('data.items[-3]', ctx({}, { items: [10, 20, 30] }))).toBe(10);
+    });
+
+    test('negative indexing with single element', () => {
+      expect(run('data.items[-1]', ctx({}, { items: [42] }))).toBe(42);
+    });
+
+    test('negative indexing in expressions', () => {
+      expect(run('data.items[-1] * 2', ctx({}, { items: [10, 20, 30] }))).toBe(60);
+      expect(run('data.items[-1] + data.items[0]', ctx({}, { items: [1, 2, 3] }))).toBe(4);
+    });
+
+    test('negative indexing with spread operator', () => {
+      expect(
+        run('[...data.items, data.items[-1] * 2]', ctx({}, { items: [10, 20, 30, 40] })),
+      ).toEqual([10, 20, 30, 40, 80]);
+    });
+
+    test('string negative indexing', () => {
+      expect(run('data.text[-1]', ctx({}, { text: 'hello' }))).toBe('o');
+      expect(run('data.text[-2]', ctx({}, { text: 'hello' }))).toBe('l');
+      expect(run('data.text[-5]', ctx({}, { text: 'hello' }))).toBe('h');
+    });
+
+    test('negative indexing out of bounds returns error', () => {
+      const result = run('data.items[-10]', ctx({}, { items: [1, 2, 3] }));
+      expect(isExprError(result)).toBe(true);
+      expect((result as ExprError).error).toBe('INDEX_OUT_OF_BOUNDS');
+    });
+  });
+
   describe('equality operators', () => {
     test('loose equality (==) with type coercion', () => {
       expect(run('1 == 1', ctx())).toBe(true);
@@ -720,102 +761,91 @@ describe('integration', () => {
 
   describe('spread operator', () => {
     test('spread in array literal', () => {
-      expect(
-        run('[1, ...[2, 3], 4]', ctx()),
-      ).toEqual([1, 2, 3, 4]);
+      expect(run('[1, ...[2, 3], 4]', ctx())).toEqual([1, 2, 3, 4]);
     });
 
     test('spread multiple arrays in array literal', () => {
-      expect(
-        run('[...[1, 2], ...[3, 4], 5]', ctx()),
-      ).toEqual([1, 2, 3, 4, 5]);
+      expect(run('[...[1, 2], ...[3, 4], 5]', ctx())).toEqual([1, 2, 3, 4, 5]);
     });
 
     test('spread in object literal', () => {
-      expect(
-        run('{ a: 1, ...{ b: 2, c: 3 }, d: 4 }', ctx()),
-      ).toEqual({ a: 1, b: 2, c: 3, d: 4 });
+      expect(run('{ a: 1, ...{ b: 2, c: 3 }, d: 4 }', ctx())).toEqual({ a: 1, b: 2, c: 3, d: 4 });
     });
 
     test('spread in object literal with property override', () => {
-      expect(
-        run('{ a: 1, b: 2, ...{ b: 3, c: 4 } }', ctx()),
-      ).toEqual({ a: 1, b: 3, c: 4 });
+      expect(run('{ a: 1, b: 2, ...{ b: 3, c: 4 } }', ctx())).toEqual({ a: 1, b: 3, c: 4 });
     });
 
     test('spread with data context', () => {
-      expect(
-        run('[0, ...data.values, 100]', ctx({}, { values: [1, 2, 3] })),
-      ).toEqual([0, 1, 2, 3, 100]);
+      expect(run('[0, ...data.values, 100]', ctx({}, { values: [1, 2, 3] }))).toEqual([
+        0, 1, 2, 3, 100,
+      ]);
     });
 
     test('max with spread operator', () => {
-      expect(
-        run('max(...data.values)', ctx({}, { values: [23.5, -15.8, 42.3, -8.1, 19.7] })),
-      ).toBe(42.3);
+      expect(run('max(...data.values)', ctx({}, { values: [23.5, -15.8, 42.3, -8.1, 19.7] }))).toBe(
+        42.3,
+      );
     });
 
     test('max with mixed args and spread', () => {
-      expect(
-        run('max(0, ...[1, 2, 3], 10)', ctx()),
-      ).toBe(10);
+      expect(run('max(0, ...[1, 2, 3], 10)', ctx())).toBe(10);
     });
 
     test('min with spread operator', () => {
-      expect(
-        run('min(...data.values)', ctx({}, { values: [23.5, -15.8, 42.3, -8.1, 19.7] })),
-      ).toBe(-15.8);
+      expect(run('min(...data.values)', ctx({}, { values: [23.5, -15.8, 42.3, -8.1, 19.7] }))).toBe(
+        -15.8,
+      );
     });
 
     test('min with mixed args and spread', () => {
-      expect(
-        run('min(100, ...data.values, -50)', ctx({}, { values: [10, 20, 30] })),
-      ).toBe(-50);
+      expect(run('min(100, ...data.values, -50)', ctx({}, { values: [10, 20, 30] }))).toBe(-50);
     });
 
     test('add function with array', () => {
-      expect(
-        run('add(data.values)', ctx({}, { values: [1, 2, 3, 4, 5] })),
-      ).toBe(15);
+      expect(run('add(data.values)', ctx({}, { values: [1, 2, 3, 4, 5] }))).toBe(15);
     });
 
     test('flatten nested arrays with spread', () => {
-      expect(
-        run('[...[1, 2], ...[3, 4]]', ctx()),
-      ).toEqual([1, 2, 3, 4]);
+      expect(run('[...[1, 2], ...[3, 4]]', ctx())).toEqual([1, 2, 3, 4]);
     });
 
     test('concat arrays', () => {
-      expect(
-        run('concat([1, 2], [3, 4], [5, 6])', ctx()),
-      ).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(run('concat([1, 2], [3, 4], [5, 6])', ctx())).toEqual([1, 2, 3, 4, 5, 6]);
     });
 
     test('concat with spread operator', () => {
       expect(
-        run('concat(...data.arrays)', ctx({}, { arrays: [[1, 2], [3, 4], [5, 6]] })),
+        run(
+          'concat(...data.arrays)',
+          ctx(
+            {},
+            {
+              arrays: [
+                [1, 2],
+                [3, 4],
+                [5, 6],
+              ],
+            },
+          ),
+        ),
       ).toEqual([1, 2, 3, 4, 5, 6]);
     });
 
     test('concat mixed arrays and values', () => {
-      expect(
-        run('concat([1], 2, [3, 4])', ctx()),
-      ).toEqual([1, 2, 3, 4]);
+      expect(run('concat([1], 2, [3, 4])', ctx())).toEqual([1, 2, 3, 4]);
     });
 
     test('spread in nested expressions', () => {
-      expect(
-        run('[...data.a, ...data.b]', ctx({}, { a: [1, 2], b: [3, 4] })),
-      ).toEqual([1, 2, 3, 4]);
+      expect(run('[...data.a, ...data.b]', ctx({}, { a: [1, 2], b: [3, 4] }))).toEqual([
+        1, 2, 3, 4,
+      ]);
     });
 
     test('complex object with math functions and spreads', () => {
       const result = run(
         '{ rounded: state.price |> round(2), total: data.values |> reduce((a, b) => a + b, 0) |> abs, maxValue: max(...data.values) }',
-        ctx(
-          { price: 123.456789 },
-          { values: [23.5, -15.8, 42.3, -8.1, 19.7] }
-        )
+        ctx({ price: 123.456789 }, { values: [23.5, -15.8, 42.3, -8.1, 19.7] }),
       ) as { rounded: number; total: number; maxValue: number };
 
       expect(result.rounded).toBe(123.46);
@@ -824,42 +854,34 @@ describe('integration', () => {
     });
 
     test('spread in method call with join', () => {
-      expect(
-        run('["a", "b", "c"].join("-")', ctx()),
-      ).toBe('a-b-c');
+      expect(run('["a", "b", "c"].join("-")', ctx())).toBe('a-b-c');
     });
 
     test('multiple function calls with spreads', () => {
       expect(
-        run('{ minVal: min(...data.values), maxVal: max(...data.values) }',
-          ctx({}, { values: [5, 2, 8, 1, 9] })),
+        run(
+          '{ minVal: min(...data.values), maxVal: max(...data.values) }',
+          ctx({}, { values: [5, 2, 8, 1, 9] }),
+        ),
       ).toEqual({ minVal: 1, maxVal: 9 });
     });
   });
 
   describe('method call syntax (syntactic sugar)', () => {
     test('array.filter() works like array |> filter()', () => {
-      expect(
-        run('[1, 2, 3, 4].filter(x => x > 2)', ctx()),
-      ).toEqual([3, 4]);
+      expect(run('[1, 2, 3, 4].filter(x => x > 2)', ctx())).toEqual([3, 4]);
     });
 
     test('array.map() works like array |> map()', () => {
-      expect(
-        run('[1, 2, 3].map(x => x * 2)', ctx()),
-      ).toEqual([2, 4, 6]);
+      expect(run('[1, 2, 3].map(x => x * 2)', ctx())).toEqual([2, 4, 6]);
     });
 
     test('array.find() works like array |> find()', () => {
-      expect(
-        run('[1, 2, 3, 4].find(x => x > 2)', ctx()),
-      ).toBe(3);
+      expect(run('[1, 2, 3, 4].find(x => x > 2)', ctx())).toBe(3);
     });
 
     test('array.reduce() works with initial value', () => {
-      expect(
-        run('[1, 2, 3].reduce((acc, x) => acc + x, 0)', ctx()),
-      ).toBe(6);
+      expect(run('[1, 2, 3].reduce((acc, x) => acc + x, 0)', ctx())).toBe(6);
     });
 
     test('array.every() checks all elements', () => {
@@ -873,9 +895,7 @@ describe('integration', () => {
     });
 
     test('method chaining works', () => {
-      expect(
-        run('[1, 2, 3, 4, 5].filter(x => x > 2).map(x => x * 2)', ctx()),
-      ).toEqual([6, 8, 10]);
+      expect(run('[1, 2, 3, 4, 5].filter(x => x > 2).map(x => x * 2)', ctx())).toEqual([6, 8, 10]);
     });
 
     test('method chaining with three methods', () => {
@@ -885,110 +905,89 @@ describe('integration', () => {
     });
 
     test('property access with method call', () => {
-      expect(
-        run('data.items.filter(x => x > 2)', ctx({}, { items: [1, 2, 3, 4] })),
-      ).toEqual([3, 4]);
+      expect(run('data.items.filter(x => x > 2)', ctx({}, { items: [1, 2, 3, 4] }))).toEqual([
+        3, 4,
+      ]);
     });
 
     test('nested property access with method call', () => {
       expect(
         run(
           'data.products.filter(p => p.price < 100)',
-          ctx({}, {
-            products: [
-              { name: 'Laptop', price: 999 },
-              { name: 'Mouse', price: 25 },
-              { name: 'Keyboard', price: 75 }
-            ]
-          })
+          ctx(
+            {},
+            {
+              products: [
+                { name: 'Laptop', price: 999 },
+                { name: 'Mouse', price: 25 },
+                { name: 'Keyboard', price: 75 },
+              ],
+            },
+          ),
         ),
       ).toEqual([
         { name: 'Mouse', price: 25 },
-        { name: 'Keyboard', price: 75 }
+        { name: 'Keyboard', price: 75 },
       ]);
     });
 
     test('string.replace() works like string |> replace()', () => {
-      expect(
-        run('"hello world".replace("world", "there")', ctx()),
-      ).toBe('hello there');
+      expect(run('"hello world".replace("world", "there")', ctx())).toBe('hello there');
     });
 
     test('string.split() works like string |> split()', () => {
-      expect(
-        run('"a,b,c".split(",")', ctx()),
-      ).toEqual(['a', 'b', 'c']);
+      expect(run('"a,b,c".split(",")', ctx())).toEqual(['a', 'b', 'c']);
     });
 
     test('array.join() works like array |> join()', () => {
-      expect(
-        run('["a", "b", "c"].join("-")', ctx()),
-      ).toBe('a-b-c');
+      expect(run('["a", "b", "c"].join("-")', ctx())).toBe('a-b-c');
     });
 
     test('string.toLowerCase() works', () => {
-      expect(
-        run('"HELLO".toLowerCase()', ctx()),
-      ).toBe('hello');
+      expect(run('"HELLO".toLowerCase()', ctx())).toBe('hello');
     });
 
     test('string.toUpperCase() works', () => {
-      expect(
-        run('"hello".toUpperCase()', ctx()),
-      ).toBe('HELLO');
+      expect(run('"hello".toUpperCase()', ctx())).toBe('HELLO');
     });
 
     test('array.slice() works', () => {
-      expect(
-        run('[1, 2, 3, 4, 5].slice(1, 3)', ctx()),
-      ).toEqual([2, 3]);
+      expect(run('[1, 2, 3, 4, 5].slice(1, 3)', ctx())).toEqual([2, 3]);
     });
 
     test('array.includes() works', () => {
-      expect(
-        run('[1, 2, 3].includes(2)', ctx()),
-      ).toBe(true);
-      expect(
-        run('[1, 2, 3].includes(5)', ctx()),
-      ).toBe(false);
+      expect(run('[1, 2, 3].includes(2)', ctx())).toBe(true);
+      expect(run('[1, 2, 3].includes(5)', ctx())).toBe(false);
     });
 
     test('array.reverse() works', () => {
-      expect(
-        run('[1, 2, 3].reverse()', ctx()),
-      ).toEqual([3, 2, 1]);
+      expect(run('[1, 2, 3].reverse()', ctx())).toEqual([3, 2, 1]);
     });
 
     test('array.sort() with comparator', () => {
-      expect(
-        run('[3, 1, 2].sort((a, b) => a - b)', ctx()),
-      ).toEqual([1, 2, 3]);
+      expect(run('[3, 1, 2].sort((a, b) => a - b)', ctx())).toEqual([1, 2, 3]);
     });
 
     test('array.flatMap() works', () => {
-      expect(
-        run('[1, 2, 3].flatMap(x => [x, x * 2])', ctx()),
-      ).toEqual([1, 2, 2, 4, 3, 6]);
+      expect(run('[1, 2, 3].flatMap(x => [x, x * 2])', ctx())).toEqual([1, 2, 2, 4, 3, 6]);
     });
 
     test('method calls with dot shorthand', () => {
       expect(
-        run(
-          'data.items.filter(.price > 50)',
-          ctx({}, { items: [{ price: 30 }, { price: 70 }] }),
-        ),
+        run('data.items.filter(.price > 50)', ctx({}, { items: [{ price: 30 }, { price: 70 }] })),
       ).toEqual([{ price: 70 }]);
     });
 
     test('mixed pipe and method syntax', () => {
-      expect(
-        run('[1, 2, 3, 4].filter(x => x > 2) |> map(x => x * 2)', ctx()),
-      ).toEqual([6, 8]);
+      expect(run('[1, 2, 3, 4].filter(x => x > 2) |> map(x => x * 2)', ctx())).toEqual([6, 8]);
     });
 
     test('method call then pipe then method call', () => {
       expect(
-        run('[1, 2, 3, 4].filter(x => x > 1) |> map(x => x * 2) |> filter(x => x > 5).reduce((acc, x) => acc + x, 0)', ctx()),
+        run(
+          '[1, 2, 3, 4].filter(x => x > 1) |> map(x => x * 2) |> filter(x => x > 5).reduce((acc, x) => acc + x, 0)',
+          ctx(),
+        ),
       ).toBe(14);
     });
   });

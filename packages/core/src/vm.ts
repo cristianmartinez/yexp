@@ -881,7 +881,7 @@ export interface EvaluateOptions {
 export function evaluate(
   program: BytecodeProgram,
   context: ExecutionContext,
-  options?: EvaluateOptions
+  options?: EvaluateOptions,
 ): ExprValue {
   const stack: StackValue[] = [];
   const { code, constants, slots: slotPaths } = program;
@@ -1577,13 +1577,16 @@ export function evaluate(
             break;
           }
 
-          if (idx < 0 || idx >= obj.length) {
+          // Handle negative indexing (e.g., arr[-1] = arr[arr.length - 1])
+          const normalizedIdx = idx < 0 ? obj.length + idx : idx;
+
+          if (normalizedIdx < 0 || normalizedIdx >= obj.length) {
             return makeError(
               'INDEX_OUT_OF_BOUNDS',
               `Index ${idx} out of bounds (length ${obj.length})`,
             );
           }
-          push(obj[idx]!);
+          push(obj[normalizedIdx]!);
           break;
         }
 
@@ -1608,13 +1611,16 @@ export function evaluate(
           }
           if (typeof idx === 'number') {
             // Access string character by index
-            if (idx < 0 || idx >= obj.length) {
+            // Handle negative indexing (e.g., str[-1] = str[str.length - 1])
+            const normalizedIdx = idx < 0 ? obj.length + idx : idx;
+
+            if (normalizedIdx < 0 || normalizedIdx >= obj.length) {
               return makeError(
                 'INDEX_OUT_OF_BOUNDS',
                 `Index ${idx} out of bounds (length ${obj.length})`,
               );
             }
-            push(obj[idx]!);
+            push(obj[normalizedIdx]!);
             break;
           }
           return makeError('TYPE_ERROR', 'String index must be a string or number');

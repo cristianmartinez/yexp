@@ -29,7 +29,7 @@ export default function PlaygroundPage() {
   const exampleId = searchParams?.get('example');
 
   const [selectedExampleId, setSelectedExampleId] = useState<string | undefined>(
-    exampleId || undefined
+    exampleId || undefined,
   );
   const [expression, setExpression] = useState('data.items[0].name');
   const [contextJSON, setContextJSON] = useState(`{
@@ -98,14 +98,9 @@ export default function PlaygroundPage() {
         <div className="w-80 border-r flex flex-col overflow-hidden bg-card">
           <div className="px-4 py-3 border-b bg-muted/30">
             <h2 className="text-sm font-semibold text-foreground">Examples</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Try different expressions
-            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">Try different expressions</p>
           </div>
-          <ExamplesPanel
-            selectedId={selectedExampleId}
-            onSelectExample={handleSelectExample}
-          />
+          <ExamplesPanel selectedId={selectedExampleId} onSelectExample={handleSelectExample} />
         </div>
 
         {/* Right Side: Playground */}
@@ -132,7 +127,10 @@ export default function PlaygroundPage() {
                         <span className="text-xs">Inspector</span>
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-[800px] sm:max-w-[800px] flex flex-col p-0">
+                    <SheetContent
+                      side="right"
+                      className="w-[800px] sm:max-w-[800px] flex flex-col p-0"
+                    >
                       <SheetHeader className="px-6 py-4 border-b">
                         <SheetTitle>Expression Inspector</SheetTitle>
                         <SheetDescription>
@@ -147,7 +145,10 @@ export default function PlaygroundPage() {
                             <TabsTrigger value="json">Compiled JSON</TabsTrigger>
                           </TabsList>
 
-                          <TabsContent value="bytecode" className="flex-1 overflow-auto mt-4 space-y-4">
+                          <TabsContent
+                            value="bytecode"
+                            className="flex-1 overflow-auto mt-4 space-y-4"
+                          >
                             {result.bytecode && (
                               <>
                                 {/* Main Program */}
@@ -158,8 +159,12 @@ export default function PlaygroundPage() {
                                   <div className="font-mono text-xs space-y-0.5 p-3 bg-muted/50 border rounded">
                                     {result.bytecode.code.map((inst, i) => (
                                       <div key={i} className="flex gap-3">
-                                        <span className="text-muted-foreground w-8 text-right">{i}:</span>
-                                        <span className="text-primary font-medium">{inst.join(' ')}</span>
+                                        <span className="text-muted-foreground w-8 text-right">
+                                          {i}:
+                                        </span>
+                                        <span className="text-primary font-medium">
+                                          {inst.join(' ')}
+                                        </span>
                                       </div>
                                     ))}
                                   </div>
@@ -168,13 +173,18 @@ export default function PlaygroundPage() {
                                 {/* Lambda Programs */}
                                 {result.bytecode.constants
                                   .map((constant, idx) => ({ constant, idx }))
-                                  .filter(({ constant }) =>
-                                    typeof constant === 'object' &&
-                                    constant !== null &&
-                                    '__lambda' in constant
+                                  .filter(
+                                    ({ constant }) =>
+                                      typeof constant === 'object' &&
+                                      constant !== null &&
+                                      '__lambda' in constant,
                                   )
                                   .map(({ constant, idx }) => {
-                                    const lambda = constant as { __lambda: true; program: typeof result.bytecode; params: string[] };
+                                    const lambda = constant as {
+                                      __lambda: true;
+                                      program: typeof result.bytecode;
+                                      params: string[];
+                                    };
                                     return (
                                       <div key={idx} className="space-y-2">
                                         <div className="flex items-center gap-2">
@@ -188,8 +198,12 @@ export default function PlaygroundPage() {
                                         <div className="font-mono text-xs space-y-0.5 p-3 bg-muted/50 border rounded">
                                           {lambda.program.code.map((inst, i) => (
                                             <div key={i} className="flex gap-3">
-                                              <span className="text-muted-foreground w-8 text-right">{i}:</span>
-                                              <span className="text-primary font-medium">{inst.join(' ')}</span>
+                                              <span className="text-muted-foreground w-8 text-right">
+                                                {i}:
+                                              </span>
+                                              <span className="text-primary font-medium">
+                                                {inst.join(' ')}
+                                              </span>
                                             </div>
                                           ))}
                                         </div>
@@ -198,8 +212,8 @@ export default function PlaygroundPage() {
                                   })}
 
                                 {/* Constants */}
-                                {result.bytecode.constants.filter(c =>
-                                  !(typeof c === 'object' && c !== null && '__lambda' in c)
+                                {result.bytecode.constants.filter(
+                                  (c) => !(typeof c === 'object' && c !== null && '__lambda' in c),
                                 ).length > 0 && (
                                   <div className="space-y-2">
                                     <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -207,8 +221,13 @@ export default function PlaygroundPage() {
                                     </div>
                                     <div className="border rounded overflow-hidden">
                                       <JsonViewer
-                                        value={result.bytecode.constants.filter(c =>
-                                          !(typeof c === 'object' && c !== null && '__lambda' in c)
+                                        value={result.bytecode.constants.filter(
+                                          (c) =>
+                                            !(
+                                              typeof c === 'object' &&
+                                              c !== null &&
+                                              '__lambda' in c
+                                            ),
                                         )}
                                         height="200px"
                                       />
@@ -269,26 +288,26 @@ export default function PlaygroundPage() {
 
               {/* Right panel: Result */}
               <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className="px-4 py-2 border-b bg-muted/50">
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                      <PlayCircle className="w-4 h-4" />
-                      Result
+                <div className="px-4 py-2 border-b bg-muted/50">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <PlayCircle className="w-4 h-4" />
+                    Result
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto p-4">
+                  {result.error ? (
+                    <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
+                      <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
+                      <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
+                        {result.error}
+                      </pre>
                     </div>
-                  </div>
-                  <div className="flex-1 overflow-auto p-4">
-                    {result.error ? (
-                      <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
-                        <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
-                        <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
-                          {result.error}
-                        </pre>
-                      </div>
-                    ) : (
-                      <div className="h-full border">
-                        <JsonViewer value={result.value} height="100%" />
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="h-full border">
+                      <JsonViewer value={result.value} height="100%" />
+                    </div>
+                  )}
+                </div>
               </div>
             </Split>
           </Split>

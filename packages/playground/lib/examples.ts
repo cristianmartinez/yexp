@@ -23,14 +23,14 @@ export const examples: Example[] = [
             profile: {
               name: 'Alice Johnson',
               email: 'alice@example.com',
-              age: 28
-            }
-          }
-        }
+              age: 28,
+            },
+          },
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'array-indexing',
@@ -43,14 +43,14 @@ export const examples: Example[] = [
         data: {
           orders: [
             { id: 'ord_1', total: 299.99, status: 'shipped' },
-            { id: 'ord_2', total: 89.50, status: 'pending' },
-            { id: 'ord_3', total: 450.00, status: 'delivered' }
-          ]
-        }
+            { id: 'ord_2', total: 89.5, status: 'pending' },
+            { id: 'ord_3', total: 450.0, status: 'delivered' },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Lambda: Filter
@@ -68,16 +68,16 @@ export const examples: Example[] = [
             { name: 'Mouse', price: 29, inStock: true, category: 'accessories' },
             { name: 'Monitor', price: 499, inStock: false, category: 'electronics' },
             { name: 'Keyboard', price: 79, inStock: true, category: 'accessories' },
-            { name: 'Webcam', price: 89, inStock: true, category: 'accessories' }
-          ]
+            { name: 'Webcam', price: 89, inStock: true, category: 'accessories' },
+          ],
         },
         state: {
-          budget: 500
-        }
+          budget: 500,
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'filter-shorthand',
@@ -92,13 +92,13 @@ export const examples: Example[] = [
             { name: 'Alice', role: 'admin', active: true, lastLogin: '2024-01-15' },
             { name: 'Bob', role: 'user', active: true, lastLogin: '2024-01-14' },
             { name: 'Charlie', role: 'admin', active: false, lastLogin: '2023-12-01' },
-            { name: 'Diana', role: 'admin', active: true, lastLogin: '2024-01-16' }
-          ]
-        }
+            { name: 'Diana', role: 'admin', active: true, lastLogin: '2024-01-16' },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Lambda: Map
@@ -107,20 +107,33 @@ export const examples: Example[] = [
     name: 'Transform Data',
     description: 'Extract and transform properties',
     category: 'Map',
-    expression: 'data.employees |> map(e => { name: e.firstName + " " + e.lastName, salary: e.salary * 1.1 })',
+    expression:
+      'data.employees |> map(e => { name: e.firstName + " " + e.lastName, salary: e.salary * 1.1 })',
     context: JSON.stringify(
       {
         data: {
           employees: [
-            { id: 1, firstName: 'John', lastName: 'Smith', salary: 75000, department: 'Engineering' },
+            {
+              id: 1,
+              firstName: 'John',
+              lastName: 'Smith',
+              salary: 75000,
+              department: 'Engineering',
+            },
             { id: 2, firstName: 'Sarah', lastName: 'Connor', salary: 85000, department: 'Product' },
-            { id: 3, firstName: 'Mike', lastName: 'Johnson', salary: 65000, department: 'Marketing' }
-          ]
-        }
+            {
+              id: 3,
+              firstName: 'Mike',
+              lastName: 'Johnson',
+              salary: 65000,
+              department: 'Marketing',
+            },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'map-shorthand',
@@ -135,13 +148,13 @@ export const examples: Example[] = [
             { name: 'Laptop', price: 999, inStock: true },
             { name: 'Mouse', price: 25, inStock: false },
             { name: 'Keyboard', price: 75, inStock: true },
-            { name: 'Monitor', price: 450, inStock: true }
-          ]
-        }
+            { name: 'Monitor', price: 450, inStock: true },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Lambda: Reduce
@@ -150,43 +163,45 @@ export const examples: Example[] = [
     name: 'Calculate Total',
     description: 'Sum order totals with reduce',
     category: 'Reduce',
-    expression: 'data.orders |> filter(.status == "paid") |> reduce((sum, order) => sum + order.amount, 0)',
+    expression:
+      'data.orders |> filter(.status == "paid") |> reduce((sum, order) => sum + order.amount, 0)',
     context: JSON.stringify(
       {
         data: {
           orders: [
             { id: 1, amount: 299.99, status: 'paid', customer: 'Alice' },
-            { id: 2, amount: 149.50, status: 'pending', customer: 'Bob' },
+            { id: 2, amount: 149.5, status: 'pending', customer: 'Bob' },
             { id: 3, amount: 89.99, status: 'paid', customer: 'Charlie' },
-            { id: 4, amount: 399.00, status: 'paid', customer: 'Diana' },
-            { id: 5, amount: 59.99, status: 'cancelled', customer: 'Eve' }
-          ]
-        }
+            { id: 4, amount: 399.0, status: 'paid', customer: 'Diana' },
+            { id: 5, amount: 59.99, status: 'cancelled', customer: 'Eve' },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'reduce-complex',
     name: 'Group and Count',
     description: 'Create summary statistics',
     category: 'Reduce',
-    expression: 'data.transactions |> reduce((acc, t) => { total: acc.total + t.amount, count: acc.count + 1, avgAmount: (acc.total + t.amount) / (acc.count + 1) }, { total: 0, count: 0, avgAmount: 0 })',
+    expression:
+      'data.transactions |> reduce((acc, t) => { total: acc.total + t.amount, count: acc.count + 1, avgAmount: (acc.total + t.amount) / (acc.count + 1) }, { total: 0, count: 0, avgAmount: 0 })',
     context: JSON.stringify(
       {
         data: {
           transactions: [
-            { id: 't1', amount: 125.50, type: 'purchase', date: '2024-01-15' },
+            { id: 't1', amount: 125.5, type: 'purchase', date: '2024-01-15' },
             { id: 't2', amount: 89.99, type: 'purchase', date: '2024-01-16' },
-            { id: 't3', amount: 45.00, type: 'refund', date: '2024-01-17' },
-            { id: 't4', amount: 199.99, type: 'purchase', date: '2024-01-18' }
-          ]
-        }
+            { id: 't3', amount: 45.0, type: 'refund', date: '2024-01-17' },
+            { id: 't4', amount: 199.99, type: 'purchase', date: '2024-01-18' },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Lambda: Find, Some, Every
@@ -203,23 +218,24 @@ export const examples: Example[] = [
             { sku: 'LAP-001', name: 'Laptop Pro', quantity: 15, location: 'A1' },
             { sku: 'MOU-042', name: 'Wireless Mouse', quantity: 83, location: 'B3' },
             { sku: 'KEY-088', name: 'Mechanical Keyboard', quantity: 42, location: 'A2' },
-            { sku: 'MON-155', name: '4K Monitor', quantity: 8, location: 'C1' }
-          ]
+            { sku: 'MON-155', name: '4K Monitor', quantity: 8, location: 'C1' },
+          ],
         },
         state: {
-          searchSku: 'KEY-088'
-        }
+          searchSku: 'KEY-088',
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'some-every',
     name: 'Check Conditions',
     description: 'Validate with some and every',
     category: 'Search',
-    expression: '{ hasHighPriority: data.tasks |> some(.priority == "high"), allCompleted: data.tasks |> every(.completed) }',
+    expression:
+      '{ hasHighPriority: data.tasks |> some(.priority == "high"), allCompleted: data.tasks |> every(.completed) }',
     context: JSON.stringify(
       {
         data: {
@@ -227,13 +243,13 @@ export const examples: Example[] = [
             { id: 1, title: 'Fix bug', priority: 'high', completed: true },
             { id: 2, title: 'Update docs', priority: 'low', completed: true },
             { id: 3, title: 'Review PR', priority: 'medium', completed: true },
-            { id: 4, title: 'Deploy', priority: 'high', completed: true }
-          ]
-        }
+            { id: 4, title: 'Deploy', priority: 'high', completed: true },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Complex Pipelines
@@ -242,7 +258,8 @@ export const examples: Example[] = [
     name: 'E-commerce Pipeline',
     description: 'Multi-step data transformation',
     category: 'Pipelines',
-    expression: 'data.orders |> filter(.status == "completed") |> map(o => { customer: o.customer, total: o.items |> reduce((sum, item) => sum + (item.price * item.qty), 0) }) |> filter(.total > 100)',
+    expression:
+      'data.orders |> filter(.status == "completed") |> map(o => { customer: o.customer, total: o.items |> reduce((sum, item) => sum + (item.price * item.qty), 0) }) |> filter(.total > 100)',
     context: JSON.stringify(
       {
         data: {
@@ -253,14 +270,14 @@ export const examples: Example[] = [
               status: 'completed',
               items: [
                 { name: 'Laptop', price: 999, qty: 1 },
-                { name: 'Mouse', price: 25, qty: 2 }
-              ]
+                { name: 'Mouse', price: 25, qty: 2 },
+              ],
             },
             {
               id: 2,
               customer: 'Bob',
               status: 'pending',
-              items: [{ name: 'Keyboard', price: 75, qty: 1 }]
+              items: [{ name: 'Keyboard', price: 75, qty: 1 }],
             },
             {
               id: 3,
@@ -268,22 +285,23 @@ export const examples: Example[] = [
               status: 'completed',
               items: [
                 { name: 'Monitor', price: 450, qty: 1 },
-                { name: 'Cable', price: 15, qty: 3 }
-              ]
-            }
-          ]
-        }
+                { name: 'Cable', price: 15, qty: 3 },
+              ],
+            },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'pipeline-analytics',
     name: 'Analytics Pipeline',
     description: 'Calculate metrics and rankings',
     category: 'Pipelines',
-    expression: 'data.sales |> map(s => { rep: s.salesRep, revenue: s.deals |> filter(.closed) |> reduce((sum, d) => sum + d.value, 0) }) |> filter(.revenue > 50000)',
+    expression:
+      'data.sales |> map(s => { rep: s.salesRep, revenue: s.deals |> filter(.closed) |> reduce((sum, d) => sum + d.value, 0) }) |> filter(.revenue > 50000)',
     context: JSON.stringify(
       {
         data: {
@@ -293,29 +311,29 @@ export const examples: Example[] = [
               deals: [
                 { id: 'd1', value: 45000, closed: true, date: '2024-01-10' },
                 { id: 'd2', value: 32000, closed: true, date: '2024-01-15' },
-                { id: 'd3', value: 18000, closed: false, date: '2024-01-20' }
-              ]
+                { id: 'd3', value: 18000, closed: false, date: '2024-01-20' },
+              ],
             },
             {
               salesRep: 'Bob Smith',
               deals: [
                 { id: 'd4', value: 28000, closed: true, date: '2024-01-12' },
-                { id: 'd5', value: 15000, closed: true, date: '2024-01-18' }
-              ]
+                { id: 'd5', value: 15000, closed: true, date: '2024-01-18' },
+              ],
             },
             {
               salesRep: 'Carol White',
               deals: [
                 { id: 'd6', value: 95000, closed: true, date: '2024-01-08' },
-                { id: 'd7', value: 52000, closed: true, date: '2024-01-22' }
-              ]
-            }
-          ]
-        }
+                { id: 'd7', value: 52000, closed: true, date: '2024-01-22' },
+              ],
+            },
+          ],
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Built-in Functions
@@ -324,49 +342,51 @@ export const examples: Example[] = [
     name: 'Math Functions',
     description: 'Use built-in math operations',
     category: 'Functions',
-    expression: '{ rounded: state.price |> round(2), total: data.values |> reduce((a, b) => a + b, 0) |> abs, maxValue: max(...data.values) }',
+    expression:
+      '{ rounded: state.price |> round(2), total: data.values |> reduce((a, b) => a + b, 0) |> abs, maxValue: max(...data.values) }',
     context: JSON.stringify(
       {
         data: {
-          values: [23.5, -15.8, 42.3, -8.1, 19.7]
+          values: [23.5, -15.8, 42.3, -8.1, 19.7],
         },
         state: {
-          price: 123.456789
-        }
+          price: 123.456789,
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'string-template',
     name: 'Template Strings',
     description: 'Format strings with interpolation',
     category: 'Functions',
-    expression: '`Hello ${data.user.name}! You have ${data.notifications |> length} notifications and ${data.cart.items |> length} items in your cart.`',
+    expression:
+      '`Hello ${data.user.name}! You have ${data.notifications |> length} notifications and ${data.cart.items |> length} items in your cart.`',
     context: JSON.stringify(
       {
         data: {
           user: {
             name: 'Alice',
-            email: 'alice@example.com'
+            email: 'alice@example.com',
           },
           notifications: [
             { id: 1, message: 'New message', read: false },
             { id: 2, message: 'Order shipped', read: false },
-            { id: 3, message: 'Payment received', read: true }
+            { id: 3, message: 'Payment received', read: true },
           ],
           cart: {
             items: [
               { product: 'Laptop', quantity: 1 },
-              { product: 'Mouse', quantity: 2 }
-            ]
-          }
-        }
+              { product: 'Mouse', quantity: 2 },
+            ],
+          },
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Object Operations
@@ -375,7 +395,8 @@ export const examples: Example[] = [
     name: 'Object Transformation',
     description: 'Merge and transform objects',
     category: 'Objects',
-    expression: '{ ...data.defaults, ...state.overrides, computed: data.defaults.x + state.overrides.y }',
+    expression:
+      '{ ...data.defaults, ...state.overrides, computed: data.defaults.x + state.overrides.y }',
     context: JSON.stringify(
       {
         data: {
@@ -383,27 +404,28 @@ export const examples: Example[] = [
             x: 10,
             y: 20,
             color: 'blue',
-            enabled: true
-          }
+            enabled: true,
+          },
         },
         state: {
           overrides: {
             y: 30,
             color: 'red',
-            priority: 'high'
-          }
-        }
+            priority: 'high',
+          },
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
   {
     id: 'conditional-object',
     name: 'Conditional Fields',
     description: 'Build objects with conditional logic',
     category: 'Objects',
-    expression: '{ name: data.user.name, email: data.user.email, status: data.user.age >= 18 ? "adult" : "minor", discount: data.user.isPremium ? 0.20 : 0.10 }',
+    expression:
+      '{ name: data.user.name, email: data.user.email, status: data.user.age >= 18 ? "adult" : "minor", discount: data.user.isPremium ? 0.20 : 0.10 }',
     context: JSON.stringify(
       {
         data: {
@@ -412,13 +434,13 @@ export const examples: Example[] = [
             email: 'sarah@example.com',
             age: 32,
             isPremium: true,
-            registrationDate: '2023-06-15'
-          }
-        }
+            registrationDate: '2023-06-15',
+          },
+        },
       },
       null,
-      2
-    )
+      2,
+    ),
   },
 
   // Wildcards
@@ -436,30 +458,30 @@ export const examples: Example[] = [
               name: 'Engineering',
               members: [
                 { name: 'Alice', role: 'Lead' },
-                { name: 'Bob', role: 'Developer' }
-              ]
+                { name: 'Bob', role: 'Developer' },
+              ],
             },
             {
               name: 'Product',
               members: [
                 { name: 'Carol', role: 'Manager' },
-                { name: 'Dave', role: 'Designer' }
-              ]
+                { name: 'Dave', role: 'Designer' },
+              ],
             },
             {
               name: 'Sales',
               members: [
                 { name: 'Eve', role: 'Director' },
-                { name: 'Frank', role: 'Rep' }
-              ]
-            }
-          ]
-        }
+                { name: 'Frank', role: 'Rep' },
+              ],
+            },
+          ],
+        },
       },
       null,
-      2
-    )
-  }
+      2,
+    ),
+  },
 ];
 
 export const categories = [
@@ -471,5 +493,5 @@ export const categories = [
   'Pipelines',
   'Functions',
   'Objects',
-  'Wildcards'
+  'Wildcards',
 ] as const;

@@ -39,7 +39,8 @@ const EXAMPLES: Example[] = [
     id: 'pipeline',
     name: 'Pipeline with Lambdas',
     description: 'Filter, map, and join with lambda functions',
-    expression: "data.users |> filter(u => u.age >= 18 && u.active) |> map(u => `\${u.name} (\${u.age})`) |> join(', ')",
+    expression:
+      "data.users |> filter(u => u.age >= 18 && u.active) |> map(u => `${u.name} (${u.age})`) |> join(', ')",
     context: `{
   "data": {
     "users": [
@@ -57,7 +58,8 @@ const EXAMPLES: Example[] = [
     id: 'object-spread',
     name: 'Object Construction & Spread',
     description: 'See how objects are built on the stack',
-    expression: "{ ...data.defaults, name: data.user.name, score: data.scores[0] * 2, status: data.active ? 'online' : 'offline' }",
+    expression:
+      "{ ...data.defaults, name: data.user.name, score: data.scores[0] * 2, status: data.active ? 'online' : 'offline' }",
     context: `{
   "data": {
     "defaults": { "color": "blue", "size": "medium" },
@@ -97,7 +99,8 @@ const EXAMPLES: Example[] = [
     id: 'template-literal',
     name: 'Template Literals',
     description: 'String interpolation with expressions',
-    expression: '`Hello \${data.name}, you have \${data.items.length} items totaling $\${data.items |> reduce((sum, item) => sum + item.price, 0)}`',
+    expression:
+      '`Hello ${data.name}, you have ${data.items.length} items totaling $${data.items |> reduce((sum, item) => sum + item.price, 0)}`',
     context: `{
   "data": {
     "name": "Alice",
