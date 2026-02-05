@@ -17,11 +17,11 @@ import {
 } from 'lucide-react';
 
 const codeExamples = [
-  'data.items[0].name',
-  'items.filter(x => x.age > 25).map(x => x.name)',
-  'users.find(u => u.id == currentUserId)?.profile',
-  'price * quantity * (1 - discount / 100)',
-  'env.API_URL + "/users/" + userId',
+  '$.items[0].name',
+  '$.items.filter(x => x.age > 25).map(x => x.name)',
+  '$.users.find(u => u.id == $context.currentUserId)?.profile',
+  '$.price * $.quantity * (1 - $.discount / 100)',
+  '$env.API_URL + "/users/" + $.userId',
 ];
 
 export default function HomePage() {

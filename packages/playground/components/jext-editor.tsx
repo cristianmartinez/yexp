@@ -108,12 +108,11 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
           'isNull',
           'isUndefined',
         ],
-        contextVars: ['data', 'state', 'env', '$', '$$'],
+        contextVars: ['$', '$context', '$env'],
         tokenizer: {
           root: [
             // Context variables (special highlighting)
-            [/\$\$?/, 'variable.predefined'],
-            [/\b(data|state|env)\b/, 'variable.predefined'],
+            [/\$(context|env)?/, 'variable.predefined'],
             // Numbers
             [/\d+(\.\d+)?/, 'number'],
             // Strings

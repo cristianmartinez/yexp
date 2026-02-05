@@ -27,7 +27,7 @@ export function Notebook({ initialContext }: NotebookProps) {
   const [cells, setCells] = useState<Cell[]>([
     {
       id: crypto.randomUUID(),
-      expression: 'data.items.length',
+      expression: '$.items.length',
       result: null,
       error: null,
       bytecode: null,

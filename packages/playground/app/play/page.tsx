@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { tokenize, parse, compile, evaluate } from '@jext/core';
-import type { ExecutionContext } from '@jext/core';
 import { Code2, PlayCircle, Database, AlertCircle, FileCode } from 'lucide-react';
 import { JextEditor } from '@/components/jext-editor';
 import { JsonEditor } from '@/components/json-editor';
@@ -31,16 +30,12 @@ export default function PlaygroundPage() {
   const [selectedExampleId, setSelectedExampleId] = useState<string | undefined>(
     exampleId || undefined,
   );
-  const [expression, setExpression] = useState('data.items[0].name');
+  const [expression, setExpression] = useState('$.items[0].name');
   const [contextJSON, setContextJSON] = useState(`{
-  "data": {
-    "items": [
-      { "name": "Alice", "age": 25 },
-      { "name": "Bob", "age": 30 }
-    ]
-  },
-  "state": {},
-  "env": {}
+  "items": [
+    { "name": "Alice", "age": 25 },
+    { "name": "Bob", "age": 30 }
+  ]
 }`);
 
   // Load example on mount if URL has example param
@@ -70,17 +65,16 @@ export default function PlaygroundPage() {
     try {
       return JSON.parse(contextJSON);
     } catch {
-      return { data: {}, state: {}, env: {} };
+      return {};
     }
   }, [contextJSON]);
 
   const result = useMemo(() => {
     try {
-      const context: ExecutionContext = parsedContext;
       const tokens = tokenize(expression);
       const ast = parse(tokens);
       const program = compile(ast);
-      const value = evaluate(program, context);
+      const value = evaluate(program, parsedContext);
       return { value, error: null, bytecode: program, ast, tokens };
     } catch (e: any) {
       return { value: null, error: e.message, bytecode: null, ast: null, tokens: null };

@@ -18,21 +18,15 @@ const EXAMPLES: Example[] = [
     name: 'Simple Arithmetic',
     description: 'See operator precedence and basic math operations',
     expression: '1 + 2 * 3',
-    context: `{
-  "data": {},
-  "state": {},
-  "env": {}
-}`,
+    context: `{}`,
   },
   {
     id: 'conditional',
     name: 'Conditional (Ternary)',
     description: 'Watch the VM jump based on conditions',
-    expression: "data.x > 10 ? 'big' : 'small'",
+    expression: "$.x > 10 ? 'big' : 'small'",
     context: `{
-  "data": { "x": 15 },
-  "state": {},
-  "env": {}
+  "x": 15
 }`,
   },
   {
@@ -40,18 +34,14 @@ const EXAMPLES: Example[] = [
     name: 'Pipeline with Lambdas',
     description: 'Filter, map, and join with lambda functions',
     expression:
-      "data.users |> filter(u => u.age >= 18 && u.active) |> map(u => `${u.name} (${u.age})`) |> join(', ')",
+      "$.users |> filter(u => u.age >= 18 && u.active) |> map(u => `${u.name} (${u.age})`) |> join(', ')",
     context: `{
-  "data": {
-    "users": [
-      { "name": "Alice", "age": 25, "active": true },
-      { "name": "Bob", "age": 17, "active": true },
-      { "name": "Carol", "age": 30, "active": false },
-      { "name": "Dave", "age": 22, "active": true }
-    ]
-  },
-  "state": {},
-  "env": {}
+  "users": [
+    { "name": "Alice", "age": 25, "active": true },
+    { "name": "Bob", "age": 17, "active": true },
+    { "name": "Carol", "age": 30, "active": false },
+    { "name": "Dave", "age": 22, "active": true }
+  ]
 }`,
   },
   {
@@ -59,40 +49,30 @@ const EXAMPLES: Example[] = [
     name: 'Object Construction & Spread',
     description: 'See how objects are built on the stack',
     expression:
-      "{ ...data.defaults, name: data.user.name, score: data.scores[0] * 2, status: data.active ? 'online' : 'offline' }",
+      "{ ...$.defaults, name: $.user.name, score: $.scores[0] * 2, status: $.active ? 'online' : 'offline' }",
     context: `{
-  "data": {
-    "defaults": { "color": "blue", "size": "medium" },
-    "user": { "name": "Alice" },
-    "scores": [45, 38, 42],
-    "active": true
-  },
-  "state": {},
-  "env": {}
+  "defaults": { "color": "blue", "size": "medium" },
+  "user": { "name": "Alice" },
+  "scores": [45, 38, 42],
+  "active": true
 }`,
   },
   {
     id: 'array-access',
     name: 'Array Operations',
     description: 'Indexing, negative indices, and array construction',
-    expression: '[...data.items, data.items[-1] * 2]',
+    expression: '[...$.items, $.items[-1] * 2]',
     context: `{
-  "data": { "items": [10, 20, 30] },
-  "state": {},
-  "env": {}
+  "items": [10, 20, 30]
 }`,
   },
   {
     id: 'optional-chaining',
     name: 'Optional Chaining',
     description: 'Safe property access with null coalescing',
-    expression: 'data.user?.profile?.avatar ?? "default.png"',
+    expression: '$.user?.profile?.avatar ?? "default.png"',
     context: `{
-  "data": {
-    "user": { "name": "Bob" }
-  },
-  "state": {},
-  "env": {}
+  "user": { "name": "Bob" }
 }`,
   },
   {
@@ -100,44 +80,34 @@ const EXAMPLES: Example[] = [
     name: 'Template Literals',
     description: 'String interpolation with expressions',
     expression:
-      '`Hello ${data.name}, you have ${data.items.length} items totaling $${data.items |> reduce((sum, item) => sum + item.price, 0)}`',
+      '`Hello ${$.name}, you have ${$.items.length} items totaling $${$.items |> reduce((sum, item) => sum + item.price, 0)}`',
     context: `{
-  "data": {
-    "name": "Alice",
-    "items": [
-      { "name": "Book", "price": 12.99 },
-      { "name": "Pen", "price": 2.50 },
-      { "name": "Notebook", "price": 5.99 }
-    ]
-  },
-  "state": {},
-  "env": {}
+  "name": "Alice",
+  "items": [
+    { "name": "Book", "price": 12.99 },
+    { "name": "Pen", "price": 2.50 },
+    { "name": "Notebook", "price": 5.99 }
+  ]
 }`,
   },
   {
     id: 'nested-ternary',
     name: 'Nested Ternary',
     description: 'Complex control flow with multiple conditions',
-    expression: 'data.score >= 90 ? "A" : data.score >= 80 ? "B" : data.score >= 70 ? "C" : "F"',
+    expression: '$.score >= 90 ? "A" : $.score >= 80 ? "B" : $.score >= 70 ? "C" : "F"',
     context: `{
-  "data": { "score": 85 },
-  "state": {},
-  "env": {}
+  "score": 85
 }`,
   },
   {
     id: 'logical-operators',
     name: 'Logical Operators',
     description: 'AND, OR, and NOT operations',
-    expression: 'data.age >= 18 && data.verified && !data.suspended',
+    expression: '$.age >= 18 && $.verified && !$.suspended',
     context: `{
-  "data": {
-    "age": 25,
-    "verified": true,
-    "suspended": false
-  },
-  "state": {},
-  "env": {}
+  "age": 25,
+  "verified": true,
+  "suspended": false
 }`,
   },
 ];

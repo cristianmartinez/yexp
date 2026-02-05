@@ -3,29 +3,24 @@
 import { useState, useMemo } from 'react';
 import { Database } from 'lucide-react';
 import { Notebook } from '@/components/notebook';
-import { ContextEditor } from '@/components/context-editor';
+import { JsonEditor } from '@/components/json-editor';
 import { PageHeader } from '@/components/page-header';
 
 export default function NotebookPage() {
-  const [dataJSON, setDataJSON] = useState(`{
+  const [contextJSON, setContextJSON] = useState(`{
   "items": [
     { "name": "Alice", "age": 25 },
     { "name": "Bob", "age": 30 }
   ]
 }`);
-  const [stateJSON, setStateJSON] = useState('{}');
-  const [envJSON, setEnvJSON] = useState('{}');
 
   const parsedContext = useMemo(() => {
     try {
-      const data = JSON.parse(dataJSON);
-      const state = JSON.parse(stateJSON);
-      const env = JSON.parse(envJSON);
-      return { data, state, env };
+      return JSON.parse(contextJSON);
     } catch {
-      return { data: {}, state: {}, env: {} };
+      return {};
     }
-  }, [dataJSON, stateJSON, envJSON]);
+  }, [contextJSON]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -42,15 +37,8 @@ export default function NotebookPage() {
               Context
             </div>
           </div>
-          <div className="flex-1 overflow-auto p-4">
-            <ContextEditor
-              data={dataJSON}
-              state={stateJSON}
-              env={envJSON}
-              onDataChange={setDataJSON}
-              onStateChange={setStateJSON}
-              onEnvChange={setEnvJSON}
-            />
+          <div className="flex-1 overflow-hidden">
+            <JsonEditor value={contextJSON} onChange={setContextJSON} height="100%" />
           </div>
         </div>
 
