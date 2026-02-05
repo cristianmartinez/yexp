@@ -8,8 +8,8 @@ function c(source: string) {
   return compile(parse(tokenize(source)));
 }
 
-function opcodes(source: string): string[] {
-  return c(source).code.map((i) => i[0] as string);
+function opcodes(source: string): Opcode[] {
+  return c(source).code.map((i) => i[0]);
 }
 
 describe('compiler', () => {
