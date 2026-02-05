@@ -17,16 +17,16 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
     editorRef.current = editor;
 
-    // Register Vlot language if not already registered
+    // Register Jext language if not already registered
     if (
       !monaco.languages
         .getLanguages()
-        .some((lang: languages.ILanguageExtensionPoint) => lang.id === 'vlot')
+        .some((lang: languages.ILanguageExtensionPoint) => lang.id === 'jext')
     ) {
-      monaco.languages.register({ id: 'vlot' });
+      monaco.languages.register({ id: 'jext' });
 
       // Set language configuration
-      monaco.languages.setLanguageConfiguration('vlot', {
+      monaco.languages.setLanguageConfiguration('jext', {
         brackets: [
           ['[', ']'],
           ['(', ')'],
@@ -42,7 +42,7 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
       });
 
       // Set tokenizer for syntax highlighting
-      monaco.languages.setMonarchTokensProvider('vlot', {
+      monaco.languages.setMonarchTokensProvider('jext', {
         keywords: [
           'true',
           'false',
@@ -164,8 +164,8 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
         },
       });
 
-      // Define VS Code dark theme for Vlot
-      monaco.editor.defineTheme('vlot-dark', {
+      // Define VS Code dark theme for Jext
+      monaco.editor.defineTheme('jext-dark', {
         base: 'vs-dark',
         inherit: true,
         rules: [
@@ -184,7 +184,7 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
       });
 
       // Register completion provider for autocompletion
-      monaco.languages.registerCompletionItemProvider('vlot', {
+      monaco.languages.registerCompletionItemProvider('jext', {
         provideCompletionItems: (model: editor.ITextModel, position: IPosition) => {
           const word = model.getWordUntilPosition(position);
           const range = {
@@ -239,11 +239,11 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
     <div className="bg-[#1e1e1e] h-full">
       <Editor
         height={height}
-        language="vlot"
+        language="jext"
         value={value}
         onChange={(val) => onChange(val || '')}
         onMount={handleEditorDidMount}
-        theme="vlot-dark"
+        theme="jext-dark"
         options={{
           minimap: { enabled: false },
           fontSize: 14,

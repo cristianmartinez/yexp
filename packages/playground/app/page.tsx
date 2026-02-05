@@ -26,7 +26,7 @@ import Split from 'react-split';
 export default function PlaygroundPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const exampleId = searchParams.get('example');
+  const exampleId = searchParams?.get('example');
 
   const [selectedExampleId, setSelectedExampleId] = useState<string | undefined>(
     exampleId || undefined

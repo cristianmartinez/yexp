@@ -1,9 +1,8 @@
-import nextra from 'nextra';
+import nextra from 'nextra'
 
 const withNextra = nextra({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
-});
+  contentDirBasePath: '/docs'
+})
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
