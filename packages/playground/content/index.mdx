@@ -9,19 +9,15 @@ Welcome to **Jext** - a fast, deterministic expression language with JavaScript-
 Watch how expressions execute step-by-step in the bytecode virtual machine:
 
 <VMExecutionDemo
-  initialExpression="data.items |> filter(.price < 100) |> map(.name) |> join(', ')"
+  initialExpression="$.items |> filter(.price < 100) |> map(.name) |> join(', ')"
   initialContext={`{
-  "data": {
-    "items": [
-      { "name": "Laptop", "price": 999 },
-      { "name": "Mouse", "price": 25 },
-      { "name": "Keyboard", "price": 75 },
-      { "name": "Monitor", "price": 350 },
-      { "name": "USB Cable", "price": 12 }
-    ]
-  },
-  "state": {},
-  "env": {}
+  "items": [
+    { "name": "Laptop", "price": 999 },
+    { "name": "Mouse", "price": 25 },
+    { "name": "Keyboard", "price": 75 },
+    { "name": "Monitor", "price": 350 },
+    { "name": "USB Cable", "price": 12 }
+  ]
 }`}
 />
 
@@ -37,7 +33,7 @@ Jext is an expression engine designed for:
 
 ```javascript
 // Filter and transform data
-data.products
+$.products
   .filter(p => p.price < 100)
   .map(p => p.name)
   .join(", ")
