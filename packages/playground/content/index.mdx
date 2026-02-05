@@ -1,6 +1,29 @@
+import { VMExecutionDemo } from '../components/vm-execution-demo'
+
 # Jext Documentation
 
 Welcome to **Jext** - a fast, deterministic expression language with JavaScript-like syntax.
+
+## VM Execution Visualizer
+
+Watch how expressions execute step-by-step in the bytecode virtual machine:
+
+<VMExecutionDemo
+  initialExpression="data.items |> filter(.price < 100) |> map(.name) |> join(', ')"
+  initialContext={`{
+  "data": {
+    "items": [
+      { "name": "Laptop", "price": 999 },
+      { "name": "Mouse", "price": 25 },
+      { "name": "Keyboard", "price": 75 },
+      { "name": "Monitor", "price": 350 },
+      { "name": "USB Cable", "price": 12 }
+    ]
+  },
+  "state": {},
+  "env": {}
+}`}
+/>
 
 ## What is Jext?
 
