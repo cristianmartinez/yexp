@@ -1,318 +1,330 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { tokenize, parse, compile, evaluate } from '@jext/core';
-import type { ExecutionContext } from '@jext/core';
-import { Code2, PlayCircle, Database, AlertCircle, FileCode } from 'lucide-react';
-import { JextEditor } from '@/components/jext-editor';
-import { JsonEditor } from '@/components/json-editor';
-import { JsonViewer } from '@/components/json-viewer';
-import { PageHeader } from '@/components/page-header';
-import { ExamplesPanel } from '@/components/examples-panel';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { examples, type Example } from '@/lib/examples';
-import Split from 'react-split';
+  Zap,
+  Code2,
+  Rocket,
+  Sparkles,
+  ArrowRight,
+  Terminal,
+  Cpu,
+  BookOpen,
+  PlayCircle,
+} from 'lucide-react';
 
-export default function PlaygroundPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const exampleId = searchParams?.get('example');
+const codeExamples = [
+  'data.items[0].name',
+  'items.filter(x => x.age > 25).map(x => x.name)',
+  'users.find(u => u.id == currentUserId)?.profile',
+  'price * quantity * (1 - discount / 100)',
+  'env.API_URL + "/users/" + userId',
+];
 
-  const [selectedExampleId, setSelectedExampleId] = useState<string | undefined>(
-    exampleId || undefined,
-  );
-  const [expression, setExpression] = useState('data.items[0].name');
-  const [contextJSON, setContextJSON] = useState(`{
-  "data": {
-    "items": [
-      { "name": "Alice", "age": 25 },
-      { "name": "Bob", "age": 30 }
-    ]
-  },
-  "state": {},
-  "env": {}
-}`);
+export default function HomePage() {
+  const [currentExample, setCurrentExample] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  // Load example on mount if URL has example param
   useEffect(() => {
-    if (exampleId) {
-      const example = examples.find((ex) => ex.id === exampleId);
-      if (example) {
-        setExpression(example.expression);
-        setContextJSON(example.context);
-        setSelectedExampleId(example.id);
-      }
-    }
-  }, []); // Only run on mount
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentExample((prev) => (prev + 1) % codeExamples.length);
+        setIsAnimating(false);
+      }, 300);
+    }, 3000);
 
-  const handleSelectExample = (example: Example) => {
-    setExpression(example.expression);
-    setContextJSON(example.context);
-    setSelectedExampleId(example.id);
-
-    // Update URL
-    const params = new URLSearchParams();
-    params.set('example', example.id);
-    router.push(`?${params.toString()}`);
-  };
-
-  const parsedContext = useMemo(() => {
-    try {
-      return JSON.parse(contextJSON);
-    } catch {
-      return { data: {}, state: {}, env: {} };
-    }
-  }, [contextJSON]);
-
-  const result = useMemo(() => {
-    try {
-      const context: ExecutionContext = parsedContext;
-      const tokens = tokenize(expression);
-      const ast = parse(tokens);
-      const program = compile(ast);
-      const value = evaluate(program, context);
-      return { value, error: null, bytecode: program, ast, tokens };
-    } catch (e: any) {
-      return { value: null, error: e.message, bytecode: null, ast: null, tokens: null };
-    }
-  }, [expression, parsedContext]);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="h-screen flex flex-col">
-      <div className="px-6 py-4 border-b">
-        <PageHeader currentPage="playground" />
-      </div>
-
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar: Examples Navigation */}
-        <div className="w-80 border-r flex flex-col overflow-hidden bg-card">
-          <div className="px-4 py-3 border-b bg-muted/30">
-            <h2 className="text-sm font-semibold text-foreground">Examples</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Try different expressions</p>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+      {/* Header */}
+      <header className="border-b backdrop-blur-sm bg-background/80 sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/jext-logo.svg"
+                alt="Jext"
+                width={40}
+                height={40}
+                className="dark:invert"
+              />
+              <h1 className="text-xl font-bold text-primary">JEXT</h1>
+            </div>
+            <nav className="flex items-center gap-3">
+              <Button variant="ghost" asChild>
+                <Link href="/docs">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Docs
+                </Link>
+              </Button>
+              <Button variant="default" asChild className="gap-2">
+                <Link href="/play">
+                  <PlayCircle className="w-4 h-4" />
+                  Try Playground
+                </Link>
+              </Button>
+            </nav>
           </div>
-          <ExamplesPanel selectedId={selectedExampleId} onSelectExample={handleSelectExample} />
         </div>
+      </header>
 
-        {/* Right Side: Playground */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Split
-            className="flex-1 split split-vertical"
-            direction="vertical"
-            sizes={[25, 75]}
-            minSize={[150, 400]}
-            gutterSize={4}
-          >
-            {/* Expression panel */}
-            <div className="border-b flex flex-col overflow-hidden">
-              <div className="px-4 py-2 border-b bg-muted/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Code2 className="w-4 h-4" />
-                    Expression
+      {/* Hero Section */}
+      <section className="container mx-auto px-6 pt-20 pb-32">
+        <div className="max-w-5xl mx-auto text-center space-y-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-muted/50 text-sm font-medium mb-4 animate-fade-in">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span>Powerful expression language for JavaScript</span>
+          </div>
+
+          <h1 className="text-6xl md:text-7xl font-bold tracking-tight animate-fade-in-up">
+            Write expressions,
+            <br />
+            <span className="text-primary">not code</span>
+          </h1>
+
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up animation-delay-200">
+            Jext is a fast, secure, and intuitive expression language that compiles to optimized
+            bytecode. Perfect for user-defined rules, formulas, and dynamic logic.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up animation-delay-400">
+            <Button size="lg" asChild className="gap-2 text-lg px-8 py-6">
+              <Link href="/play">
+                <Zap className="w-5 h-5" />
+                Try Interactive Playground
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild className="gap-2 text-lg px-8 py-6">
+              <Link href="/docs">
+                <BookOpen className="w-5 h-5" />
+                Read Documentation
+              </Link>
+            </Button>
+          </div>
+
+          {/* Animated Code Example */}
+          <div className="mt-16 animate-fade-in-up animation-delay-600">
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-card border rounded-lg shadow-2xl overflow-hidden">
+                <div className="bg-muted/50 px-4 py-2 border-b flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/80" />
                   </div>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-7 gap-1">
-                        <FileCode className="w-3.5 h-3.5" />
-                        <span className="text-xs">Inspector</span>
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent
-                      side="right"
-                      className="w-[800px] sm:max-w-[800px] flex flex-col p-0"
-                    >
-                      <SheetHeader className="px-6 py-4 border-b">
-                        <SheetTitle>Expression Inspector</SheetTitle>
-                        <SheetDescription>
-                          View the AST, bytecode, and compiled output
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="flex-1 overflow-hidden p-6">
-                        <Tabs defaultValue="bytecode" className="flex flex-col h-full">
-                          <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="bytecode">Bytecode</TabsTrigger>
-                            <TabsTrigger value="ast">AST</TabsTrigger>
-                            <TabsTrigger value="json">Compiled JSON</TabsTrigger>
-                          </TabsList>
-
-                          <TabsContent
-                            value="bytecode"
-                            className="flex-1 overflow-auto mt-4 space-y-4"
-                          >
-                            {result.bytecode && (
-                              <>
-                                {/* Main Program */}
-                                <div className="space-y-2">
-                                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Main Program
-                                  </div>
-                                  <div className="font-mono text-xs space-y-0.5 p-3 bg-muted/50 border rounded">
-                                    {result.bytecode.code.map((inst, i) => (
-                                      <div key={i} className="flex gap-3">
-                                        <span className="text-muted-foreground w-8 text-right">
-                                          {i}:
-                                        </span>
-                                        <span className="text-primary font-medium">
-                                          {inst.join(' ')}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Lambda Programs */}
-                                {result.bytecode.constants
-                                  .map((constant, idx) => ({ constant, idx }))
-                                  .filter(
-                                    ({ constant }) =>
-                                      typeof constant === 'object' &&
-                                      constant !== null &&
-                                      '__lambda' in constant,
-                                  )
-                                  .map(({ constant, idx }) => {
-                                    const lambda = constant as {
-                                      __lambda: true;
-                                      program: typeof result.bytecode;
-                                      params: string[];
-                                    };
-                                    return (
-                                      <div key={idx} className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                            Lambda #{idx}
-                                          </div>
-                                          <code className="text-xs text-primary/70 font-mono">
-                                            ({lambda.params.join(', ')}) ={'>'} ...
-                                          </code>
-                                        </div>
-                                        <div className="font-mono text-xs space-y-0.5 p-3 bg-muted/50 border rounded">
-                                          {lambda.program.code.map((inst, i) => (
-                                            <div key={i} className="flex gap-3">
-                                              <span className="text-muted-foreground w-8 text-right">
-                                                {i}:
-                                              </span>
-                                              <span className="text-primary font-medium">
-                                                {inst.join(' ')}
-                                              </span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-
-                                {/* Constants */}
-                                {result.bytecode.constants.filter(
-                                  (c) => !(typeof c === 'object' && c !== null && '__lambda' in c),
-                                ).length > 0 && (
-                                  <div className="space-y-2">
-                                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                      Constants
-                                    </div>
-                                    <div className="border rounded overflow-hidden">
-                                      <JsonViewer
-                                        value={result.bytecode.constants.filter(
-                                          (c) =>
-                                            !(
-                                              typeof c === 'object' &&
-                                              c !== null &&
-                                              '__lambda' in c
-                                            ),
-                                        )}
-                                        height="200px"
-                                      />
-                                    </div>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </TabsContent>
-
-                          <TabsContent value="ast" className="flex-1 overflow-hidden mt-4">
-                            <div className="h-full border rounded overflow-hidden">
-                              <JsonViewer value={result.ast} height="100%" />
-                            </div>
-                          </TabsContent>
-
-                          <TabsContent value="json" className="flex-1 overflow-hidden mt-4">
-                            <div className="h-full border rounded overflow-hidden">
-                              <JsonViewer value={result.bytecode} height="100%" />
-                            </div>
-                          </TabsContent>
-                        </Tabs>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
+                  <span className="text-xs text-muted-foreground ml-2">Expression</span>
+                </div>
+                <div className="p-8 font-mono text-2xl text-primary min-h-[120px] flex items-center justify-center">
+                  <span
+                    className={`transition-all duration-300 ${
+                      isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+                    }`}
+                  >
+                    {codeExamples[currentExample]}
+                  </span>
                 </div>
               </div>
-              <div className="flex-1">
-                <JextEditor
-                  value={expression}
-                  onChange={setExpression}
-                  context={parsedContext}
-                  height="100%"
-                />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Why Jext?</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Built for developers who need safe, fast, and flexible user-defined logic
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Feature 1: Interactive Playground */}
+            <div className="group bg-card border rounded-xl p-8 hover:shadow-xl transition-all duration-300 hover:border-primary/50 hover:-translate-y-1">
+              <div className="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Terminal className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3">Interactive Playground</h3>
+              <p className="text-muted-foreground mb-4">
+                Live code editor with instant feedback, AST visualization, and bytecode inspection.
+                See your expressions come to life in real-time.
+              </p>
+              <Button variant="link" asChild className="gap-2 p-0 h-auto text-primary">
+                <Link href="/play">
+                  Try it now <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Feature 2: Performance & Bytecode */}
+            <div className="group bg-card border rounded-xl p-8 hover:shadow-xl transition-all duration-300 hover:border-primary/50 hover:-translate-y-1">
+              <div className="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Cpu className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3">Blazing Fast</h3>
+              <p className="text-muted-foreground mb-4">
+                Compiles expressions to optimized bytecode for lightning-fast execution. Stack-based
+                VM designed for performance and efficiency.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-primary">
+                <Rocket className="w-4 h-4" />
+                <span className="font-mono">Optimized bytecode compilation</span>
               </div>
             </div>
 
-            {/* Main content area */}
-            <Split
-              className="flex-1 split split-horizontal"
-              direction="horizontal"
-              sizes={[33, 67]}
-              minSize={[200, 300]}
-              gutterSize={4}
-            >
-              {/* Context panel */}
-              <div className="border-r flex flex-col overflow-hidden">
-                <div className="px-4 py-2 border-b bg-muted/50">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Database className="w-4 h-4" />
-                    Context
-                  </div>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <JsonEditor value={contextJSON} onChange={setContextJSON} height="100%" />
-                </div>
+            {/* Feature 3: Developer Experience */}
+            <div className="group bg-card border rounded-xl p-8 hover:shadow-xl transition-all duration-300 hover:border-primary/50 hover:-translate-y-1">
+              <div className="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Code2 className="w-7 h-7 text-primary" />
               </div>
+              <h3 className="text-2xl font-semibold mb-3">Amazing DX</h3>
+              <p className="text-muted-foreground mb-4">
+                First-class TypeScript support, comprehensive documentation, and powerful tooling.
+                Built by developers, for developers.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-mono rounded-full">
+                  TypeScript
+                </span>
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-mono rounded-full">
+                  Great Docs
+                </span>
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-mono rounded-full">
+                  Testing Tools
+                </span>
+              </div>
+            </div>
 
-              {/* Right panel: Result */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <div className="px-4 py-2 border-b bg-muted/50">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <PlayCircle className="w-4 h-4" />
-                    Result
-                  </div>
-                </div>
-                <div className="flex-1 overflow-auto p-4">
-                  {result.error ? (
-                    <div className="flex items-start gap-3 p-4 border border-destructive/50 bg-destructive/10">
-                      <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
-                      <pre className="text-destructive text-sm font-mono whitespace-pre-wrap flex-1">
-                        {result.error}
-                      </pre>
-                    </div>
-                  ) : (
-                    <div className="h-full border">
-                      <JsonViewer value={result.value} height="100%" />
-                    </div>
-                  )}
-                </div>
+            {/* Feature 4: Rich Language */}
+            <div className="group bg-card border rounded-xl p-8 hover:shadow-xl transition-all duration-300 hover:border-primary/50 hover:-translate-y-1">
+              <div className="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-7 h-7 text-primary" />
               </div>
-            </Split>
-          </Split>
+              <h3 className="text-2xl font-semibold mb-3">Powerful Expressions</h3>
+              <p className="text-muted-foreground mb-4">
+                Rich syntax with operators, functions, property access, array/object operations, and
+                more. Familiar JavaScript-like syntax that&apos;s easy to learn.
+              </p>
+              <div className="space-y-1 text-sm font-mono text-muted-foreground">
+                <div>✓ Arithmetic & logical operators</div>
+                <div>✓ Lambda functions & filters</div>
+                <div>✓ Safe property access</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-12 text-center">
+            <h2 className="text-4xl font-bold mb-4">Ready to get started?</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Jump into the interactive playground and start writing expressions in seconds. No
+              installation required.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" asChild className="gap-2 text-lg px-8 py-6">
+                <Link href="/play">
+                  <PlayCircle className="w-5 h-5" />
+                  Launch Playground
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="gap-2 text-lg px-8 py-6">
+                <Link href="/docs">View Documentation</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t mt-20">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/jext-logo.svg"
+                alt="Jext"
+                width={24}
+                height={24}
+                className="dark:invert"
+              />
+              <span className="text-sm text-muted-foreground">
+                Jext Expression Language
+              </span>
+            </div>
+            <div className="flex gap-6 text-sm text-muted-foreground">
+              <Link href="/docs" className="hover:text-primary transition-colors">
+                Documentation
+              </Link>
+              <Link href="/play" className="hover:text-primary transition-colors">
+                Playground
+              </Link>
+              <Link href="/notebook" className="hover:text-primary transition-colors">
+                Notebook
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <style jsx global>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out;
+        }
+
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out;
+        }
+
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+          opacity: 0;
+          animation-fill-mode: forwards;
+        }
+
+        .animation-delay-400 {
+          animation-delay: 0.4s;
+          opacity: 0;
+          animation-fill-mode: forwards;
+        }
+
+        .animation-delay-600 {
+          animation-delay: 0.6s;
+          opacity: 0;
+          animation-fill-mode: forwards;
+        }
+      `}</style>
     </div>
   );
 }

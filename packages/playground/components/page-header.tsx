@@ -1,20 +1,37 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Zap, FileText } from 'lucide-react';
+import { BookOpen, Zap, FileText, Home } from 'lucide-react';
 
 interface PageHeaderProps {
-  currentPage: 'playground' | 'notebook' | 'docs';
+  currentPage: 'home' | 'playground' | 'notebook' | 'docs';
 }
 
 export function PageHeader({ currentPage }: PageHeaderProps) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
+      <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
         <Image src="/jext-logo.svg" alt="Jext" width={40} height={40} className="dark:invert" />
         <h1 className="text-sm font-bold text-primary">JEXT</h1>
-      </div>
+      </Link>
       <div className="flex gap-2">
+        <Button
+          variant={currentPage === 'home' ? 'default' : 'outline'}
+          className="gap-2"
+          asChild={currentPage !== 'home'}
+        >
+          {currentPage === 'home' ? (
+            <>
+              <Home className="w-4 h-4" />
+              Home
+            </>
+          ) : (
+            <Link href="/">
+              <Home className="w-4 h-4" />
+              Home
+            </Link>
+          )}
+        </Button>
         <Button
           variant={currentPage === 'playground' ? 'default' : 'outline'}
           className="gap-2"
@@ -26,7 +43,7 @@ export function PageHeader({ currentPage }: PageHeaderProps) {
               Playground
             </>
           ) : (
-            <Link href="/">
+            <Link href="/play">
               <Zap className="w-4 h-4" />
               Playground
             </Link>
