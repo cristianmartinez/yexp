@@ -10,7 +10,7 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { LLMClient } from "./llm-client";
-import { compileExpr } from "@yexp/core";
+import { compileExpr, run } from "@yexp/core";
 
 const llm = new LLMClient();
 
@@ -19,6 +19,7 @@ interface TestCase {
   input: string;
   expected: string;
   context: Record<string, any>;
+  sampleData?: Record<string, any>; // Actual data for runtime validation
 }
 
 interface EvalResult {
@@ -53,6 +54,15 @@ const DATASET: TestCase[] = [
     input: "Get all active users",
     expected: "data.users |> filter(.active)",
     context: { data: { users: "array<{active: boolean, name: string}>" } },
+    sampleData: {
+      data: {
+        users: [
+          { active: true, name: "Alice" },
+          { active: false, name: "Bob" },
+          { active: true, name: "Charlie" },
+        ],
+      },
+    },
   },
   {
     id: "filter-map-chain",
@@ -71,6 +81,15 @@ const DATASET: TestCase[] = [
     input: "Extract all product names",
     expected: "data.products |> map(.name)",
     context: { data: { products: "array<{name: string}>" } },
+    sampleData: {
+      data: {
+        products: [
+          { name: "Widget", price: 10 },
+          { name: "Gadget", price: 20 },
+          { name: "Doohickey", price: 15 },
+        ],
+      },
+    },
   },
   {
     id: "filter-multiple-conditions",
@@ -352,6 +371,15 @@ const DATASET: TestCase[] = [
     input: "Find users who have at least one completed task",
     expected: "data.users |> filter((u) => u.tasks |> some(.completed))",
     context: { data: { users: "array<{tasks: array<{completed: boolean}>}>" } },
+    sampleData: {
+      data: {
+        users: [
+          { name: "Alice", tasks: [{ completed: true }, { completed: false }] },
+          { name: "Bob", tasks: [{ completed: false }] },
+          { name: "Charlie", tasks: [{ completed: true }] },
+        ],
+      },
+    },
   },
   {
     id: "complex-flatten-filter",
@@ -495,15 +523,36 @@ class RalphLoop {
 
   /**
    * Score generated expression vs expected
+   * If sampleData is provided, executes both and compares outputs (runtime validation)
+   * Otherwise falls back to token-based similarity
    */
-  private scoreExpression(generated: string, expected: string): number {
+  private scoreExpression(
+    generated: string,
+    expected: string,
+    sampleData?: Record<string, any>
+  ): number {
     if (generated === expected) return 1.0;
 
     const normalize = (s: string) =>
       s.replace(/\s+/g, " ").replace(/;$/, "").trim();
     if (normalize(generated) === normalize(expected)) return 0.95;
 
-    // Token overlap
+    // Runtime validation if sample data provided
+    if (sampleData) {
+      try {
+        const expectedOutput = run(expected, { root: sampleData, state: sampleData.state, data: sampleData.data, env: sampleData.env });
+        const generatedOutput = run(generated, { root: sampleData, state: sampleData.state, data: sampleData.data, env: sampleData.env });
+
+        // Deep equality check
+        const areEqual = JSON.stringify(expectedOutput) === JSON.stringify(generatedOutput);
+        return areEqual ? 1.0 : 0.0;
+      } catch (error) {
+        // If runtime execution fails, fall through to token-based scoring
+        // (Don't log here to avoid noise during eval runs)
+      }
+    }
+
+    // Token overlap (fallback)
     const genTokens = new Set(generated.split(/[\s|>().,]/));
     const expTokens = new Set(expected.split(/[\s|>().,]/));
     const intersection = new Set([...genTokens].filter((t) => expTokens.has(t)));
@@ -541,7 +590,7 @@ class RalphLoop {
           compilationError = compileErr instanceof Error ? compileErr.message : "Compilation failed";
         }
 
-        const score = compilationError ? 0 : this.scoreExpression(generated.text, testCase.expected);
+        const score = compilationError ? 0 : this.scoreExpression(generated.text, testCase.expected, testCase.sampleData);
         const passed = !compilationError && score >= 0.9;
 
         totalInputTokens += generated.tokens.input;
