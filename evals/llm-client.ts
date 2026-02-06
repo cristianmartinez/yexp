@@ -112,14 +112,16 @@ export class LLMClient {
         role: m.role,
         content: m.content,
       })),
-      maxTokens: options.maxTokens || 1024,
+      maxRetries: 3,
     });
 
     return {
       text: result.text,
       usage: {
-        inputTokens: result.usage.promptTokens,
-        outputTokens: result.usage.completionTokens,
+        // @ts-ignore - AI SDK type mismatch
+        inputTokens: result.usage.promptTokens || 0,
+        // @ts-ignore - AI SDK type mismatch
+        outputTokens: result.usage.completionTokens || 0,
       },
     };
   }

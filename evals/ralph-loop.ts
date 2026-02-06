@@ -37,6 +37,11 @@ interface IterationResult {
   failures: EvalResult[];
   learnings: string;
   cost: number;
+  tokens: {
+    input: number;
+    output: number;
+    total: number;
+  };
   timestamp: string;
 }
 
@@ -141,8 +146,10 @@ class RalphLoop {
   private currentPrompt: string;
   private learnings: string[];
   private history: IterationResult[] = [];
+  private currentModel: string;
 
   constructor() {
+    this.currentModel = process.env.DEFAULT_MODEL || "claude-sonnet-4-5-20250929";
     // Ensure results directory exists
     if (!existsSync(RESULTS_DIR)) {
       mkdirSync(RESULTS_DIR, { recursive: true });
@@ -182,7 +189,10 @@ class RalphLoop {
   /**
    * Generate expression using current prompt
    */
-  async generate(task: string, context: Record<string, any>): Promise<string> {
+  async generate(
+    task: string,
+    context: Record<string, any>
+  ): Promise<{ text: string; tokens: { input: number; output: number } }> {
     const result = await llm.generate({
       system: this.currentPrompt,
       messages: [
@@ -194,7 +204,13 @@ class RalphLoop {
       maxTokens: 512,
     });
 
-    return result.text.trim();
+    return {
+      text: result.text.trim(),
+      tokens: {
+        input: result.usage.inputTokens,
+        output: result.usage.outputTokens,
+      },
+    };
   }
 
   /**
@@ -218,18 +234,26 @@ class RalphLoop {
   /**
    * Run evaluation on full dataset
    */
-  async runEval(): Promise<EvalResult[]> {
+  async runEval(): Promise<{
+    results: EvalResult[];
+    tokens: { input: number; output: number };
+  }> {
     const results: EvalResult[] = [];
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
 
     for (const testCase of DATASET) {
       try {
         const generated = await this.generate(testCase.input, testCase.context);
-        const score = this.scoreExpression(generated, testCase.expected);
+        const score = this.scoreExpression(generated.text, testCase.expected);
         const passed = score >= 0.9;
+
+        totalInputTokens += generated.tokens.input;
+        totalOutputTokens += generated.tokens.output;
 
         results.push({
           testCase,
-          generated,
+          generated: generated.text,
           passed,
           score,
         });
@@ -244,15 +268,24 @@ class RalphLoop {
       }
     }
 
-    return results;
+    return {
+      results,
+      tokens: { input: totalInputTokens, output: totalOutputTokens },
+    };
   }
 
   /**
    * AI analyzes failures and generates improvement suggestions
    */
-  async analyzeFailures(failures: EvalResult[]): Promise<string> {
+  async analyzeFailures(failures: EvalResult[]): Promise<{
+    analysis: string;
+    tokens: { input: number; output: number };
+  }> {
     if (failures.length === 0) {
-      return "All tests passing - no failures to analyze.";
+      return {
+        analysis: "All tests passing - no failures to analyze.",
+        tokens: { input: 0, output: 0 },
+      };
     }
 
     const failureReport = failures
@@ -293,13 +326,22 @@ Be specific and actionable. Focus on the most impactful changes.`;
       maxTokens: 2048,
     });
 
-    return result.text;
+    return {
+      analysis: result.text,
+      tokens: {
+        input: result.usage.inputTokens,
+        output: result.usage.outputTokens,
+      },
+    };
   }
 
   /**
    * AI generates improved prompt based on analysis
    */
-  async improvePrompt(analysis: string): Promise<string> {
+  async improvePrompt(analysis: string): Promise<{
+    prompt: string;
+    tokens: { input: number; output: number };
+  }> {
     // Load the actual yexp spec to constrain improvements
     const yexpSpec = this.loadYexpSpec();
 
@@ -336,7 +378,13 @@ Output ONLY the improved prompt text, no explanations.`;
       maxTokens: 4096,
     });
 
-    return result.text.trim() || this.currentPrompt;
+    return {
+      prompt: result.text.trim() || this.currentPrompt,
+      tokens: {
+        input: result.usage.inputTokens,
+        output: result.usage.outputTokens,
+      },
+    };
   }
 
   /**
@@ -404,7 +452,8 @@ Yexp uses:
 
       // Run evals
       console.log("\n🔬 Running evaluations...");
-      const results = await this.runEval();
+      const evalResult = await this.runEval();
+      const { results, tokens: evalTokens } = evalResult;
 
       // Calculate metrics
       const passed = results.filter((r) => r.passed).length;
@@ -415,23 +464,32 @@ Yexp uses:
       console.log(`📈 Avg Score: ${avgScore.toFixed(3)}`);
       console.log(`❌ Failures: ${failures.length}`);
 
-      // Save iteration result
-      const iteration: IterationResult = {
-        iteration: i,
-        prompt: this.currentPrompt,
-        totalTests: results.length,
-        passed,
-        avgScore,
-        failures,
-        learnings: "",
-        cost: 0, // TODO: track actual cost
-        timestamp: new Date().toISOString(),
-      };
+      // Track tokens for this iteration
+      let totalInputTokens = evalTokens.input;
+      let totalOutputTokens = evalTokens.output;
 
-      // Check if target met
+      // Check if target met (early exit - no analysis needed)
       if (avgScore >= targetScore) {
+        const cost = llm.calculateCost(this.currentModel, totalInputTokens, totalOutputTokens);
         console.log(`\n🎯 Target score achieved! (${avgScore.toFixed(3)} >= ${targetScore})`);
-        iteration.learnings = "Target achieved";
+        console.log(`💰 Cost: $${cost.toFixed(6)} | Tokens: ${totalInputTokens + totalOutputTokens}`);
+
+        const iteration: IterationResult = {
+          iteration: i,
+          prompt: this.currentPrompt,
+          totalTests: results.length,
+          passed,
+          avgScore,
+          failures,
+          learnings: "Target achieved",
+          cost,
+          tokens: {
+            input: totalInputTokens,
+            output: totalOutputTokens,
+            total: totalInputTokens + totalOutputTokens,
+          },
+          timestamp: new Date().toISOString(),
+        };
         this.history.push(iteration);
         this.saveProgress();
         break;
@@ -439,17 +497,28 @@ Yexp uses:
 
       // AI analyzes failures
       console.log("\n🤔 AI analyzing failures...");
-      const analysis = await this.analyzeFailures(failures);
+      const analysisResult = await this.analyzeFailures(failures);
+      const { analysis, tokens: analysisTokens } = analysisResult;
+      totalInputTokens += analysisTokens.input;
+      totalOutputTokens += analysisTokens.output;
+
       console.log("\n📝 Analysis:");
       console.log(analysis.substring(0, 300) + "...");
 
       // AI improves prompt
       console.log("\n✨ AI improving prompt...");
-      const improvedPrompt = await this.improvePrompt(analysis);
+      const improvementResult = await this.improvePrompt(analysis);
+      const { prompt: improvedPrompt, tokens: improvementTokens } = improvementResult;
+      totalInputTokens += improvementTokens.input;
+      totalOutputTokens += improvementTokens.output;
+
+      // Calculate cost
+      const cost = llm.calculateCost(this.currentModel, totalInputTokens, totalOutputTokens);
 
       // Update learnings
       const learning = `## Iteration ${i} (${new Date().toISOString()})
 Score: ${avgScore.toFixed(3)} | Passed: ${passed}/${results.length}
+Cost: $${cost.toFixed(6)} | Tokens: ${totalInputTokens + totalOutputTokens}
 
 ${analysis}
 
@@ -458,12 +527,30 @@ Prompt updated.`;
       this.learnings.push(learning);
       this.currentPrompt = improvedPrompt;
 
-      // Save state
-      iteration.learnings = analysis;
+      // Save iteration result
+      const iteration: IterationResult = {
+        iteration: i,
+        prompt: this.currentPrompt,
+        totalTests: results.length,
+        passed,
+        avgScore,
+        failures,
+        learnings: analysis,
+        cost,
+        tokens: {
+          input: totalInputTokens,
+          output: totalOutputTokens,
+          total: totalInputTokens + totalOutputTokens,
+        },
+        timestamp: new Date().toISOString(),
+      };
+
       this.history.push(iteration);
       this.savePrompt(improvedPrompt);
       this.saveLearnings();
       this.saveProgress();
+
+      console.log(`💰 Iteration cost: $${cost.toFixed(6)} | Tokens: ${totalInputTokens + totalOutputTokens}`);
 
       console.log("\n💾 State saved. Prompt updated for next iteration.");
     }
@@ -473,10 +560,20 @@ Prompt updated.`;
     console.log("=".repeat(60));
 
     const finalResult = this.history[this.history.length - 1];
+    const totalCost = this.history.reduce((sum, iter) => sum + iter.cost, 0);
+    const totalTokens = this.history.reduce(
+      (sum, iter) => sum + iter.tokens.total,
+      0
+    );
+
     console.log(`\nFinal Score: ${finalResult.avgScore.toFixed(3)}`);
     console.log(`Final Pass Rate: ${finalResult.passed}/${finalResult.totalTests}`);
     console.log(`Total Iterations: ${this.history.length}`);
-    console.log(`\nPrompt saved to: ./SYSTEM_PROMPT.txt`);
+    console.log(`\n💰 Total Cost: $${totalCost.toFixed(6)}`);
+    console.log(`📊 Total Tokens: ${totalTokens.toLocaleString()}`);
+    console.log(`   Input: ${this.history.reduce((sum, iter) => sum + iter.tokens.input, 0).toLocaleString()}`);
+    console.log(`   Output: ${this.history.reduce((sum, iter) => sum + iter.tokens.output, 0).toLocaleString()}`);
+    console.log(`\nPrompt saved to: ${PROMPT_FILE}`);
     console.log(`Learnings saved to: ${LEARNINGS_FILE}`);
     console.log(`Progress saved to: ${PROGRESS_FILE}`);
   }
