@@ -6,7 +6,8 @@
   "scripts": {
     "ralph": "bun run ralph-loop.ts",
     "eval": "bun run yexp-eval.ts",
-    "optimize": "bun run prompt-optimizer.ts"
+    "optimize": "bun run prompt-optimizer.ts",
+    "report": "bun run visualize.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
