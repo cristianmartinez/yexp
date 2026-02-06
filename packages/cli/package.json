@@ -16,7 +16,8 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@jext/core": "workspace:*"
+    "@jext/core": "workspace:*",
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "bun-types": "^1.3.8",

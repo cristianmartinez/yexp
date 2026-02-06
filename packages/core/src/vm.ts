@@ -7,7 +7,7 @@ import type {
 } from './types.js';
 import { Opcode, isExprError, isLambdaValue, makeError } from './types.js';
 
-type BuiltinFn = (...args: ExprValue[]) => ExprValue;
+export type BuiltinFn = (...args: ExprValue[]) => ExprValue;
 type HOBuiltinFn = (context: ExecutionContext, ...args: ExprValue[]) => ExprValue;
 
 // Security: Constants for preventing prototype pollution
@@ -880,6 +880,8 @@ export interface EvaluateOptions {
   context?: ExprValue;
   /** Optional environment variables */
   env?: ExprValue;
+  /** Custom functions that extend or override built-in functions */
+  functions?: Record<string, BuiltinFn>;
 }
 
 // Overload signatures for backward compatibility
@@ -922,6 +924,7 @@ export function evaluate(
       onStep: options?.onStep,
     };
   }
+  const customFns = options?.functions;
   const stack: StackValue[] = [];
   const { code, constants, slots: slotPaths } = program;
 
@@ -2011,7 +2014,14 @@ export function evaluate(
           }
         }
 
-        // Check higher-order builtins first (they need context)
+        // Check custom functions first (allows overriding builtins)
+        const customFn = customFns?.[name];
+        if (customFn) {
+          push(customFn(...args));
+          break;
+        }
+
+        // Check higher-order builtins (they need context)
         const hoFn = HO_BUILTINS.get(name);
         if (hoFn) {
           const result = hoFn(context, ...args);

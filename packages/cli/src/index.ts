@@ -11,6 +11,7 @@
 
 import { readFileSync } from 'fs';
 import { tokenize, parse, compile, evaluate } from '@jext/core';
+import { cliFunctions } from './functions.js';
 
 interface Options {
   compact?: boolean;
@@ -181,7 +182,7 @@ async function main() {
     const program = compile(ast);
 
     // Use new API: pass input directly instead of wrapping in context
-    const result = evaluate(program, inputData);
+    const result = evaluate(program, inputData, { functions: cliFunctions });
 
     // Output result
     console.log(formatOutput(result, options));

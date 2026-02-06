@@ -81,6 +81,66 @@ echo '{"score": 85}' | jext 'score >= 90 ? "A" : score >= 80 ? "B" : "C"'
 # Output: "B"
 ```
 
+## File System Functions
+
+The CLI includes built-in functions for file exploration, making jext a composable alternative to `find` and `grep`.
+
+### `glob(pattern)`
+
+Find files matching a glob pattern. Returns an array of file entries.
+
+```bash
+echo '{}' | jext 'glob("src/**/*.ts") |> map(.name)'
+# Output: ["index.ts", "functions.ts"]
+
+echo '{}' | jext 'glob("src/**/*.ts") |> filter(.size > 10000) |> sort(.size)'
+# Find large TypeScript files
+
+echo '{}' | jext 'glob("**/*.ts") |> filter(.modified > now() - 86400000)'
+# Files modified in the last 24 hours
+```
+
+Each file entry has: `path`, `name`, `ext`, `size`, `modified`, `type`.
+
+### `read(path)`
+
+Read a file's contents as a string.
+
+```bash
+echo '{}' | jext 'read("package.json") |> length'
+# Output: 726
+
+echo '{}' | jext 'read("tsconfig.json")'
+# Output: raw file contents
+```
+
+### `lines(path)`
+
+Read a file as an array of `{num, text}` objects.
+
+```bash
+echo '{}' | jext 'lines("src/index.ts") |> filter(.text.includes("import")) |> map(.num)'
+# Output: [1, 2, 3]
+
+echo '{}' | jext 'lines("src/index.ts") |> length'
+# Count lines in a file
+```
+
+### `grep(pattern, pathGlob?)`
+
+Search file contents for a pattern. Returns `{path, line, num, match}` objects.
+
+```bash
+echo '{}' | jext 'grep("TODO", "src/**/*.ts") |> groupBy(.path)'
+# Find all TODOs grouped by file
+
+echo '{}' | jext 'grep("evaluate", "packages/core/src/*.ts") |> map(.path) |> unique'
+# Find files containing "evaluate"
+
+echo '{}' | jext 'grep("/export\\s+const/", "src/**/*.ts")'
+# Regex pattern (wrap in /slashes/)
+```
+
 ## Comparison with jq
 
 | Feature | jext | jq |

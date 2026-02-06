@@ -19,7 +19,7 @@ export {
   type LambdaValue,
   type Token,
 } from './types.js';
-export { evaluate, type EvaluateOptions } from './vm.js';
+export { evaluate, type EvaluateOptions, type BuiltinFn } from './vm.js';
 
 import { compile as compileAst } from './compiler.js';
 import { tokenize } from './lexer.js';
