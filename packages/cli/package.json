@@ -8,7 +8,7 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": ["dist", "README.md"],
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",
     "build:bin": "bun build src/index.ts --compile --outfile dist/yexp",
@@ -16,7 +16,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@yexp/core": "workspace:*",
+    "@yexp/core": "^0.0.1",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
@@ -24,5 +24,16 @@
     "@types/node": "^20.10.0",
     "typescript": "^5.7.0"
   },
-  "keywords": ["yexp", "json", "query", "expression", "cli"]
+  "keywords": ["yexp", "json", "query", "expression", "cli", "jq"],
+  "author": "Cristian Martinez <dev.cmartinez@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cristianmartinez/yexp.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/cristianmartinez/yexp#readme",
+  "bugs": {
+    "url": "https://github.com/cristianmartinez/yexp/issues"
+  }
 }
