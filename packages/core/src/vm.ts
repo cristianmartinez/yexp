@@ -39,11 +39,20 @@ function invokeLambda(
   context: ExecutionContext,
   args: ExprValue[],
 ): ExprValue {
-  const lambdaContext: ExecutionContext = { ...context };
-  for (let i = 0; i < lambda.params.length; i++) {
-    (lambdaContext as Record<string, ExprValue>)[lambda.params[i]!] = args[i] ?? null;
+  // Mutate-and-restore: avoid object spread allocation per invocation
+  const ctx = context as Record<string, ExprValue | undefined>;
+  const params = lambda.params;
+  const saved: (ExprValue | undefined)[] = [];
+  for (let i = 0; i < params.length; i++) {
+    const key = params[i]!;
+    saved[i] = ctx[key];
+    ctx[key] = args[i] ?? null;
   }
-  return evaluate(lambda.program, lambdaContext);
+  const result = evaluate(lambda.program, context);
+  for (let i = 0; i < params.length; i++) {
+    ctx[params[i]!] = saved[i];
+  }
+  return result;
 }
 
 const BUILTINS = new Map<string, BuiltinFn>([
@@ -2127,6 +2136,7 @@ function isTruthy(value: ExprValue): boolean {
 function resolvePath(context: ExecutionContext, path: string): ExprValue {
   const parts = parsePath(path);
   let current: ExprValue;
+  let startIdx = 0;
 
   // Handle virtual slots: $, $context, $env
   if (parts.length > 0) {
@@ -2134,15 +2144,15 @@ function resolvePath(context: ExecutionContext, path: string): ExprValue {
     if (firstPart === '$') {
       // $ maps to context.root
       current = context.root;
-      parts.shift(); // Remove first part
+      startIdx = 1;
     } else if (firstPart === '$context') {
       // $context maps to context.context
       current = context.context ?? null;
-      parts.shift();
+      startIdx = 1;
     } else if (firstPart === '$env') {
       // $env maps to context.env
       current = context.env ?? null;
-      parts.shift();
+      startIdx = 1;
     } else {
       // Regular path - start from context object
       current = context as unknown as ExprValue;
@@ -2152,7 +2162,8 @@ function resolvePath(context: ExecutionContext, path: string): ExprValue {
   }
 
   // Navigate remaining path
-  for (const part of parts) {
+  for (let i = startIdx; i < parts.length; i++) {
+    const part = parts[i]!;
     // Security: Block access to dangerous keys
     if (isDangerousKey(part)) {
       return null;
@@ -2238,7 +2249,12 @@ function deletePath(context: ExecutionContext, path: string): void {
   }
 }
 
+const parsePathCache = new Map<string, string[]>();
+
 function parsePath(path: string): string[] {
+  let cached = parsePathCache.get(path);
+  if (cached) return cached;
+
   const parts: string[] = [];
   let current = '';
   for (let i = 0; i < path.length; i++) {
@@ -2257,5 +2273,6 @@ function parsePath(path: string): string[] {
     }
   }
   if (current) parts.push(current);
+  parsePathCache.set(path, parts);
   return parts;
 }
