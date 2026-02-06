@@ -49,6 +49,76 @@ function generateASCIIChart(data: number[], label: string, width = 60) {
   console.log(`Min: ${min.toFixed(3)} | Max: ${max.toFixed(3)} | Avg: ${(data.reduce((a, b) => a + b, 0) / data.length).toFixed(3)}`);
 }
 
+function extractCategory(testId: string): string {
+  // Extract category from test ID prefix (e.g., "filter-active" → "filter")
+  const prefixes = [
+    "filter", "map", "limit", "unique", "first", "last", "reverse",
+    "sort", "groupby", "uniqueby",
+    "sum", "average", "min", "max", "count", "percentage",
+    "optional", "chained",
+    "mutation",
+    "recursive",
+    "string",
+    "object",
+    "complex"
+  ];
+
+  for (const prefix of prefixes) {
+    if (testId.startsWith(prefix)) return prefix;
+  }
+
+  return "other";
+}
+
+function generateCategoryBreakdown(progress: ProgressData[]) {
+  if (progress.length === 0) return;
+
+  console.log("\n\n📊 Category Performance (Across All Iterations):");
+  console.log("─".repeat(80));
+
+  const categoryFailures = new Map<string, number>();
+
+  // Collect all failures across all iterations by category
+  progress.forEach((iter) => {
+    iter.failures?.forEach((f: any) => {
+      const category = extractCategory(f.testCase?.id || "");
+      categoryFailures.set(category, (categoryFailures.get(category) || 0) + 1);
+    });
+  });
+
+  if (categoryFailures.size === 0) {
+    console.log("✅ No failures in any category!");
+    return;
+  }
+
+  // Sort categories by failure count (most failures first)
+  const sortedCategories = Array.from(categoryFailures.entries())
+    .map(([category, failures]) => ({ category, failures }))
+    .sort((a, b) => b.failures - a.failures);
+
+  const maxFailures = sortedCategories[0]?.failures || 1;
+
+  // Display category stats
+  console.log(`${"Category".padEnd(20)} ${"Failures".padEnd(12)} Bar`);
+  console.log("─".repeat(80));
+
+  sortedCategories.forEach(({ category, failures }) => {
+    const barLength = Math.round((failures / maxFailures) * 40);
+    const bar = "█".repeat(barLength);
+    const failuresStr = `${failures}`.padEnd(12);
+    console.log(`${category.padEnd(20)} ${failuresStr} ${bar}`);
+  });
+
+  console.log("─".repeat(80));
+  console.log(`Total failure instances: ${Array.from(categoryFailures.values()).reduce((a, b) => a + b, 0)}`);
+
+  // Highlight most problematic categories
+  const topIssues = sortedCategories.slice(0, 3);
+  if (topIssues.length > 0) {
+    console.log(`⚠️  Most problematic: ${topIssues.map(c => `${c.category} (${c.failures})`).join(", ")}`);
+  }
+}
+
 function generateFailureHeatmap(progress: ProgressData[]) {
   if (progress.length === 0) return;
 
@@ -138,6 +208,9 @@ function generateReport() {
     generateASCIIChart(scores, "Score Progression");
     generateASCIIChart(passRates, "Pass Rate Progression");
     generateASCIIChart(costs, "Cost per Iteration ($)");
+
+    // Show category breakdown
+    generateCategoryBreakdown(progress);
 
     // Show failure heatmap
     generateFailureHeatmap(progress);

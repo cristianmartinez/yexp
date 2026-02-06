@@ -10,6 +10,7 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { LLMClient } from "./llm-client";
+import { compileExpr } from "@yexp/core";
 
 const llm = new LLMClient();
 
@@ -397,6 +398,7 @@ const RESULTS_DIR = `./results/${MODEL_SLUG}`;
 const LEARNINGS_FILE = "./LEARNINGS.md"; // Global learnings
 const PROGRESS_FILE = `${RESULTS_DIR}/progress.json`;
 const PROMPT_FILE = `${RESULTS_DIR}/SYSTEM_PROMPT.txt`;
+const DETAILED_RESULTS_DIR = `${RESULTS_DIR}/detailed`;
 
 class RalphLoop {
   private currentPrompt: string;
@@ -406,9 +408,12 @@ class RalphLoop {
 
   constructor() {
     this.currentModel = process.env.DEFAULT_MODEL || "claude-sonnet-4-5-20250929";
-    // Ensure results directory exists
+    // Ensure results directories exist
     if (!existsSync(RESULTS_DIR)) {
       mkdirSync(RESULTS_DIR, { recursive: true });
+    }
+    if (!existsSync(DETAILED_RESULTS_DIR)) {
+      mkdirSync(DETAILED_RESULTS_DIR, { recursive: true });
     }
 
     this.currentPrompt = this.loadPrompt();
@@ -440,6 +445,25 @@ class RalphLoop {
 
   private saveProgress() {
     writeFileSync(PROGRESS_FILE, JSON.stringify(this.history, null, 2));
+  }
+
+  /**
+   * Save detailed test results (expected vs generated) for an iteration
+   */
+  private saveDetailedResults(iteration: number, results: EvalResult[]) {
+    const detailedResults = results.map((r) => ({
+      testId: r.testCase.id,
+      input: r.testCase.input,
+      context: r.testCase.context,
+      expected: r.testCase.expected,
+      generated: r.generated,
+      passed: r.passed,
+      score: r.score,
+      error: r.error,
+    }));
+
+    const filename = `${DETAILED_RESULTS_DIR}/iteration-${iteration}.json`;
+    writeFileSync(filename, JSON.stringify(detailedResults, null, 2));
   }
 
   /**
@@ -502,12 +526,23 @@ class RalphLoop {
 
     for (let i = 0; i < DATASET.length; i++) {
       const testCase = DATASET[i];
+      if (!testCase) continue;
+
       process.stdout.write(`  [${i + 1}/${DATASET.length}] ${testCase.id}: `);
 
       try {
         const generated = await this.generate(testCase.input, testCase.context);
-        const score = this.scoreExpression(generated.text, testCase.expected);
-        const passed = score >= 0.9;
+
+        // Validate that the generated expression is valid yexp syntax
+        let compilationError: string | undefined;
+        try {
+          compileExpr(generated.text);
+        } catch (compileErr) {
+          compilationError = compileErr instanceof Error ? compileErr.message : "Compilation failed";
+        }
+
+        const score = compilationError ? 0 : this.scoreExpression(generated.text, testCase.expected);
+        const passed = !compilationError && score >= 0.9;
 
         totalInputTokens += generated.tokens.input;
         totalOutputTokens += generated.tokens.output;
@@ -516,9 +551,16 @@ class RalphLoop {
         if (passed) {
           console.log(`✓ (${(score * 100).toFixed(0)}%)`);
         } else {
-          console.log(`✗ (${(score * 100).toFixed(0)}%)`);
-          console.log(`    Expected: ${testCase.expected}`);
-          console.log(`    Got:      ${generated.text}`);
+          if (compilationError) {
+            console.log(`✗ COMPILE ERROR`);
+            console.log(`    Expected: ${testCase.expected}`);
+            console.log(`    Got:      ${generated.text}`);
+            console.log(`    Error:    ${compilationError}`);
+          } else {
+            console.log(`✗ (${(score * 100).toFixed(0)}%)`);
+            console.log(`    Expected: ${testCase.expected}`);
+            console.log(`    Got:      ${generated.text}`);
+          }
         }
 
         results.push({
@@ -526,6 +568,7 @@ class RalphLoop {
           generated: generated.text,
           passed,
           score,
+          error: compilationError,
         });
       } catch (error) {
         console.log(`✗ ERROR`);
@@ -765,6 +808,7 @@ Yexp uses:
         };
         this.history.push(iteration);
         this.saveProgress();
+        this.saveDetailedResults(i, results);
         break;
       }
 
@@ -822,6 +866,7 @@ Prompt updated.`;
       this.savePrompt(improvedPrompt);
       this.saveLearnings();
       this.saveProgress();
+      this.saveDetailedResults(i, results);
 
       console.log(`💰 Iteration cost: $${cost.toFixed(6)} | Tokens: ${totalInputTokens + totalOutputTokens}`);
 
@@ -849,6 +894,7 @@ Prompt updated.`;
     console.log(`\nPrompt saved to: ${PROMPT_FILE}`);
     console.log(`Learnings saved to: ${LEARNINGS_FILE}`);
     console.log(`Progress saved to: ${PROGRESS_FILE}`);
+    console.log(`Detailed results saved to: ${DETAILED_RESULTS_DIR}/`);
   }
 }
 
