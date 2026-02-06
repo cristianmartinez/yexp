@@ -361,7 +361,7 @@ const DATASET: TestCase[] = [
   {
     id: "complex-reduce",
     input: "Calculate weighted average of scores",
-    expected: "data.scores |> reduce(@ + value.score * value.weight, 0) / data.scores |> map(.weight) |> add",
+    expected: "data.scores |> reduce((acc, value) => acc + value.score * value.weight, 0) / (data.scores |> map(.weight) |> add)",
     context: { data: { scores: "array<{score: number, weight: number}>" } },
   },
   {
