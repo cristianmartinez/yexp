@@ -14,6 +14,30 @@ import { compileExpr, run } from "@yexp/core";
 
 const llm = new LLMClient();
 
+/**
+ * Deep equality check for comparing expression outputs
+ */
+function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== typeof b) return false;
+
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((val, i) => deepEqual(val, b[i]));
+  }
+
+  if (typeof a === "object" && typeof b === "object") {
+    const keysA = Object.keys(a).sort();
+    const keysB = Object.keys(b).sort();
+    if (keysA.length !== keysB.length) return false;
+    if (!keysA.every((key, i) => key === keysB[i])) return false;
+    return keysA.every((key) => deepEqual(a[key], b[key]));
+  }
+
+  return false;
+}
+
 interface TestCase {
   id: string;
   input: string;
@@ -544,8 +568,7 @@ class RalphLoop {
         const generatedOutput = run(generated, { root: sampleData, state: sampleData.state, data: sampleData.data, env: sampleData.env });
 
         // Deep equality check
-        const areEqual = JSON.stringify(expectedOutput) === JSON.stringify(generatedOutput);
-        return areEqual ? 1.0 : 0.0;
+        return deepEqual(expectedOutput, generatedOutput) ? 1.0 : 0.0;
       } catch (error) {
         // If runtime execution fails, fall through to token-based scoring
         // (Don't log here to avoid noise during eval runs)
