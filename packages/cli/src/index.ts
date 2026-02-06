@@ -12,10 +12,12 @@
 import { readFileSync } from 'fs';
 import { tokenize, parse, compile, evaluate } from '@jext/core';
 import { cliFunctions } from './functions.js';
+import { formatOutput } from './format.js';
 
 interface Options {
   compact?: boolean;
   raw?: boolean;
+  noColor?: boolean;
   help?: boolean;
   version?: boolean;
   file?: string;
@@ -36,6 +38,8 @@ function parseArgs(args: string[]): { expression?: string; options: Options } {
       options.compact = true;
     } else if (arg === '-r' || arg === '--raw') {
       options.raw = true;
+    } else if (arg === '--no-color') {
+      options.noColor = true;
     } else if (arg === '-f' || arg === '--file') {
       options.file = args[++i];
     } else if (!expression) {
@@ -63,6 +67,7 @@ ARGUMENTS:
 OPTIONS:
   -c, --compact   Compact output (no pretty-printing)
   -r, --raw       Raw output (no JSON encoding for strings)
+  --no-color      Disable colorized output
   -h, --help      Show this help message
   -v, --version   Show version
 
@@ -113,17 +118,6 @@ async function readStdin(): Promise<string> {
   return Buffer.concat(chunks).toString('utf-8');
 }
 
-function formatOutput(value: any, options: Options): string {
-  if (options.raw && typeof value === 'string') {
-    return value;
-  }
-
-  if (options.compact) {
-    return JSON.stringify(value);
-  }
-
-  return JSON.stringify(value, null, 2);
-}
 
 async function main() {
   const args = process.argv.slice(2);
