@@ -12,6 +12,13 @@ interface ProgressData {
   cost: number;
   tokens?: { input: number; output: number; total: number };
   timestamp: string;
+  failures?: Array<{
+    testCase: { id: string; input: string; expected: string };
+    generated: string;
+    passed: boolean;
+    score: number;
+    error?: string;
+  }>;
 }
 
 function loadProgress(modelSlug: string): ProgressData[] {
@@ -40,6 +47,60 @@ function generateASCIIChart(data: number[], label: string, width = 60) {
 
   console.log("─".repeat(width + 10));
   console.log(`Min: ${min.toFixed(3)} | Max: ${max.toFixed(3)} | Avg: ${(data.reduce((a, b) => a + b, 0) / data.length).toFixed(3)}`);
+}
+
+function generateFailureHeatmap(progress: ProgressData[]) {
+  if (progress.length === 0) return;
+
+  // Collect all unique test IDs across iterations
+  const allTestIds = new Set<string>();
+  progress.forEach((iter) => {
+    iter.failures?.forEach((f: any) => {
+      if (f.testCase?.id) allTestIds.add(f.testCase.id);
+    });
+  });
+
+  if (allTestIds.size === 0) {
+    console.log("\n✅ No failures recorded across any iteration!");
+    return;
+  }
+
+  console.log("\n\n🗺️  Test Failure Heatmap:");
+  console.log("─".repeat(80));
+
+  // Header row
+  const iterHeaders = progress.map((_, i) => `It${i + 1}`).join("  ");
+  console.log(`${"Test".padEnd(40)} ${iterHeaders}`);
+  console.log("─".repeat(80));
+
+  // Build failure map
+  const failureMap = new Map<string, boolean[]>();
+  allTestIds.forEach((testId) => {
+    const results = progress.map((iter) => {
+      const failure = iter.failures?.find((f: any) => f.testCase?.id === testId);
+      return !failure; // true = passed, false = failed
+    });
+    failureMap.set(testId, results);
+  });
+
+  // Sort by number of failures (most failures first)
+  const sortedTests = Array.from(failureMap.entries()).sort(
+    (a, b) => {
+      const aFails = a[1].filter((passed) => !passed).length;
+      const bFails = b[1].filter((passed) => !passed).length;
+      return bFails - aFails;
+    }
+  );
+
+  // Display heatmap
+  sortedTests.forEach(([testId, results]) => {
+    const statusIcons = results.map((passed) => passed ? "✓" : "✗").join("   ");
+    const failCount = results.filter((passed) => !passed).length;
+    console.log(`${testId.padEnd(40)} ${statusIcons}  (${failCount} fails)`);
+  });
+
+  console.log("─".repeat(80));
+  console.log("Legend: ✓ = passed, ✗ = failed");
 }
 
 function generateReport() {
@@ -77,6 +138,9 @@ function generateReport() {
     generateASCIIChart(scores, "Score Progression");
     generateASCIIChart(passRates, "Pass Rate Progression");
     generateASCIIChart(costs, "Cost per Iteration ($)");
+
+    // Show failure heatmap
+    generateFailureHeatmap(progress);
 
     // Summary stats
     const totalCost = costs.reduce((a, b) => a + b, 0);
