@@ -134,7 +134,8 @@ export class LLMClient {
         "anthropic/claude-3-haiku",
         "anthropic/claude-opus-4-latest",
         "openai/gpt-4o",
-        "google/gemini-2.0-flash-exp",
+        "google/gemini-3-flash-preview",
+        "google/gemini-2.5-flash",
         "meta-llama/llama-3.3-70b-instruct",
       ];
     }
@@ -160,7 +161,9 @@ export class LLMClient {
       "anthropic/claude-3-haiku": { input: 0.8, output: 4.0 },
       "anthropic/claude-opus-4-latest": { input: 15.0, output: 75.0 },
       "openai/gpt-4o": { input: 2.5, output: 10.0 },
-      "google/gemini-2.0-flash-exp": { input: 0.0, output: 0.0 }, // Free during preview
+      "google/gemini-3-flash-preview": { input: 0.0, output: 0.0 }, // Free preview
+      "google/gemini-2.5-flash": { input: 0.075, output: 0.30 },
+      "google/gemini-2.0-flash-001": { input: 0.075, output: 0.30 },
       "meta-llama/llama-3.3-70b-instruct": { input: 0.18, output: 0.18 },
     };
 

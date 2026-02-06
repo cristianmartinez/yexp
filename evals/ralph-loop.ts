@@ -8,7 +8,7 @@
  * 4. Repeats until threshold met
  */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { LLMClient } from "./llm-client";
 
 const llm = new LLMClient();
@@ -120,8 +120,22 @@ Yexp is an expression language with:
 
 Output ONLY the expression, no explanation.`;
 
-const LEARNINGS_FILE = "./LEARNINGS.md";
-const PROGRESS_FILE = "./progress.json";
+// Get model-specific directory
+const getModelSlug = () => {
+  const model = process.env.DEFAULT_MODEL || "claude-sonnet-4-5-20250929";
+  return model
+    .replace(/\//g, "-")
+    .replace("anthropic-", "")
+    .replace("openai-", "")
+    .replace("google-", "")
+    .replace("meta-llama-", "");
+};
+
+const MODEL_SLUG = getModelSlug();
+const RESULTS_DIR = `./results/${MODEL_SLUG}`;
+const LEARNINGS_FILE = "./LEARNINGS.md"; // Global learnings
+const PROGRESS_FILE = `${RESULTS_DIR}/progress.json`;
+const PROMPT_FILE = `${RESULTS_DIR}/SYSTEM_PROMPT.txt`;
 
 class RalphLoop {
   private currentPrompt: string;
@@ -129,13 +143,18 @@ class RalphLoop {
   private history: IterationResult[] = [];
 
   constructor() {
+    // Ensure results directory exists
+    if (!existsSync(RESULTS_DIR)) {
+      mkdirSync(RESULTS_DIR, { recursive: true });
+    }
+
     this.currentPrompt = this.loadPrompt();
     this.learnings = this.loadLearnings();
   }
 
   private loadPrompt(): string {
-    if (existsSync("./SYSTEM_PROMPT.txt")) {
-      return readFileSync("./SYSTEM_PROMPT.txt", "utf-8");
+    if (existsSync(PROMPT_FILE)) {
+      return readFileSync(PROMPT_FILE, "utf-8");
     }
     return INITIAL_PROMPT;
   }
@@ -149,7 +168,7 @@ class RalphLoop {
   }
 
   private savePrompt(prompt: string) {
-    writeFileSync("./SYSTEM_PROMPT.txt", prompt);
+    writeFileSync(PROMPT_FILE, prompt);
   }
 
   private saveLearnings() {
@@ -281,6 +300,9 @@ Be specific and actionable. Focus on the most impactful changes.`;
    * AI generates improved prompt based on analysis
    */
   async improvePrompt(analysis: string): Promise<string> {
+    // Load the actual yexp spec to constrain improvements
+    const yexpSpec = this.loadYexpSpec();
+
     const improvementPrompt = `You are optimizing a system prompt for yexp expression generation.
 
 Current prompt:
@@ -291,11 +313,21 @@ ${this.currentPrompt}
 Failure analysis:
 ${analysis}
 
-Generate an IMPROVED system prompt that addresses the identified issues. The prompt should:
-- Fix the root causes identified
+CRITICAL CONSTRAINTS - The yexp specification:
+"""
+${yexpSpec}
+"""
+
+Generate an IMPROVED system prompt that addresses the identified issues. The prompt MUST:
+- Fix the root causes identified in the failure analysis
 - Add specific examples for common mistakes
 - Be clear and unambiguous
 - Maintain all necessary context about yexp
+- **ONLY use syntax and functions that exist in the yexp specification above**
+- **NEVER invent new syntax, operators, or functions**
+- **Teach how to use actual yexp features correctly, not imaginary ones**
+
+If a failure can't be fixed with existing yexp features, explain the limitation rather than inventing syntax.
 
 Output ONLY the improved prompt text, no explanations.`;
 
@@ -308,10 +340,62 @@ Output ONLY the improved prompt text, no explanations.`;
   }
 
   /**
+   * Load the yexp spec to constrain prompt improvements
+   */
+  private loadYexpSpec(): string {
+    const specPath = "../docs/spec.md";
+    try {
+      if (existsSync(specPath)) {
+        // Return a concise summary of key features
+        return `
+Yexp Core Syntax:
+- Context roots: state, data, env
+- Pipe operator: |> (for chaining)
+- Operators: +, -, *, /, %, ==, !=, <, >, <=, >=, &&, ||, !
+- Optional chaining: ?. (safe access)
+- Nullish coalescing: ?? (fallback)
+- Recursive descent: .. (find properties at any depth)
+- Assignment: = (state only)
+
+Lambda Syntax (for filter/map/reduce/etc):
+- Arrow function: (x) => x.price > 100
+- Dot shorthand: .price > 100
+- NO @ syntax - use dot shorthand or arrow functions only
+
+Built-in Functions:
+Type/Inspection: toString(x), type(x), length(x)
+Math: round(x,n), floor(x), ceil(x), abs(x), min(...), max(...), sqrt(x), pow(x,n), sin/cos/tan/log/exp
+String: toLowerCase(s), toUpperCase(s), trim(s), startsWith(s,pre), endsWith(s,suf), split(s,d), replace(s,x,y), substring(s,i,j), includes(s,x)
+Array: first(a), last(a), limit(a,n), join(a,sep), add(a), unique(a), reverse(a), flatten(a)
+Object: keys(o), values(o), entries(o), has(o,k), pick(o,ks), del(o,k)
+Higher-order: map(a,fn), filter(a,fn), find(a,fn), reduce(a,fn,init), every(a,fn), some(a,fn), sort(a,cmp), groupBy(a,fn), uniqueBy(a,fn), minBy/maxBy(a,fn)
+
+NO regex support, NO is.* type checking functions
+`;
+      }
+    } catch (error) {
+      console.warn("Could not load yexp spec, using basic constraints");
+    }
+
+    // Fallback if spec file not found
+    return `
+Yexp uses:
+- Dot shorthand for lambdas: .property
+- Arrow functions: (x) => expression
+- NO @ syntax for current item
+- type(x) for type checking (returns "string", "number", etc)
+- NO is.* functions
+- NO regex support
+`;
+  }
+
+  /**
    * Main RALPH loop
    */
   async run(maxIterations = 10, targetScore = 0.95) {
-    console.log("🚀 Starting RALPH optimization loop...\n");
+    console.log("🚀 Starting RALPH optimization loop...");
+    console.log(`📁 Model: ${MODEL_SLUG}`);
+    console.log(`📂 Results: ${RESULTS_DIR}\n`);
 
     for (let i = 1; i <= maxIterations; i++) {
       console.log(`\n${"=".repeat(60)}`);

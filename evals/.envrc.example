@@ -16,7 +16,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 # Model Configuration
 # For Anthropic Direct: claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001, claude-opus-4-6
 # For OpenRouter: Use Anthropic model names (auto-converted), or:
-#   - anthropic/claude-3.5-sonnet, openai/gpt-4o, google/gemini-2.0-flash-exp
+#   - anthropic/claude-3.5-sonnet, openai/gpt-4o, google/gemini-2.5-flash, google/gemini-3-flash-preview
 export DEFAULT_MODEL="claude-sonnet-4-5-20250929"
 
 # Cost and Quality Targets
