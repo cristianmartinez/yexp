@@ -1,0 +1,1619 @@
+[
+  {
+    "id": "filter-active",
+    "input": "Get all active users",
+    "expected": "data.users |> filter(.active)",
+    "context": {
+      "data": {
+        "users": "array<{active: boolean, name: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "users": [
+          {
+            "active": true,
+            "name": "Alice"
+          },
+          {
+            "active": false,
+            "name": "Bob"
+          },
+          {
+            "active": true,
+            "name": "Charlie"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "active": true,
+        "name": "Alice"
+      },
+      {
+        "active": true,
+        "name": "Charlie"
+      }
+    ]
+  },
+  {
+    "id": "filter-map-chain",
+    "input": "Calculate total price for items over $100",
+    "expected": "data.items |> filter(.price > 100) |> map(.price) |> add",
+    "context": {
+      "data": {
+        "items": "array<{price: number, name: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "items": [
+          {
+            "price": 50,
+            "name": "Item A"
+          },
+          {
+            "price": 150,
+            "name": "Item B"
+          },
+          {
+            "price": 200,
+            "name": "Item C"
+          },
+          {
+            "price": 80,
+            "name": "Item D"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 350
+  },
+  {
+    "id": "limit",
+    "input": "Get the first 5 premium users",
+    "expected": "data.users |> filter(.premium) |> limit(5)",
+    "context": {
+      "data": {
+        "users": "array<{premium: boolean}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "users": [
+          {
+            "premium": true,
+            "name": "User1"
+          },
+          {
+            "premium": false,
+            "name": "User2"
+          },
+          {
+            "premium": true,
+            "name": "User3"
+          },
+          {
+            "premium": true,
+            "name": "User4"
+          },
+          {
+            "premium": true,
+            "name": "User5"
+          },
+          {
+            "premium": true,
+            "name": "User6"
+          },
+          {
+            "premium": true,
+            "name": "User7"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "premium": true,
+        "name": "User1"
+      },
+      {
+        "premium": true,
+        "name": "User3"
+      },
+      {
+        "premium": true,
+        "name": "User4"
+      },
+      {
+        "premium": true,
+        "name": "User5"
+      },
+      {
+        "premium": true,
+        "name": "User6"
+      }
+    ]
+  },
+  {
+    "id": "map-dot-shorthand",
+    "input": "Extract all product names",
+    "expected": "data.products |> map(.name)",
+    "context": {
+      "data": {
+        "products": "array<{name: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "products": [
+          {
+            "name": "Widget",
+            "price": 10
+          },
+          {
+            "name": "Gadget",
+            "price": 20
+          },
+          {
+            "name": "Doohickey",
+            "price": 15
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "Widget",
+      "Gadget",
+      "Doohickey"
+    ]
+  },
+  {
+    "id": "filter-multiple-conditions",
+    "input": "Find users who are active and have premium accounts",
+    "expected": "data.users |> filter(.active && .premium)",
+    "context": {
+      "data": {
+        "users": "array<{active: boolean, premium: boolean}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "users": [
+          {
+            "active": true,
+            "premium": true,
+            "name": "Alice"
+          },
+          {
+            "active": true,
+            "premium": false,
+            "name": "Bob"
+          },
+          {
+            "active": false,
+            "premium": true,
+            "name": "Charlie"
+          },
+          {
+            "active": false,
+            "premium": false,
+            "name": "Dave"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "active": true,
+        "premium": true,
+        "name": "Alice"
+      }
+    ]
+  },
+  {
+    "id": "map-arithmetic",
+    "input": "Calculate discounted prices (20% off)",
+    "expected": "data.items |> map(.price * 0.8)",
+    "context": {
+      "data": {
+        "items": "array<{price: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "items": [
+          {
+            "price": 100
+          },
+          {
+            "price": 50
+          },
+          {
+            "price": 200
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      80,
+      40,
+      160
+    ]
+  },
+  {
+    "id": "filter-comparison",
+    "input": "Get products priced between $50 and $100",
+    "expected": "data.products |> filter(.price >= 50 && .price <= 100)",
+    "context": {
+      "data": {
+        "products": "array<{price: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "products": [
+          {
+            "price": 30,
+            "name": "Cheap"
+          },
+          {
+            "price": 75,
+            "name": "Mid"
+          },
+          {
+            "price": 150,
+            "name": "Expensive"
+          },
+          {
+            "price": 50,
+            "name": "Low bound"
+          },
+          {
+            "price": 100,
+            "name": "High bound"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "price": 75,
+        "name": "Mid"
+      },
+      {
+        "price": 50,
+        "name": "Low bound"
+      },
+      {
+        "price": 100,
+        "name": "High bound"
+      }
+    ]
+  },
+  {
+    "id": "unique-values",
+    "input": "Get unique category names from all products",
+    "expected": "data.products |> map(.category) |> unique",
+    "context": {
+      "data": {
+        "products": "array<{category: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "products": [
+          {
+            "category": "Electronics"
+          },
+          {
+            "category": "Books"
+          },
+          {
+            "category": "Electronics"
+          },
+          {
+            "category": "Toys"
+          },
+          {
+            "category": "Books"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "Electronics",
+      "Books",
+      "Toys"
+    ]
+  },
+  {
+    "id": "first-last",
+    "input": "Get the newest order",
+    "expected": "data.orders |> last",
+    "context": {
+      "data": {
+        "orders": "array<{id: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "orders": [
+          {
+            "id": "order1"
+          },
+          {
+            "id": "order2"
+          },
+          {
+            "id": "order3"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "id": "order3"
+    }
+  },
+  {
+    "id": "reverse-limit",
+    "input": "Get the last 3 messages",
+    "expected": "data.messages |> reverse |> limit(3)",
+    "context": {
+      "data": {
+        "messages": "array<{text: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "messages": [
+          {
+            "text": "msg1"
+          },
+          {
+            "text": "msg2"
+          },
+          {
+            "text": "msg3"
+          },
+          {
+            "text": "msg4"
+          },
+          {
+            "text": "msg5"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "text": "msg5"
+      },
+      {
+        "text": "msg4"
+      },
+      {
+        "text": "msg3"
+      }
+    ]
+  },
+  {
+    "id": "sort-descending",
+    "input": "Sort users by age descending",
+    "expected": "data.users |> sort(-.age)",
+    "context": {
+      "data": {
+        "users": "array<{age: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "users": [
+          {
+            "age": 25,
+            "name": "Alice"
+          },
+          {
+            "age": 30,
+            "name": "Bob"
+          },
+          {
+            "age": 20,
+            "name": "Charlie"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "error": "TYPE_ERROR",
+      "message": "Cannot negate non-number"
+    }
+  },
+  {
+    "id": "sort-ascending",
+    "input": "Sort products by price ascending",
+    "expected": "data.products |> sort(.price)",
+    "context": {
+      "data": {
+        "products": "array<{price: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "products": [
+          {
+            "price": 50,
+            "name": "Product B"
+          },
+          {
+            "price": 20,
+            "name": "Product A"
+          },
+          {
+            "price": 100,
+            "name": "Product C"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "price": 50,
+        "name": "Product B"
+      },
+      {
+        "price": 20,
+        "name": "Product A"
+      },
+      {
+        "price": 100,
+        "name": "Product C"
+      }
+    ]
+  },
+  {
+    "id": "groupby",
+    "input": "Group items by category",
+    "expected": "data.items |> groupBy(.category)",
+    "context": {
+      "data": {
+        "items": "array<{category: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "items": [
+          {
+            "category": "A",
+            "value": 1
+          },
+          {
+            "category": "B",
+            "value": 2
+          },
+          {
+            "category": "A",
+            "value": 3
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "A": [
+        {
+          "category": "A",
+          "value": 1
+        },
+        {
+          "category": "A",
+          "value": 3
+        }
+      ],
+      "B": [
+        {
+          "category": "B",
+          "value": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "groupby-then-count",
+    "input": "Count items per category",
+    "expected": "data.items |> groupBy(.category) |> mapEntries((e) => { key: e.key, value: length(e.value) })",
+    "context": {
+      "data": {
+        "items": "array<{category: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "items": [
+          {
+            "category": "Electronics"
+          },
+          {
+            "category": "Books"
+          },
+          {
+            "category": "Electronics"
+          },
+          {
+            "category": "Toys"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "Electronics": 2,
+      "Books": 1,
+      "Toys": 1
+    }
+  },
+  {
+    "id": "uniqueby",
+    "input": "Get unique users by email",
+    "expected": "data.users |> uniqueBy(.email)",
+    "context": {
+      "data": {
+        "users": "array<{email: string, name: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "users": [
+          {
+            "email": "alice@example.com",
+            "name": "Alice"
+          },
+          {
+            "email": "bob@example.com",
+            "name": "Bob"
+          },
+          {
+            "email": "alice@example.com",
+            "name": "Alice Duplicate"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "email": "alice@example.com",
+        "name": "Alice"
+      },
+      {
+        "email": "bob@example.com",
+        "name": "Bob"
+      }
+    ]
+  },
+  {
+    "id": "sum-prices",
+    "input": "Calculate total revenue from all orders",
+    "expected": "data.orders |> map(.total) |> add",
+    "context": {
+      "data": {
+        "orders": "array<{total: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "orders": [
+          {
+            "total": 100
+          },
+          {
+            "total": 200
+          },
+          {
+            "total": 150
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 450
+  },
+  {
+    "id": "average-score",
+    "input": "Calculate average rating",
+    "expected": "data.reviews |> map(.rating) |> add / length(data.reviews)",
+    "context": {
+      "data": {
+        "reviews": "array<{rating: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "reviews": [
+          {
+            "rating": 5
+          },
+          {
+            "rating": 4
+          },
+          {
+            "rating": 3
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 4
+  },
+  {
+    "id": "min-max",
+    "input": "Find the cheapest product",
+    "expected": "data.products |> minBy(.price)",
+    "context": {
+      "data": {
+        "products": "array<{price: number, name: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "products": [
+          {
+            "price": 50,
+            "name": "Product A"
+          },
+          {
+            "price": 20,
+            "name": "Product B"
+          },
+          {
+            "price": 100,
+            "name": "Product C"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "price": 20,
+      "name": "Product B"
+    }
+  },
+  {
+    "id": "count-items",
+    "input": "Count how many tasks are completed",
+    "expected": "data.tasks |> filter(.completed) |> length",
+    "context": {
+      "data": {
+        "tasks": "array<{completed: boolean}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "tasks": [
+          {
+            "completed": true,
+            "name": "Task 1"
+          },
+          {
+            "completed": false,
+            "name": "Task 2"
+          },
+          {
+            "completed": true,
+            "name": "Task 3"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 2
+  },
+  {
+    "id": "percentage",
+    "input": "Calculate percentage of active users",
+    "expected": "(data.users |> filter(.active) |> length) / length(data.users) * 100",
+    "context": {
+      "data": {
+        "users": "array<{active: boolean}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "users": [
+          {
+            "active": true
+          },
+          {
+            "active": false
+          },
+          {
+            "active": true
+          },
+          {
+            "active": true
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 75
+  },
+  {
+    "id": "optional-chaining",
+    "input": "Get user name or 'Guest' if not available",
+    "expected": "state.user?.name ?? 'Guest'",
+    "context": {
+      "state": {
+        "user": "object | null"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "user": {
+          "name": "Alice"
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": "Alice"
+  },
+  {
+    "id": "nested-safe-access",
+    "input": "Get user profile theme setting with fallback to 'light'",
+    "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+    "context": {
+      "state": {
+        "user": {
+          "type": "object | null",
+          "shape": "{ profile?: { settings?: { theme?: string } } }"
+        }
+      }
+    },
+    "sampleData": {
+      "state": {
+        "user": {
+          "profile": {
+            "settings": {
+              "theme": "dark"
+            }
+          }
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": "dark"
+  },
+  {
+    "id": "optional-array-access",
+    "input": "Get first item name or 'No items'",
+    "expected": "data.items[0]?.name ?? 'No items'",
+    "context": {
+      "data": {
+        "items": "array<{name: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "items": [
+          {
+            "name": "Item 1"
+          },
+          {
+            "name": "Item 2"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": "Item 1"
+  },
+  {
+    "id": "chained-optionals",
+    "input": "Get company name from user or 'N/A'",
+    "expected": "state.user?.organization?.company?.name ?? 'N/A'",
+    "context": {
+      "state": {
+        "user": "object | null"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "user": {
+          "organization": {
+            "company": {
+              "name": "Acme Corp"
+            }
+          }
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": "Acme Corp"
+  },
+  {
+    "id": "optional-with-default-number",
+    "input": "Get retry count or default to 3",
+    "expected": "state.config?.retries ?? 3",
+    "context": {
+      "state": {
+        "config": "object | null"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "config": {
+          "retries": 5
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 5
+  },
+  {
+    "id": "mutation-increment",
+    "input": "Increment the counter",
+    "expected": "state.count = state.count + 1",
+    "context": {
+      "state": {
+        "count": "number"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "count": 6
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": null
+  },
+  {
+    "id": "mutation-toggle",
+    "input": "Toggle the loading flag",
+    "expected": "state.loading = !state.loading",
+    "context": {
+      "state": {
+        "loading": "boolean"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "loading": false
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": null
+  },
+  {
+    "id": "mutation-append",
+    "input": "Add a new item to the list",
+    "expected": "state.items << data.newItem",
+    "context": {
+      "state": {
+        "items": "array"
+      },
+      "data": {
+        "newItem": "object"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "items": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          },
+          {
+            "id": 3
+          }
+        ]
+      },
+      "data": {
+        "newItem": {
+          "id": 3
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": null
+  },
+  {
+    "id": "mutation-object-merge",
+    "input": "Update user profile with new data",
+    "expected": "state.user = { ...state.user, ...data.updates }",
+    "context": {
+      "state": {
+        "user": "object"
+      },
+      "data": {
+        "updates": "object"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "user": {
+          "name": "Alice",
+          "age": 31,
+          "city": "NYC"
+        }
+      },
+      "data": {
+        "updates": {
+          "age": 31,
+          "city": "NYC"
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": null
+  },
+  {
+    "id": "mutation-reset",
+    "input": "Reset the form to initial values",
+    "expected": "state.form = data.initialForm",
+    "context": {
+      "state": {
+        "form": "object"
+      },
+      "data": {
+        "initialForm": "object"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "form": {
+          "name": "",
+          "email": ""
+        }
+      },
+      "data": {
+        "initialForm": {
+          "name": "",
+          "email": ""
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": null
+  },
+  {
+    "id": "recursive-descent",
+    "input": "Find all email addresses at any depth",
+    "expected": "data..email",
+    "context": {
+      "data": "object"
+    },
+    "sampleData": {
+      "data": {
+        "user": {
+          "email": "user@example.com",
+          "profile": {
+            "email": "profile@example.com"
+          }
+        },
+        "admin": {
+          "email": "admin@example.com"
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "user@example.com",
+      "profile@example.com",
+      "admin@example.com"
+    ]
+  },
+  {
+    "id": "recursive-descent-filter",
+    "input": "Find all IDs in the entire data structure",
+    "expected": "data..id",
+    "context": {
+      "data": "object"
+    },
+    "sampleData": {
+      "data": {
+        "id": 1,
+        "items": [
+          {
+            "id": 2,
+            "sub": {
+              "id": 3
+            }
+          },
+          {
+            "id": 4
+          }
+        ],
+        "metadata": {
+          "id": 5
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "recursive-descent-unique",
+    "input": "Get all unique tag names from nested structure",
+    "expected": "data..tags |> flatten |> unique",
+    "context": {
+      "data": "object"
+    },
+    "sampleData": {
+      "data": {
+        "post1": {
+          "tags": [
+            "tech",
+            "ai"
+          ]
+        },
+        "post2": {
+          "tags": [
+            "tech",
+            "code"
+          ]
+        },
+        "nested": {
+          "post3": {
+            "tags": [
+              "ai",
+              "ml"
+            ]
+          }
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "tech",
+      "ai",
+      "code",
+      "ml"
+    ]
+  },
+  {
+    "id": "string-concat",
+    "input": "Create full name from first and last name",
+    "expected": "`${state.firstName} ${state.lastName}`",
+    "context": {
+      "state": {
+        "firstName": "string",
+        "lastName": "string"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "firstName": "John",
+        "lastName": "Doe"
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": "John Doe"
+  },
+  {
+    "id": "string-uppercase",
+    "input": "Convert category to uppercase",
+    "expected": "data.category |> toUpperCase",
+    "context": {
+      "data": {
+        "category": "string"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "category": "electronics"
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": "ELECTRONICS"
+  },
+  {
+    "id": "string-split-join",
+    "input": "Convert comma-separated string to array",
+    "expected": "data.tags |> split(',')",
+    "context": {
+      "data": {
+        "tags": "string"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "tags": "javascript,typescript,react"
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "javascript",
+      "typescript",
+      "react"
+    ]
+  },
+  {
+    "id": "string-trim",
+    "input": "Remove whitespace from user input",
+    "expected": "data.input |> trim",
+    "context": {
+      "data": {
+        "input": "string"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "input": "  hello world  "
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": "hello world"
+  },
+  {
+    "id": "string-includes",
+    "input": "Check if description contains the word 'premium'",
+    "expected": "data.description |> includes('premium')",
+    "context": {
+      "data": {
+        "description": "string"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "description": "This is a premium product with advanced features"
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": true
+  },
+  {
+    "id": "object-keys",
+    "input": "Get all setting keys",
+    "expected": "state.settings |> keys",
+    "context": {
+      "state": {
+        "settings": "object"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "settings": {
+          "theme": "dark",
+          "notifications": true,
+          "language": "en"
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "theme",
+      "notifications",
+      "language"
+    ]
+  },
+  {
+    "id": "object-values",
+    "input": "Get all configuration values",
+    "expected": "data.config |> values",
+    "context": {
+      "data": {
+        "config": "object"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "config": {
+          "apiUrl": "https://api.example.com",
+          "timeout": 5000,
+          "retries": 3
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "https://api.example.com",
+      5000,
+      3
+    ]
+  },
+  {
+    "id": "object-pick",
+    "input": "Extract only name and email from user",
+    "expected": "state.user |> pick(['name', 'email'])",
+    "context": {
+      "state": {
+        "user": "object"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "user": {
+          "name": "Alice",
+          "email": "alice@example.com",
+          "age": 30,
+          "city": "NYC"
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "name": "Alice",
+      "email": "alice@example.com"
+    }
+  },
+  {
+    "id": "object-has-key",
+    "input": "Check if user has a phone number",
+    "expected": "state.user |> has('phone')",
+    "context": {
+      "state": {
+        "user": "object"
+      }
+    },
+    "sampleData": {
+      "state": {
+        "user": {
+          "name": "Bob",
+          "email": "bob@example.com",
+          "phone": "555-1234"
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": true
+  },
+  {
+    "id": "object-merge",
+    "input": "Merge default settings with user preferences",
+    "expected": "{ ...data.defaults, ...state.preferences }",
+    "context": {
+      "data": {
+        "defaults": "object"
+      },
+      "state": {
+        "preferences": "object"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "defaults": {
+          "theme": "light",
+          "fontSize": 14,
+          "lineHeight": 1.5
+        }
+      },
+      "state": {
+        "preferences": {
+          "theme": "dark",
+          "fontSize": 16
+        }
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "theme": "dark",
+      "fontSize": 16,
+      "lineHeight": 1.5
+    }
+  },
+  {
+    "id": "complex-filter-map-reduce",
+    "input": "Calculate total value of active items in stock",
+    "expected": "data.inventory |> filter(.active && .stock > 0) |> map(.price * .stock) |> add",
+    "context": {
+      "data": {
+        "inventory": "array<{active: boolean, stock: number, price: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "inventory": [
+          {
+            "active": true,
+            "stock": 10,
+            "price": 5
+          },
+          {
+            "active": false,
+            "stock": 5,
+            "price": 3
+          },
+          {
+            "active": true,
+            "stock": 0,
+            "price": 2
+          },
+          {
+            "active": true,
+            "stock": 8,
+            "price": 4
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 82
+  },
+  {
+    "id": "complex-sort-limit-map",
+    "input": "Get names of top 3 highest rated products",
+    "expected": "data.products |> sort(-.rating) |> limit(3) |> map(.name)",
+    "context": {
+      "data": {
+        "products": "array<{name: string, rating: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "products": [
+          {
+            "name": "Product A",
+            "rating": 4.5
+          },
+          {
+            "name": "Product B",
+            "rating": 4.8
+          },
+          {
+            "name": "Product C",
+            "rating": 3.9
+          },
+          {
+            "name": "Product D",
+            "rating": 4.9
+          },
+          {
+            "name": "Product E",
+            "rating": 4.2
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "error": "TYPE_ERROR",
+      "message": "Cannot negate non-number"
+    }
+  },
+  {
+    "id": "complex-groupby-count",
+    "input": "Count orders per status",
+    "expected": "data.orders |> groupBy(.status) |> mapEntries((e) => { key: e.key, value: length(e.value) })",
+    "context": {
+      "data": {
+        "orders": "array<{status: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "orders": [
+          {
+            "status": "pending"
+          },
+          {
+            "status": "shipped"
+          },
+          {
+            "status": "pending"
+          },
+          {
+            "status": "delivered"
+          },
+          {
+            "status": "shipped"
+          },
+          {
+            "status": "pending"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": {
+      "pending": 3,
+      "shipped": 2,
+      "delivered": 1
+    }
+  },
+  {
+    "id": "complex-nested-filter",
+    "input": "Find users who have at least one completed task",
+    "expected": "data.users |> filter((u) => u.tasks |> some(.completed))",
+    "context": {
+      "data": {
+        "users": "array<{tasks: array<{completed: boolean}>}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "users": [
+          {
+            "name": "Alice",
+            "tasks": [
+              {
+                "completed": true
+              },
+              {
+                "completed": false
+              }
+            ]
+          },
+          {
+            "name": "Bob",
+            "tasks": [
+              {
+                "completed": false
+              }
+            ]
+          },
+          {
+            "name": "Charlie",
+            "tasks": [
+              {
+                "completed": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      {
+        "name": "Alice",
+        "tasks": [
+          {
+            "completed": true
+          },
+          {
+            "completed": false
+          }
+        ]
+      },
+      {
+        "name": "Charlie",
+        "tasks": [
+          {
+            "completed": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "complex-flatten-filter",
+    "input": "Get all tags from all posts that are published",
+    "expected": "data.posts |> filter(.published) |> map(.tags) |> flatten |> unique",
+    "context": {
+      "data": {
+        "posts": "array<{published: boolean, tags: array<string>}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "posts": [
+          {
+            "published": true,
+            "tags": [
+              "javascript",
+              "web"
+            ]
+          },
+          {
+            "published": false,
+            "tags": [
+              "python",
+              "data"
+            ]
+          },
+          {
+            "published": true,
+            "tags": [
+              "web",
+              "react"
+            ]
+          },
+          {
+            "published": true,
+            "tags": [
+              "javascript",
+              "node"
+            ]
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      "javascript",
+      "web",
+      "react",
+      "node"
+    ]
+  },
+  {
+    "id": "complex-reduce",
+    "input": "Calculate weighted average of scores",
+    "expected": "data.scores |> reduce((acc, value) => acc + value.score * value.weight, 0) / (data.scores |> map(.weight) |> add)",
+    "context": {
+      "data": {
+        "scores": "array<{score: number, weight: number}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "scores": [
+          {
+            "score": 90,
+            "weight": 0.5
+          },
+          {
+            "score": 80,
+            "weight": 0.3
+          },
+          {
+            "score": 95,
+            "weight": 0.2
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": 88
+  },
+  {
+    "id": "complex-conditional-map",
+    "input": "Apply different discounts based on membership level",
+    "expected": "data.orders |> map(.memberLevel == 'gold' ? .total * 0.8 : .memberLevel == 'silver' ? .total * 0.9 : .total)",
+    "context": {
+      "data": {
+        "orders": "array<{total: number, memberLevel: string}>"
+      }
+    },
+    "sampleData": {
+      "data": {
+        "orders": [
+          {
+            "total": 100,
+            "memberLevel": "gold"
+          },
+          {
+            "total": 100,
+            "memberLevel": "silver"
+          },
+          {
+            "total": 100,
+            "memberLevel": "bronze"
+          },
+          {
+            "total": 50,
+            "memberLevel": "gold"
+          }
+        ]
+      }
+    },
+    "expectedCompiles": true,
+    "expectedResult": [
+      80,
+      90,
+      100,
+      40
+    ]
+  }
+]

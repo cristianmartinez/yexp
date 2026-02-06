@@ -11,6 +11,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { LLMClient } from "./llm-client";
 import { compileExpr, run } from "@yexp/core";
+import { loadDataset, type TestCase } from "./dataset-loader";
 
 const llm = new LLMClient();
 
@@ -38,20 +39,16 @@ function deepEqual(a: any, b: any): boolean {
   return false;
 }
 
-interface TestCase {
-  id: string;
-  input: string;
-  expected: string;
-  context: Record<string, any>;
-  sampleData?: Record<string, any>; // Actual data for runtime validation
-}
-
 interface EvalResult {
   testCase: TestCase;
   generated: string;
+  generatedCompiles: boolean;
+  generatedResult?: any;
   passed: boolean;
   score: number;
-  error?: string;
+  compilationError?: string;
+  runtimeError?: string;
+  resultMatch: boolean;
 }
 
 interface IterationResult {
@@ -71,359 +68,8 @@ interface IterationResult {
   timestamp: string;
 }
 
-const DATASET: TestCase[] = [
-  // Basic filtering & mapping (10 tests)
-  {
-    id: "filter-active",
-    input: "Get all active users",
-    expected: "data.users |> filter(.active)",
-    context: { data: { users: "array<{active: boolean, name: string}>" } },
-    sampleData: {
-      data: {
-        users: [
-          { active: true, name: "Alice" },
-          { active: false, name: "Bob" },
-          { active: true, name: "Charlie" },
-        ],
-      },
-    },
-  },
-  {
-    id: "filter-map-chain",
-    input: "Calculate total price for items over $100",
-    expected: "data.items |> filter(.price > 100) |> map(.price) |> add",
-    context: { data: { items: "array<{price: number, name: string}>" } },
-  },
-  {
-    id: "limit",
-    input: "Get the first 5 premium users",
-    expected: "data.users |> filter(.premium) |> limit(5)",
-    context: { data: { users: "array<{premium: boolean}>" } },
-  },
-  {
-    id: "map-dot-shorthand",
-    input: "Extract all product names",
-    expected: "data.products |> map(.name)",
-    context: { data: { products: "array<{name: string}>" } },
-    sampleData: {
-      data: {
-        products: [
-          { name: "Widget", price: 10 },
-          { name: "Gadget", price: 20 },
-          { name: "Doohickey", price: 15 },
-        ],
-      },
-    },
-  },
-  {
-    id: "filter-multiple-conditions",
-    input: "Find users who are active and have premium accounts",
-    expected: "data.users |> filter(.active && .premium)",
-    context: { data: { users: "array<{active: boolean, premium: boolean}>" } },
-  },
-  {
-    id: "map-arithmetic",
-    input: "Calculate discounted prices (20% off)",
-    expected: "data.items |> map(.price * 0.8)",
-    context: { data: { items: "array<{price: number}>" } },
-  },
-  {
-    id: "filter-comparison",
-    input: "Get products priced between $50 and $100",
-    expected: "data.products |> filter(.price >= 50 && .price <= 100)",
-    context: { data: { products: "array<{price: number}>" } },
-  },
-  {
-    id: "unique-values",
-    input: "Get unique category names from all products",
-    expected: "data.products |> map(.category) |> unique",
-    context: { data: { products: "array<{category: string}>" } },
-  },
-  {
-    id: "first-last",
-    input: "Get the newest order",
-    expected: "data.orders |> last",
-    context: { data: { orders: "array<{id: string}>" } },
-  },
-  {
-    id: "reverse-limit",
-    input: "Get the last 3 messages",
-    expected: "data.messages |> reverse |> limit(3)",
-    context: { data: { messages: "array<{text: string}>" } },
-  },
-
-  // Sorting & grouping (5 tests)
-  {
-    id: "sort-descending",
-    input: "Sort users by age descending",
-    expected: "data.users |> sort(-.age)",
-    context: { data: { users: "array<{age: number}>" } },
-  },
-  {
-    id: "sort-ascending",
-    input: "Sort products by price ascending",
-    expected: "data.products |> sort(.price)",
-    context: { data: { products: "array<{price: number}>" } },
-  },
-  {
-    id: "groupby",
-    input: "Group items by category",
-    expected: "data.items |> groupBy(.category)",
-    context: { data: { items: "array<{category: string}>" } },
-  },
-  {
-    id: "groupby-then-count",
-    input: "Count items per category",
-    expected: "data.items |> groupBy(.category) |> mapEntries((e) => { key: e.key, value: length(e.value) })",
-    context: { data: { items: "array<{category: string}>" } },
-  },
-  {
-    id: "uniqueby",
-    input: "Get unique users by email",
-    expected: "data.users |> uniqueBy(.email)",
-    context: { data: { users: "array<{email: string, name: string}>" } },
-  },
-
-  // Aggregation & math (5 tests)
-  {
-    id: "sum-prices",
-    input: "Calculate total revenue from all orders",
-    expected: "data.orders |> map(.total) |> add",
-    context: { data: { orders: "array<{total: number}>" } },
-  },
-  {
-    id: "average-score",
-    input: "Calculate average rating",
-    expected: "data.reviews |> map(.rating) |> add / length(data.reviews)",
-    context: { data: { reviews: "array<{rating: number}>" } },
-  },
-  {
-    id: "min-max",
-    input: "Find the cheapest product",
-    expected: "data.products |> minBy(.price)",
-    context: { data: { products: "array<{price: number, name: string}>" } },
-  },
-  {
-    id: "count-items",
-    input: "Count how many tasks are completed",
-    expected: "data.tasks |> filter(.completed) |> length",
-    context: { data: { tasks: "array<{completed: boolean}>" } },
-  },
-  {
-    id: "percentage",
-    input: "Calculate percentage of active users",
-    expected: "(data.users |> filter(.active) |> length) / length(data.users) * 100",
-    context: { data: { users: "array<{active: boolean}>" } },
-  },
-
-  // Optional chaining & nullish coalescing (5 tests)
-  {
-    id: "optional-chaining",
-    input: "Get user name or 'Guest' if not available",
-    expected: "state.user?.name ?? 'Guest'",
-    context: { state: { user: "object | null" } },
-  },
-  {
-    id: "nested-safe-access",
-    input: "Get user profile theme setting with fallback to 'light'",
-    expected: "state.user?.profile?.settings?.theme ?? 'light'",
-    context: {
-      state: {
-        user: {
-          type: "object | null",
-          shape: "{ profile?: { settings?: { theme?: string } } }",
-        },
-      },
-    },
-  },
-  {
-    id: "optional-array-access",
-    input: "Get first item name or 'No items'",
-    expected: "data.items[0]?.name ?? 'No items'",
-    context: { data: { items: "array<{name: string}>" } },
-  },
-  {
-    id: "chained-optionals",
-    input: "Get company name from user or 'N/A'",
-    expected: "state.user?.organization?.company?.name ?? 'N/A'",
-    context: { state: { user: "object | null" } },
-  },
-  {
-    id: "optional-with-default-number",
-    input: "Get retry count or default to 3",
-    expected: "state.config?.retries ?? 3",
-    context: { state: { config: "object | null" } },
-  },
-
-  // State mutations (5 tests)
-  {
-    id: "mutation-increment",
-    input: "Increment the counter",
-    expected: "state.count = state.count + 1",
-    context: { state: { count: "number" } },
-  },
-  {
-    id: "mutation-toggle",
-    input: "Toggle the loading flag",
-    expected: "state.loading = !state.loading",
-    context: { state: { loading: "boolean" } },
-  },
-  {
-    id: "mutation-append",
-    input: "Add a new item to the list",
-    expected: "state.items << data.newItem",
-    context: { state: { items: "array" }, data: { newItem: "object" } },
-  },
-  {
-    id: "mutation-object-merge",
-    input: "Update user profile with new data",
-    expected: "state.user = { ...state.user, ...data.updates }",
-    context: { state: { user: "object" }, data: { updates: "object" } },
-  },
-  {
-    id: "mutation-reset",
-    input: "Reset the form to initial values",
-    expected: "state.form = data.initialForm",
-    context: { state: { form: "object" }, data: { initialForm: "object" } },
-  },
-
-  // Recursive descent (3 tests)
-  {
-    id: "recursive-descent",
-    input: "Find all email addresses at any depth",
-    expected: "data..email",
-    context: { data: "object" },
-  },
-  {
-    id: "recursive-descent-filter",
-    input: "Find all IDs in the entire data structure",
-    expected: "data..id",
-    context: { data: "object" },
-  },
-  {
-    id: "recursive-descent-unique",
-    input: "Get all unique tag names from nested structure",
-    expected: "data..tags |> flatten |> unique",
-    context: { data: "object" },
-  },
-
-  // String operations (5 tests)
-  {
-    id: "string-concat",
-    input: "Create full name from first and last name",
-    expected: "`${state.firstName} ${state.lastName}`",
-    context: { state: { firstName: "string", lastName: "string" } },
-  },
-  {
-    id: "string-uppercase",
-    input: "Convert category to uppercase",
-    expected: "data.category |> toUpperCase",
-    context: { data: { category: "string" } },
-  },
-  {
-    id: "string-split-join",
-    input: "Convert comma-separated string to array",
-    expected: "data.tags |> split(',')",
-    context: { data: { tags: "string" } },
-  },
-  {
-    id: "string-trim",
-    input: "Remove whitespace from user input",
-    expected: "data.input |> trim",
-    context: { data: { input: "string" } },
-  },
-  {
-    id: "string-includes",
-    input: "Check if description contains the word 'premium'",
-    expected: "data.description |> includes('premium')",
-    context: { data: { description: "string" } },
-  },
-
-  // Object operations (5 tests)
-  {
-    id: "object-keys",
-    input: "Get all setting keys",
-    expected: "state.settings |> keys",
-    context: { state: { settings: "object" } },
-  },
-  {
-    id: "object-values",
-    input: "Get all configuration values",
-    expected: "data.config |> values",
-    context: { data: { config: "object" } },
-  },
-  {
-    id: "object-pick",
-    input: "Extract only name and email from user",
-    expected: "state.user |> pick(['name', 'email'])",
-    context: { state: { user: "object" } },
-  },
-  {
-    id: "object-has-key",
-    input: "Check if user has a phone number",
-    expected: "state.user |> has('phone')",
-    context: { state: { user: "object" } },
-  },
-  {
-    id: "object-merge",
-    input: "Merge default settings with user preferences",
-    expected: "{ ...data.defaults, ...state.preferences }",
-    context: { data: { defaults: "object" }, state: { preferences: "object" } },
-  },
-
-  // Complex chaining (7 tests)
-  {
-    id: "complex-filter-map-reduce",
-    input: "Calculate total value of active items in stock",
-    expected: "data.inventory |> filter(.active && .stock > 0) |> map(.price * .stock) |> add",
-    context: { data: { inventory: "array<{active: boolean, stock: number, price: number}>" } },
-  },
-  {
-    id: "complex-sort-limit-map",
-    input: "Get names of top 3 highest rated products",
-    expected: "data.products |> sort(-.rating) |> limit(3) |> map(.name)",
-    context: { data: { products: "array<{name: string, rating: number}>" } },
-  },
-  {
-    id: "complex-groupby-count",
-    input: "Count orders per status",
-    expected: "data.orders |> groupBy(.status) |> mapEntries((e) => { key: e.key, value: length(e.value) })",
-    context: { data: { orders: "array<{status: string}>" } },
-  },
-  {
-    id: "complex-nested-filter",
-    input: "Find users who have at least one completed task",
-    expected: "data.users |> filter((u) => u.tasks |> some(.completed))",
-    context: { data: { users: "array<{tasks: array<{completed: boolean}>}>" } },
-    sampleData: {
-      data: {
-        users: [
-          { name: "Alice", tasks: [{ completed: true }, { completed: false }] },
-          { name: "Bob", tasks: [{ completed: false }] },
-          { name: "Charlie", tasks: [{ completed: true }] },
-        ],
-      },
-    },
-  },
-  {
-    id: "complex-flatten-filter",
-    input: "Get all tags from all posts that are published",
-    expected: "data.posts |> filter(.published) |> map(.tags) |> flatten |> unique",
-    context: { data: { posts: "array<{published: boolean, tags: array<string>}>" } },
-  },
-  {
-    id: "complex-reduce",
-    input: "Calculate weighted average of scores",
-    expected: "data.scores |> reduce((acc, value) => acc + value.score * value.weight, 0) / (data.scores |> map(.weight) |> add)",
-    context: { data: { scores: "array<{score: number, weight: number}>" } },
-  },
-  {
-    id: "complex-conditional-map",
-    input: "Apply different discounts based on membership level",
-    expected: "data.orders |> map(.memberLevel == 'gold' ? .total * 0.8 : .memberLevel == 'silver' ? .total * 0.9 : .total)",
-    context: { data: { orders: "array<{total: number, memberLevel: string}>" } },
-  },
-];
+// DATASET has been moved to dataset-with-results.json
+// Load using: loadDataset() from ./dataset-loader
 
 const INITIAL_PROMPT = `You are a yexp expression generator. Generate valid yexp expressions from natural language.
 
@@ -457,9 +103,15 @@ class RalphLoop {
   private learnings: string[];
   private history: IterationResult[] = [];
   private currentModel: string;
+  private dataset: TestCase[];
 
   constructor() {
     this.currentModel = process.env.DEFAULT_MODEL || "claude-sonnet-4-5-20250929";
+
+    // Load dataset from JSON
+    this.dataset = loadDataset();
+    console.log(`📊 Loaded ${this.dataset.length} test cases from dataset-with-results.json`);
+
     // Ensure results directories exist
     if (!existsSync(RESULTS_DIR)) {
       mkdirSync(RESULTS_DIR, { recursive: true });
@@ -508,10 +160,15 @@ class RalphLoop {
       input: r.testCase.input,
       context: r.testCase.context,
       expected: r.testCase.expected,
+      expectedResult: r.testCase.expectedResult,
       generated: r.generated,
+      generatedCompiles: r.generatedCompiles,
+      generatedResult: r.generatedResult,
       passed: r.passed,
       score: r.score,
-      error: r.error,
+      resultMatch: r.resultMatch,
+      compilationError: r.compilationError,
+      runtimeError: r.runtimeError,
     }));
 
     const filename = `${DETAILED_RESULTS_DIR}/iteration-${iteration}.json`;
@@ -546,41 +203,21 @@ class RalphLoop {
   }
 
   /**
-   * Score generated expression vs expected
-   * If sampleData is provided, executes both and compares outputs (runtime validation)
-   * Otherwise falls back to token-based similarity
+   * Score generated expression by comparing result against pre-computed expected result
    */
   private scoreExpression(
-    generated: string,
-    expected: string,
-    sampleData?: Record<string, any>
+    generatedResult: any,
+    expectedResult: any,
+    hasRuntimeError: boolean,
+    expectedCompiles: boolean
   ): number {
-    if (generated === expected) return 1.0;
-
-    const normalize = (s: string) =>
-      s.replace(/\s+/g, " ").replace(/;$/, "").trim();
-    if (normalize(generated) === normalize(expected)) return 0.95;
-
-    // Runtime validation if sample data provided
-    if (sampleData) {
-      try {
-        const expectedOutput = run(expected, { root: sampleData, state: sampleData.state, data: sampleData.data, env: sampleData.env });
-        const generatedOutput = run(generated, { root: sampleData, state: sampleData.state, data: sampleData.data, env: sampleData.env });
-
-        // Deep equality check
-        return deepEqual(expectedOutput, generatedOutput) ? 1.0 : 0.0;
-      } catch (error) {
-        // If runtime execution fails, fall through to token-based scoring
-        // (Don't log here to avoid noise during eval runs)
-      }
+    // If either has errors, score is 0
+    if (hasRuntimeError || !expectedCompiles) {
+      return 0;
     }
 
-    // Token overlap (fallback)
-    const genTokens = new Set(generated.split(/[\s|>().,]/));
-    const expTokens = new Set(expected.split(/[\s|>().,]/));
-    const intersection = new Set([...genTokens].filter((t) => expTokens.has(t)));
-
-    return intersection.size / expTokens.size;
+    // Compare actual execution results using deep equality
+    return deepEqual(generatedResult, expectedResult) ? 1.0 : 0.0;
   }
 
   /**
@@ -594,65 +231,96 @@ class RalphLoop {
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
 
-    console.log(`Running ${DATASET.length} tests...`);
+    console.log(`Running ${this.dataset.length} tests...`);
 
-    for (let i = 0; i < DATASET.length; i++) {
-      const testCase = DATASET[i];
+    for (let i = 0; i < this.dataset.length; i++) {
+      const testCase = this.dataset[i];
       if (!testCase) continue;
 
-      process.stdout.write(`  [${i + 1}/${DATASET.length}] ${testCase.id}: `);
+      process.stdout.write(`  [${i + 1}/${this.dataset.length}] ${testCase.id}: `);
+
+      const result: EvalResult = {
+        testCase,
+        generated: "",
+        generatedCompiles: false,
+        passed: false,
+        score: 0,
+        resultMatch: false,
+      };
 
       try {
         const generated = await this.generate(testCase.input, testCase.context);
-
-        // Validate that the generated expression is valid yexp syntax
-        let compilationError: string | undefined;
-        try {
-          compileExpr(generated.text);
-        } catch (compileErr) {
-          compilationError = compileErr instanceof Error ? compileErr.message : "Compilation failed";
-        }
-
-        const score = compilationError ? 0 : this.scoreExpression(generated.text, testCase.expected, testCase.sampleData);
-        const passed = !compilationError && score >= 0.9;
+        result.generated = generated.text;
 
         totalInputTokens += generated.tokens.input;
         totalOutputTokens += generated.tokens.output;
 
-        // Real-time feedback
-        if (passed) {
-          console.log(`✓ (${(score * 100).toFixed(0)}%)`);
-        } else {
-          if (compilationError) {
-            console.log(`✗ COMPILE ERROR`);
-            console.log(`    Expected: ${testCase.expected}`);
-            console.log(`    Got:      ${generated.text}`);
-            console.log(`    Error:    ${compilationError}`);
-          } else {
-            console.log(`✗ (${(score * 100).toFixed(0)}%)`);
-            console.log(`    Expected: ${testCase.expected}`);
-            console.log(`    Got:      ${generated.text}`);
+        // Check if generated expression compiles
+        try {
+          compileExpr(result.generated);
+          result.generatedCompiles = true;
+        } catch (compileErr) {
+          result.compilationError = compileErr instanceof Error ? compileErr.message : "Compilation failed";
+        }
+
+        // If compiled and we have sample data, run it
+        if (result.generatedCompiles && testCase.sampleData) {
+          try {
+            result.generatedResult = run(result.generated, {
+              root: testCase.sampleData,
+              state: testCase.sampleData.state,
+              data: testCase.sampleData.data,
+              env: testCase.sampleData.env,
+            });
+          } catch (runErr) {
+            result.runtimeError = runErr instanceof Error ? runErr.message : "Runtime error";
           }
         }
 
-        results.push({
-          testCase,
-          generated: generated.text,
-          passed,
-          score,
-          error: compilationError,
-        });
+        // Compare results if we have both
+        if (!result.runtimeError && testCase.expectedResult !== undefined && result.generatedResult !== undefined) {
+          result.resultMatch = deepEqual(result.generatedResult, testCase.expectedResult);
+        }
+
+        // Calculate score
+        result.score = this.scoreExpression(
+          result.generatedResult,
+          testCase.expectedResult,
+          !!result.runtimeError,
+          testCase.expectedCompiles ?? true
+        );
+        result.passed = result.score >= 0.9;
+
+        // Real-time feedback
+        if (result.passed) {
+          console.log(`✓ (${(result.score * 100).toFixed(0)}%)`);
+        } else {
+          if (result.compilationError) {
+            console.log(`✗ COMPILE ERROR`);
+            console.log(`    Expected: ${testCase.expected}`);
+            console.log(`    Got:      ${result.generated}`);
+            console.log(`    Error:    ${result.compilationError}`);
+          } else if (result.runtimeError) {
+            console.log(`✗ RUNTIME ERROR`);
+            console.log(`    Expected: ${testCase.expected}`);
+            console.log(`    Got:      ${result.generated}`);
+            console.log(`    Error:    ${result.runtimeError}`);
+          } else if (!result.resultMatch) {
+            console.log(`✗ RESULT MISMATCH`);
+            console.log(`    Expected expression: ${testCase.expected}`);
+            console.log(`    Got expression:      ${result.generated}`);
+            console.log(`    Expected result:     ${JSON.stringify(testCase.expectedResult)?.substring(0, 100)}`);
+            console.log(`    Got result:          ${JSON.stringify(result.generatedResult)?.substring(0, 100)}`);
+          }
+        }
+
+        results.push(result);
       } catch (error) {
         console.log(`✗ ERROR`);
         console.log(`    ${error instanceof Error ? error.message : "Unknown error"}`);
 
-        results.push({
-          testCase,
-          generated: "",
-          passed: false,
-          score: 0,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
+        result.compilationError = error instanceof Error ? error.message : "Unknown error";
+        results.push(result);
       }
     }
 
@@ -684,7 +352,10 @@ Input: "${f.testCase.input}"
 Expected: ${f.testCase.expected}
 Generated: ${f.generated}
 Score: ${f.score.toFixed(2)}
-${f.error ? `Error: ${f.error}` : ""}
+Compiles: ${f.generatedCompiles}
+Result Match: ${f.resultMatch}
+${f.compilationError ? `Compilation Error: ${f.compilationError}` : ""}
+${f.runtimeError ? `Runtime Error: ${f.runtimeError}` : ""}
 `
       )
       .join("\n---\n");

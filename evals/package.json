@@ -7,7 +7,9 @@
     "ralph": "bun run ralph-loop.ts",
     "eval": "bun run yexp-eval.ts",
     "optimize": "bun run prompt-optimizer.ts",
-    "report": "bun run visualize.ts"
+    "report": "bun run visualize.ts",
+    "dataset:generate": "bun run generate-expected-results.ts",
+    "test:validation": "bun run test-validation.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -19,7 +21,6 @@
     "@anthropic-ai/sdk": "^0.73.0",
     "@openrouter/ai-sdk-provider": "^2.1.1",
     "@yexp/core": "workspace:*",
-    "ai": "^6.0.74",
-    "braintrust": "^2.2.0"
+    "ai": "^6.0.74"
   }
 }
