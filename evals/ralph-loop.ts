@@ -498,7 +498,12 @@ class RalphLoop {
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
 
-    for (const testCase of DATASET) {
+    console.log(`Running ${DATASET.length} tests...`);
+
+    for (let i = 0; i < DATASET.length; i++) {
+      const testCase = DATASET[i];
+      process.stdout.write(`  [${i + 1}/${DATASET.length}] ${testCase.id}: `);
+
       try {
         const generated = await this.generate(testCase.input, testCase.context);
         const score = this.scoreExpression(generated.text, testCase.expected);
@@ -507,6 +512,15 @@ class RalphLoop {
         totalInputTokens += generated.tokens.input;
         totalOutputTokens += generated.tokens.output;
 
+        // Real-time feedback
+        if (passed) {
+          console.log(`✓ (${(score * 100).toFixed(0)}%)`);
+        } else {
+          console.log(`✗ (${(score * 100).toFixed(0)}%)`);
+          console.log(`    Expected: ${testCase.expected}`);
+          console.log(`    Got:      ${generated.text}`);
+        }
+
         results.push({
           testCase,
           generated: generated.text,
@@ -514,6 +528,9 @@ class RalphLoop {
           score,
         });
       } catch (error) {
+        console.log(`✗ ERROR`);
+        console.log(`    ${error instanceof Error ? error.message : "Unknown error"}`);
+
         results.push({
           testCase,
           generated: "",
