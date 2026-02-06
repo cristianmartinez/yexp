@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
-import type { BytecodeProgram, ExecutionContext } from '@jext/core';
+import type { BytecodeProgram, ExecutionContext } from '@yexp/core';
 import { VMStepper } from '../lib/vm-stepper';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -51,7 +51,7 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
   const [, setRenderCounter] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(500); // ms per step
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const stepper = stepperRef.current;
   const currentStep = stepper.getCurrentState();
@@ -247,15 +247,6 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
             </div>
           )}
 
-          {/* Error */}
-          {currentStep.state.error && (
-            <div className="mt-4 pt-4 border-t">
-              <h4 className="font-semibold text-sm mb-2 text-red-500">Error</h4>
-              <div className="px-3 py-2 bg-red-500/20 rounded border-l-2 border-red-500 font-mono text-xs">
-                {currentStep.state.error}
-              </div>
-            </div>
-          )}
         </Card>
       </div>
     </div>

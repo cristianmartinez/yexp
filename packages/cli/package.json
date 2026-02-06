@@ -1,22 +1,22 @@
 {
-  "name": "@jext/cli",
+  "name": "@yexp/cli",
   "version": "0.0.1",
   "type": "module",
-  "description": "CLI for Jext expression language",
+  "description": "CLI for Yexp expression language",
   "bin": {
-    "jext": "./dist/index.js"
+    "yexp": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",
-    "build:bin": "bun build src/index.ts --compile --outfile dist/jext",
+    "build:bin": "bun build src/index.ts --compile --outfile dist/yexp",
     "dev": "bun run src/index.ts",
     "test": "bun test"
   },
   "dependencies": {
-    "@jext/core": "workspace:*",
+    "@yexp/core": "workspace:*",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
@@ -24,5 +24,5 @@
     "@types/node": "^20.10.0",
     "typescript": "^5.7.0"
   },
-  "keywords": ["jext", "json", "query", "expression", "cli"]
+  "keywords": ["yexp", "json", "query", "expression", "cli"]
 }

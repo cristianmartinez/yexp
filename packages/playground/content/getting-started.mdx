@@ -1,21 +1,21 @@
 # Getting Started
 
-Get up and running with Jext in minutes.
+Get up and running with Yexp in minutes.
 
 ## Installation
 
-Install Jext via npm or bun:
+Install Yexp via npm or bun:
 
 ```bash
-npm install @jext/core
+npm install @yexp/core
 # or
-bun add @jext/core
+bun add @yexp/core
 ```
 
 ## Basic Usage
 
 ```typescript
-import { run } from '@jext/core'
+import { run } from '@yexp/core'
 
 // Prepare your input data
 const input = {
@@ -34,7 +34,7 @@ console.log(result)
 
 ## Context Access
 
-Jext provides three ways to access data in expressions:
+Yexp provides three ways to access data in expressions:
 
 - **`$`** - Access the main input data
 - **`$context`** - Access auxiliary context (optional)
@@ -55,7 +55,7 @@ run('$.items.length', input, options)  // 3
 For better performance, compile expressions once and reuse:
 
 ```typescript
-import { tokenize, parse, compile, evaluate } from '@jext/core'
+import { tokenize, parse, compile, evaluate } from '@yexp/core'
 
 // Compile to bytecode
 const program = compile(parse(tokenize('$.items |> filter(x => x > 2)')))

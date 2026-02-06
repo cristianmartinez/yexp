@@ -1,5 +1,5 @@
 {
-  "name": "@jext/benchmarks",
+  "name": "@yexp/benchmarks",
   "private": true,
   "type": "module",
   "scripts": {

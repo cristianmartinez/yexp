@@ -1,5 +1,5 @@
 /**
- * Benchmark: Jext vs jq vs JSONata
+ * Benchmark: Yexp vs jq vs JSONata
  *
  * Compares performance across different JSON query/transformation engines
  */
@@ -57,21 +57,21 @@ function runJq(expr: string, data: any): any {
   }
 }
 
-// Run jext CLI via command line
-function runJextCli(expr: string, data: any): any {
+// Run yexp CLI via command line
+function runYexpCli(expr: string, data: any): any {
   try {
     const input = JSON.stringify(data);
-    // Use the compiled native jext binary (no JS runtime startup overhead)
+    // Use the compiled native yexp binary (no JS runtime startup overhead)
     // From: packages/core/exploratory/benchmarks/benchmark.ts
-    // To:   packages/cli/dist/jext (native binary)
-    const jextPath = new URL('../../../cli/dist/jext', import.meta.url).pathname;
-    const result = execSync(`echo '${input}' | ${jextPath} '${expr}'`, {
+    // To:   packages/cli/dist/yexp (native binary)
+    const yexpPath = new URL('../../../cli/dist/yexp', import.meta.url).pathname;
+    const result = execSync(`echo '${input}' | ${yexpPath} '${expr}'`, {
       encoding: 'utf-8',
       timeout: 5000,
     });
     return JSON.parse(result);
   } catch (e) {
-    console.error('jext CLI error:', e);
+    console.error('yexp CLI error:', e);
     return null;
   }
 }
@@ -90,21 +90,21 @@ function benchmarkJq(name: string, expr: string, data: any) {
   return { name: `${name} (jq CLI)`, total, perOp, iterations };
 }
 
-// Benchmark jext CLI
-function benchmarkJextCli(name: string, expr: string, data: any) {
+// Benchmark yexp CLI
+function benchmarkYexpCli(name: string, expr: string, data: any) {
   const iterations = 100; // Same as jq for fair comparison
   const start = performance.now();
   for (let i = 0; i < iterations; i++) {
-    runJextCli(expr, data);
+    runYexpCli(expr, data);
   }
   const end = performance.now();
   const total = end - start;
   const perOp = (total / iterations) * 1000; // microseconds
 
-  return { name: `${name} (jext CLI)`, total, perOp, iterations };
+  return { name: `${name} (yexp CLI)`, total, perOp, iterations };
 }
 
-console.log('🏁 Benchmark: Jext vs jq vs JSONata\n');
+console.log('🏁 Benchmark: Yexp vs jq vs JSONata\n');
 console.log('='.repeat(80));
 
 // Test 1: Simple property access
@@ -113,12 +113,12 @@ console.log('Expression: users[0].name\n');
 
 const test1Results: any[] = [];
 
-// Jext
-const jextExpr1 = 'users[0].name';
-const jextProgram1 = compile(parse(tokenize(jextExpr1)));
+// Yexp
+const yexpExpr1 = 'users[0].name';
+const yexpProgram1 = compile(parse(tokenize(yexpExpr1)));
 test1Results.push(
-  benchmark('Jext', () => {
-    evaluate(jextProgram1, { data: testData, state: {}, env: {} });
+  benchmark('Yexp', () => {
+    evaluate(yexpProgram1, { data: testData, state: {}, env: {} });
   }),
 );
 
@@ -133,8 +133,8 @@ test1Results.push(
 // jq CLI
 test1Results.push(benchmarkJq('jq', '.users[0].name', testData));
 
-// jext CLI
-test1Results.push(benchmarkJextCli('jext', '$.users[0].name', testData));
+// yexp CLI
+test1Results.push(benchmarkYexpCli('yexp', '$.users[0].name', testData));
 
 printResults(test1Results);
 
@@ -144,12 +144,12 @@ console.log('Expression: users.filter(u => u.age > 28)\n');
 
 const test2Results: any[] = [];
 
-// Jext
-const jextExpr2 = 'users.filter(u => u.age > 28)';
-const jextProgram2 = compile(parse(tokenize(jextExpr2)));
+// Yexp
+const yexpExpr2 = 'users.filter(u => u.age > 28)';
+const yexpProgram2 = compile(parse(tokenize(yexpExpr2)));
 test2Results.push(
-  benchmark('Jext', () => {
-    evaluate(jextProgram2, { data: testData, state: {}, env: {} });
+  benchmark('Yexp', () => {
+    evaluate(yexpProgram2, { data: testData, state: {}, env: {} });
   }),
 );
 
@@ -164,8 +164,8 @@ test2Results.push(
 // jq CLI
 test2Results.push(benchmarkJq('jq', '.users | map(select(.age > 28))', testData));
 
-// jext CLI
-test2Results.push(benchmarkJextCli('jext', '$.users.filter(u => u.age > 28)', testData));
+// yexp CLI
+test2Results.push(benchmarkYexpCli('yexp', '$.users.filter(u => u.age > 28)', testData));
 
 printResults(test2Results);
 
@@ -175,12 +175,12 @@ console.log('Expression: users.map(u => u.name)\n');
 
 const test3Results: any[] = [];
 
-// Jext
-const jextExpr3 = 'users.map(u => u.name)';
-const jextProgram3 = compile(parse(tokenize(jextExpr3)));
+// Yexp
+const yexpExpr3 = 'users.map(u => u.name)';
+const yexpProgram3 = compile(parse(tokenize(yexpExpr3)));
 test3Results.push(
-  benchmark('Jext', () => {
-    evaluate(jextProgram3, { data: testData, state: {}, env: {} });
+  benchmark('Yexp', () => {
+    evaluate(yexpProgram3, { data: testData, state: {}, env: {} });
   }),
 );
 
@@ -195,8 +195,8 @@ test3Results.push(
 // jq CLI
 test3Results.push(benchmarkJq('jq', '.users | map(.name)', testData));
 
-// jext CLI
-test3Results.push(benchmarkJextCli('jext', '$.users.map(u => u.name)', testData));
+// yexp CLI
+test3Results.push(benchmarkYexpCli('yexp', '$.users.map(u => u.name)', testData));
 
 printResults(test3Results);
 
@@ -206,12 +206,12 @@ console.log('Expression: users.filter(u => u.city == "NYC").map(u => u.score)\n'
 
 const test4Results: any[] = [];
 
-// Jext
-const jextExpr4 = 'users.filter(u => u.city == "NYC").map(u => u.score)';
-const jextProgram4 = compile(parse(tokenize(jextExpr4)));
+// Yexp
+const yexpExpr4 = 'users.filter(u => u.city == "NYC").map(u => u.score)';
+const yexpProgram4 = compile(parse(tokenize(yexpExpr4)));
 test4Results.push(
-  benchmark('Jext', () => {
-    evaluate(jextProgram4, { data: testData, state: {}, env: {} });
+  benchmark('Yexp', () => {
+    evaluate(yexpProgram4, { data: testData, state: {}, env: {} });
   }),
 );
 
@@ -228,9 +228,9 @@ test4Results.push(
   benchmarkJq('jq', '.users | map(select(.city == "NYC")) | map(.score)', testData),
 );
 
-// jext CLI
+// yexp CLI
 test4Results.push(
-  benchmarkJextCli('jext', '$.users.filter(u => u.city == "NYC").map(u => u.score)', testData),
+  benchmarkYexpCli('yexp', '$.users.filter(u => u.city == "NYC").map(u => u.score)', testData),
 );
 
 printResults(test4Results);
@@ -241,12 +241,12 @@ console.log('Expression: users[0].score * 1.1 + 10\n');
 
 const test5Results: any[] = [];
 
-// Jext
-const jextExpr5 = 'users[0].score * 1.1 + 10';
-const jextProgram5 = compile(parse(tokenize(jextExpr5)));
+// Yexp
+const yexpExpr5 = 'users[0].score * 1.1 + 10';
+const yexpProgram5 = compile(parse(tokenize(yexpExpr5)));
 test5Results.push(
-  benchmark('Jext', () => {
-    evaluate(jextProgram5, { data: testData, state: {}, env: {} });
+  benchmark('Yexp', () => {
+    evaluate(yexpProgram5, { data: testData, state: {}, env: {} });
   }),
 );
 
@@ -261,8 +261,8 @@ test5Results.push(
 // jq CLI
 test5Results.push(benchmarkJq('jq', '.users[0].score * 1.1 + 10', testData));
 
-// jext CLI
-test5Results.push(benchmarkJextCli('jext', '$.users[0].score * 1.1 + 10', testData));
+// yexp CLI
+test5Results.push(benchmarkYexpCli('yexp', '$.users[0].score * 1.1 + 10', testData));
 
 printResults(test5Results);
 
@@ -273,16 +273,16 @@ console.log('\n📈 Summary\n');
 console.log('Typical Performance Characteristics:\n');
 console.log('│ Tool          │ Speed       │ Per Op   │ Use Case                           │');
 console.log('├───────────────┼─────────────┼──────────┼────────────────────────────────────┤');
-console.log('│ Jext (lib)    │ Very Fast   │ ~0.3µs   │ User rules, high-frequency queries │');
+console.log('│ Yexp (lib)    │ Very Fast   │ ~0.3µs   │ User rules, high-frequency queries │');
 console.log('│ JSONata (lib) │ Fast        │ ~0.8µs   │ Node-RED, transformation pipelines │');
 console.log('│ jq CLI        │ Medium*     │ ~7ms     │ Shell scripting, one-off queries   │');
-console.log('│ jext CLI      │ Medium*     │ ~29ms    │ Shell scripting, one-off queries   │');
+console.log('│ yexp CLI      │ Medium*     │ ~29ms    │ Shell scripting, one-off queries   │');
 console.log('\n* CLI tools have subprocess overhead but are still fast enough (<100ms)');
 console.log('  for interactive use and shell scripts\n');
 
 console.log('Key Takeaways:');
-console.log('  • Jext library: 20,000x faster than CLI tools - use for embedded/high-frequency');
-console.log('  • jq CLI: 4x faster than jext CLI (native C binary vs JavaScript runtime)');
+console.log('  • Yexp library: 20,000x faster than CLI tools - use for embedded/high-frequency');
+console.log('  • jq CLI: 4x faster than yexp CLI (native C binary vs JavaScript runtime)');
 console.log('  • JSONata: great for complex transformations, library-only');
 console.log('  • Both CLIs are fast enough for shell scripts and interactive use');
 

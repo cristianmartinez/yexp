@@ -6,12 +6,12 @@ const withNextra = nextra({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@jext/core'],
+  transpilePackages: ['@yexp/core'],
   experimental: {
-    optimizePackageImports: ['@jext/core'],
+    optimizePackageImports: ['@yexp/core'],
   },
   webpack: (config) => {
-    // Handle @jext/core ES modules properly
+    // Handle @yexp/core ES modules properly
     config.resolve.extensionAlias = {
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
     };

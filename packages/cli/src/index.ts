@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * Jext CLI - JSON expression evaluation tool
+ * Yexp CLI - JSON expression evaluation tool
  *
  * Usage:
- *   echo '{"name": "Alice"}' | jext 'name'
- *   jext 'users[0].name' data.json
- *   cat data.json | jext 'users.filter(u => u.age > 25)'
+ *   echo '{"name": "Alice"}' | yexp 'name'
+ *   yexp 'users[0].name' data.json
+ *   cat data.json | yexp 'users.filter(u => u.age > 25)'
  */
 
 import { readFileSync } from 'fs';
-import { tokenize, parse, compile, evaluate } from '@jext/core';
+import { tokenize, parse, compile, evaluate } from '@yexp/core';
 import { cliFunctions } from './functions.js';
 import { formatOutput } from './format.js';
 
@@ -55,13 +55,13 @@ function parseArgs(args: string[]): { expression?: string; options: Options } {
 
 function showHelp() {
   console.log(`
-Jext - Fast JSON expression evaluation
+Yexp - Fast JSON expression evaluation
 
 USAGE:
-  jext [OPTIONS] <expression> [file]
+  yexp [OPTIONS] <expression> [file]
 
 ARGUMENTS:
-  <expression>    Jext expression to evaluate
+  <expression>    Yexp expression to evaluate
   [file]          JSON file to read (stdin if not provided)
 
 OPTIONS:
@@ -73,39 +73,39 @@ OPTIONS:
 
 EXAMPLES:
   # Property access (jq-style with '.')
-  echo '{"name": "Alice", "age": 30}' | jext '.name'
+  echo '{"name": "Alice", "age": 30}' | yexp '.name'
   # Output: "Alice"
 
   # Array operations
-  echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | jext '.users[0].name'
+  echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | yexp '.users[0].name'
   # Output: "Alice"
 
   # Filter and map
-  jext '.users.filter(u => u.age > 25).map(u => u.name)' data.json
+  yexp '.users.filter(u => u.age > 25).map(u => u.name)' data.json
 
   # Arithmetic
-  echo '{"price": 100}' | jext '.price * 1.1'
+  echo '{"price": 100}' | yexp '.price * 1.1'
   # Output: 110
 
   # Template strings (use '$' to access input)
-  echo '{"name": "Alice"}' | jext '\`Hello, \${$.name}!\`'
+  echo '{"name": "Alice"}' | yexp '\`Hello, \${$.name}!\`'
   # Output: "Hello, Alice!"
 
   # Access input explicitly with '$'
-  echo '{"name": "Alice"}' | jext '$.name'
+  echo '{"name": "Alice"}' | yexp '$.name'
   # Output: "Alice"
 
 PERFORMANCE:
-  Jext is optimized for speed (2-6x faster than JSONata)
+  Yexp is optimized for speed (2-6x faster than JSONata)
   Uses compiled bytecode for efficient evaluation
 
 MORE INFO:
-  https://github.com/yourusername/jext
+  https://github.com/yourusername/yexp
 `);
 }
 
 function showVersion() {
-  console.log('jext 0.0.1');
+  console.log('yexp 0.0.1');
 }
 
 async function readStdin(): Promise<string> {
@@ -137,7 +137,7 @@ async function main() {
   // Validate expression
   if (!expression) {
     console.error('Error: Expression required');
-    console.error('Run "jext --help" for usage information');
+    console.error('Run "yexp --help" for usage information');
     process.exit(1);
   }
 

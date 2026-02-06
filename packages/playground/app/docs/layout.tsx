@@ -4,12 +4,12 @@ import { getPageMap } from 'nextra/page-map';
 
 const navbar = (
   <Navbar
-    logo={<span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Jext</span>}
+    logo={<span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Yexp</span>}
     projectLink="https://github.com/cristianmartinez/Expr"
   />
 );
 
-const footer = <Footer>Jext Expression Engine</Footer>;
+const footer = <Footer>Yexp Expression Engine</Footer>;
 
 export default async function DocsLayout({
   children,

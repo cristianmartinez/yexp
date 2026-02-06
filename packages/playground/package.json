@@ -1,5 +1,5 @@
 {
-  "name": "@jext/playground",
+  "name": "@yexp/playground",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@jext/core": "workspace:*",
+    "@yexp/core": "workspace:*",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@monaco-editor/react": "^4.6.0",

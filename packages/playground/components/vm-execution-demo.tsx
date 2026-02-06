@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { tokenize, parse, compile } from '@jext/core';
-import type { ExecutionContext } from '@jext/core';
+import { tokenize, parse, compile } from '@yexp/core';
+import type { ExecutionContext } from '@yexp/core';
 import { VMExecutionPlayer } from './vm-execution-player';
-import { JextEditor } from './jext-editor';
+import { YexpEditor } from './yexp-editor';
 import { JsonEditor } from './json-editor';
 import { Card } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -57,8 +57,8 @@ export function VMExecutionDemo({
           </TabsList>
           <TabsContent value="expression" className="mt-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Enter any Jext expression:</label>
-              <JextEditor
+              <label className="text-sm font-medium">Enter any Yexp expression:</label>
+              <YexpEditor
                 value={expression}
                 onChange={setExpression}
                 context={context || {}}

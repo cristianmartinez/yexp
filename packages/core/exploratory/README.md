@@ -1,6 +1,6 @@
 # Core Exploratory
 
-Experimental features for Jext core.
+Experimental features for Yexp core.
 
 ## Current Explorations
 

@@ -48,13 +48,13 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Image
-                src="/jext-logo.svg"
-                alt="Jext"
+                src="/yexp-logo.svg"
+                alt="Yexp"
                 width={40}
                 height={40}
                 className="dark:invert"
               />
-              <h1 className="text-xl font-bold text-primary">JEXT</h1>
+              <h1 className="text-xl font-bold text-primary">YEXP</h1>
             </div>
             <nav className="flex items-center gap-3">
               <Button variant="ghost" asChild>
@@ -89,7 +89,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up animation-delay-200">
-            Jext is a fast, secure, and intuitive expression language that compiles to optimized
+            Yexp is a fast, secure, and intuitive expression language that compiles to optimized
             bytecode. Perfect for user-defined rules, formulas, and dynamic logic.
           </p>
 
@@ -140,7 +140,7 @@ export default function HomePage() {
       <section className="container mx-auto px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Why Jext?</h2>
+            <h2 className="text-4xl font-bold mb-4">Why Yexp?</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Built for developers who need safe, fast, and flexible user-defined logic
             </p>
@@ -253,13 +253,13 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
               <Image
-                src="/jext-logo.svg"
-                alt="Jext"
+                src="/yexp-logo.svg"
+                alt="Yexp"
                 width={24}
                 height={24}
                 className="dark:invert"
               />
-              <span className="text-sm text-muted-foreground">Jext Expression Language</span>
+              <span className="text-sm text-muted-foreground">Yexp Expression Language</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <Link href="/docs" className="hover:text-primary transition-colors">

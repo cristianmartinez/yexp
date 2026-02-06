@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { tokenize, parse, compile, evaluate } from '@jext/core';
+import { tokenize, parse, compile, evaluate } from '@yexp/core';
 import { Code2, PlayCircle, Database, AlertCircle, FileCode } from 'lucide-react';
-import { JextEditor } from '@/components/jext-editor';
+import { YexpEditor } from '@/components/yexp-editor';
 import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 import { PageHeader } from '@/components/page-header';
@@ -250,7 +250,7 @@ export default function PlaygroundPage() {
                 </div>
               </div>
               <div className="flex-1">
-                <JextEditor
+                <YexpEditor
                   value={expression}
                   onChange={setExpression}
                   context={parsedContext}

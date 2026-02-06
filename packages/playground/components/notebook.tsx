@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { tokenize, parse, compile, evaluate } from '@jext/core';
-import type { ExecutionContext, BytecodeProgram } from '@jext/core';
+import { tokenize, parse, compile, evaluate } from '@yexp/core';
+import type { ExecutionContext, BytecodeProgram } from '@yexp/core';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Play, Plus, Trash2, ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
-import { JextEditor } from './jext-editor';
+import { YexpEditor } from './yexp-editor';
 import { JsonViewer } from './json-viewer';
 
 interface Cell {
@@ -184,7 +184,7 @@ export function Notebook({ initialContext }: NotebookProps) {
 
               {/* Expression Input */}
               <div className="rounded-md overflow-hidden border border-border">
-                <JextEditor
+                <YexpEditor
                   value={cell.expression}
                   onChange={(expr) => updateCell(cell.id, expr)}
                   context={initialContext}

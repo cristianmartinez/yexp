@@ -392,7 +392,7 @@ bun test packages/core/tests/security.test.ts -t "HIGH SEVERITY"
 To test prototype pollution protection:
 
 ```typescript
-import { compile, evaluate } from '@jext/core';
+import { compile, evaluate } from '@yexp/core';
 
 // This should NOT pollute Object.prototype
 const program = compile(`{...__proto__: {polluted: true}}`);
@@ -405,7 +405,7 @@ console.log(testObj.polluted); // undefined (safe!)
 To test flatten depth limit:
 
 ```typescript
-import { compile, evaluate } from '@jext/core';
+import { compile, evaluate } from '@yexp/core';
 
 // This should return an error, not crash
 const program = compile(`data.arr |> flatten(999999)`);

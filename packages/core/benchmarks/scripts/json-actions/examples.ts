@@ -9,7 +9,7 @@ export const actionExamples = {
       type: 'assign' as const,
       path: 'state.count',
       value: {
-        type: 'jext' as const,
+        type: 'yexp' as const,
         expr: 'state.count + 1',
       },
     },
@@ -21,7 +21,7 @@ export const actionExamples = {
     action: {
       type: 'conditional' as const,
       condition: {
-        type: 'jext' as const,
+        type: 'yexp' as const,
         expr: 'state.count > 5',
       },
       then: {

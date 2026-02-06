@@ -75,8 +75,8 @@ Human‑friendly, editable, debuggable:
 ```json
 {
   "and": [
-    { "jext": "state.value > 1" },
-    { "jext": "state.value < 10" }
+    { "yexp": "state.value > 1" },
+    { "yexp": "state.value < 10" }
   ]
 }
 ```

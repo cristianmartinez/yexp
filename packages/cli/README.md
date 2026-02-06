@@ -1,12 +1,12 @@
-# @jext/cli
+# @yexp/cli
 
-Command-line interface for Jext expression language.
+Command-line interface for Yexp expression language.
 
 ## Installation
 
 ```bash
 # From npm (when published)
-npm install -g @jext/cli
+npm install -g @yexp/cli
 
 # From source
 cd packages/cli
@@ -19,31 +19,31 @@ npm link
 
 ```bash
 # Basic property access (jq-style with '.')
-echo '{"name": "Alice", "age": 30}' | jext '.name'
+echo '{"name": "Alice", "age": 30}' | yexp '.name'
 # Output: "Alice"
 
 # Array indexing
-echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | jext '.users[0].name'
+echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | yexp '.users[0].name'
 # Output: "Alice"
 
 # From file
-jext '.users[0].name' data.json
+yexp '.users[0].name' data.json
 
 # Filter and map
 echo '{"users": [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]}' | \
-  jext '.users.filter(u => u.age > 25).map(u => u.name)'
+  yexp '.users.filter(u => u.age > 25).map(u => u.name)'
 # Output: ["Alice"]
 
 # Arithmetic
-echo '{"price": 100, "tax": 0.1}' | jext '.price * (1 + .tax)'
+echo '{"price": 100, "tax": 0.1}' | yexp '.price * (1 + .tax)'
 # Output: 110
 
 # Template strings (use '$' to access input)
-echo '{"name": "Alice"}' | jext '`Hello, ${$.name}!`'
+echo '{"name": "Alice"}' | yexp '`Hello, ${$.name}!`'
 # Output: "Hello, Alice!"
 
 # Access input explicitly with '$'
-echo '{"name": "Alice"}' | jext '$.name'
+echo '{"name": "Alice"}' | yexp '$.name'
 # Output: "Alice"
 ```
 
@@ -59,44 +59,44 @@ echo '{"name": "Alice"}' | jext '$.name'
 
 ### Filter Users by Age
 ```bash
-cat users.json | jext 'users.filter(u => u.age >= 21)'
+cat users.json | yexp 'users.filter(u => u.age >= 21)'
 ```
 
 ### Calculate Total
 ```bash
 echo '{"items": [{"price": 10}, {"price": 20}]}' | \
-  jext 'items.map(i => i.price).reduce((a, b) => a + b, 0)'
+  yexp 'items.map(i => i.price).reduce((a, b) => a + b, 0)'
 ```
 
 ### Extract Nested Data
 ```bash
-jext '$.orders[0].items.map(i => i.name)' orders.json
+yexp '$.orders[0].items.map(i => i.name)' orders.json
 # Or use jq-style leading dot:
-jext '.orders[0].items.map(i => i.name)' orders.json
+yexp '.orders[0].items.map(i => i.name)' orders.json
 ```
 
 ### Conditional Logic
 ```bash
-echo '{"score": 85}' | jext 'score >= 90 ? "A" : score >= 80 ? "B" : "C"'
+echo '{"score": 85}' | yexp 'score >= 90 ? "A" : score >= 80 ? "B" : "C"'
 # Output: "B"
 ```
 
 ## File System Functions
 
-The CLI includes built-in functions for file exploration, making jext a composable alternative to `find` and `grep`.
+The CLI includes built-in functions for file exploration, making yexp a composable alternative to `find` and `grep`.
 
 ### `glob(pattern)`
 
 Find files matching a glob pattern. Returns an array of file entries.
 
 ```bash
-echo '{}' | jext 'glob("src/**/*.ts") |> map(.name)'
+echo '{}' | yexp 'glob("src/**/*.ts") |> map(.name)'
 # Output: ["index.ts", "functions.ts"]
 
-echo '{}' | jext 'glob("src/**/*.ts") |> filter(.size > 10000) |> sort(.size)'
+echo '{}' | yexp 'glob("src/**/*.ts") |> filter(.size > 10000) |> sort(.size)'
 # Find large TypeScript files
 
-echo '{}' | jext 'glob("**/*.ts") |> filter(.modified > now() - 86400000)'
+echo '{}' | yexp 'glob("**/*.ts") |> filter(.modified > now() - 86400000)'
 # Files modified in the last 24 hours
 ```
 
@@ -107,10 +107,10 @@ Each file entry has: `path`, `name`, `ext`, `size`, `modified`, `type`.
 Read a file's contents as a string.
 
 ```bash
-echo '{}' | jext 'read("package.json") |> length'
+echo '{}' | yexp 'read("package.json") |> length'
 # Output: 726
 
-echo '{}' | jext 'read("tsconfig.json")'
+echo '{}' | yexp 'read("tsconfig.json")'
 # Output: raw file contents
 ```
 
@@ -119,10 +119,10 @@ echo '{}' | jext 'read("tsconfig.json")'
 Read a file as an array of `{num, text}` objects.
 
 ```bash
-echo '{}' | jext 'lines("src/index.ts") |> filter(.text.includes("import")) |> map(.num)'
+echo '{}' | yexp 'lines("src/index.ts") |> filter(.text.includes("import")) |> map(.num)'
 # Output: [1, 2, 3]
 
-echo '{}' | jext 'lines("src/index.ts") |> length'
+echo '{}' | yexp 'lines("src/index.ts") |> length'
 # Count lines in a file
 ```
 
@@ -131,19 +131,19 @@ echo '{}' | jext 'lines("src/index.ts") |> length'
 Search file contents for a pattern. Returns `{path, line, num, match}` objects.
 
 ```bash
-echo '{}' | jext 'grep("TODO", "src/**/*.ts") |> groupBy(.path)'
+echo '{}' | yexp 'grep("TODO", "src/**/*.ts") |> groupBy(.path)'
 # Find all TODOs grouped by file
 
-echo '{}' | jext 'grep("evaluate", "packages/core/src/*.ts") |> map(.path) |> unique'
+echo '{}' | yexp 'grep("evaluate", "packages/core/src/*.ts") |> map(.path) |> unique'
 # Find files containing "evaluate"
 
-echo '{}' | jext 'grep("/export\\s+const/", "src/**/*.ts")'
+echo '{}' | yexp 'grep("/export\\s+const/", "src/**/*.ts")'
 # Regex pattern (wrap in /slashes/)
 ```
 
 ## Comparison with jq
 
-| Feature | jext | jq |
+| Feature | yexp | jq |
 |---------|------|-----|
 | Syntax | JavaScript-like | Custom DSL |
 | Performance | ⚡ Very fast | Fast (C implementation) |
@@ -152,15 +152,15 @@ echo '{}' | jext 'grep("/export\\s+const/", "src/**/*.ts")'
 
 ## Performance
 
-Jext is optimized for speed with compiled bytecode:
+Yexp is optimized for speed with compiled bytecode:
 
 ```bash
 # Benchmark: 100,000 evaluations
-jext 'users[0].name'  # ~0.3µs per eval
+yexp 'users[0].name'  # ~0.3µs per eval
 jq '.users[0].name'   # ~50ms per eval (subprocess overhead)
 ```
 
-For CLI usage, both are fast enough. Jext shines when embedded in applications.
+For CLI usage, both are fast enough. Yexp shines when embedded in applications.
 
 ## Development
 

@@ -130,7 +130,7 @@ Each layer can work standalone:
 **Build-time compilation** (production):
 ```ts
 // At build time
-import { tokenize, parse, compile } from '@jext/core';
+import { tokenize, parse, compile } from '@yexp/core';
 
 const bytecode = compile(parse(tokenize(expr)));
 fs.writeFileSync('compiled.json', JSON.stringify(bytecode));
@@ -139,7 +139,7 @@ fs.writeFileSync('compiled.json', JSON.stringify(bytecode));
 **Runtime-only** (smallest bundle):
 ```ts
 // At runtime (only VM in bundle)
-import { evaluate } from '@jext/core';
+import { evaluate } from '@yexp/core';
 import bytecode from './compiled.json';
 
 const result = evaluate(bytecode, context);

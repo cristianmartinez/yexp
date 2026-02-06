@@ -4,29 +4,29 @@ import { useRef } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import type { editor, languages, IPosition } from 'monaco-editor';
 
-interface JextEditorProps {
+interface YexpEditorProps {
   value: string;
   onChange: (value: string) => void;
   context?: Record<string, any>;
   height?: string;
 }
 
-export function JextEditor({ value, onChange, context = {}, height = '120px' }: JextEditorProps) {
+export function YexpEditor({ value, onChange, context = {}, height = '120px' }: YexpEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
     editorRef.current = editor;
 
-    // Register Jext language if not already registered
+    // Register Yexp language if not already registered
     if (
       !monaco.languages
         .getLanguages()
-        .some((lang: languages.ILanguageExtensionPoint) => lang.id === 'jext')
+        .some((lang: languages.ILanguageExtensionPoint) => lang.id === 'yexp')
     ) {
-      monaco.languages.register({ id: 'jext' });
+      monaco.languages.register({ id: 'yexp' });
 
       // Set language configuration
-      monaco.languages.setLanguageConfiguration('jext', {
+      monaco.languages.setLanguageConfiguration('yexp', {
         brackets: [
           ['[', ']'],
           ['(', ')'],
@@ -42,7 +42,7 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
       });
 
       // Set tokenizer for syntax highlighting
-      monaco.languages.setMonarchTokensProvider('jext', {
+      monaco.languages.setMonarchTokensProvider('yexp', {
         keywords: ['true', 'false', 'null', 'undefined'],
         builtins: [
           // String functions
@@ -158,8 +158,8 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
         },
       });
 
-      // Define VS Code dark theme for Jext
-      monaco.editor.defineTheme('jext-dark', {
+      // Define VS Code dark theme for Yexp
+      monaco.editor.defineTheme('yexp-dark', {
         base: 'vs-dark',
         inherit: true,
         rules: [
@@ -178,7 +178,7 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
       });
 
       // Register completion provider for autocompletion
-      monaco.languages.registerCompletionItemProvider('jext', {
+      monaco.languages.registerCompletionItemProvider('yexp', {
         provideCompletionItems: (model: editor.ITextModel, position: IPosition) => {
           const word = model.getWordUntilPosition(position);
           const range = {
@@ -233,11 +233,11 @@ export function JextEditor({ value, onChange, context = {}, height = '120px' }: 
     <div className="bg-[#1e1e1e] h-full">
       <Editor
         height={height}
-        language="jext"
+        language="yexp"
         value={value}
         onChange={(val) => onChange(val || '')}
         onMount={handleEditorDidMount}
-        theme="jext-dark"
+        theme="yexp-dark"
         options={{
           minimap: { enabled: false },
           fontSize: 14,

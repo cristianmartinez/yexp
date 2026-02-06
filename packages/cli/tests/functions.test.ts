@@ -32,7 +32,7 @@ describe('CLI functions', () => {
     test('reads file contents', () => {
       const result = read!('packages/cli/package.json');
       expect(typeof result).toBe('string');
-      expect(result as string).toContain('@jext/cli');
+      expect(result as string).toContain('@yexp/cli');
     });
 
     test('errors on non-existent file', () => {
@@ -69,13 +69,13 @@ describe('CLI functions', () => {
 
   describe('grep', () => {
     test('finds literal string matches', () => {
-      const result = grep!('@jext/cli', 'packages/cli/package.json') as any[];
+      const result = grep!('@yexp/cli', 'packages/cli/package.json') as any[];
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toHaveProperty('path');
       expect(result[0]).toHaveProperty('line');
       expect(result[0]).toHaveProperty('num');
-      expect(result[0].match).toBe('@jext/cli');
+      expect(result[0].match).toBe('@yexp/cli');
     });
 
     test('supports regex patterns', () => {

@@ -499,7 +499,7 @@ export const SECURITY_LIMITS = {
 
 If you discover a security vulnerability in Expr, please report it responsibly:
 
-**Email:** security@jext.dev (if available)
+**Email:** security@yexp.dev (if available)
 **PGP Key:** [Include PGP key for encrypted communication]
 
 **Please include:**

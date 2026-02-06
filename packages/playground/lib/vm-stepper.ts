@@ -1,8 +1,8 @@
-// Uses the actual VM from @jext/core with debug mode enabled
+// Uses the actual VM from @yexp/core with debug mode enabled
 // This ensures the playground visualizer always matches production behavior
 
-import type { BytecodeProgram, ExprValue, ExecutionContext } from '@jext/core';
-import { evaluate } from '@jext/core';
+import type { BytecodeProgram, ExprValue, ExecutionContext } from '@yexp/core';
+import { evaluate } from '@yexp/core';
 
 export interface VMState {
   ip: number;

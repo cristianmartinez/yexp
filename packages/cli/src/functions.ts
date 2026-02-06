@@ -1,7 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import { resolve, basename, extname } from 'node:path';
-import type { BuiltinFn } from '@jext/core';
-import { makeError } from '@jext/core';
+import type { BuiltinFn } from '@yexp/core';
+import { makeError } from '@yexp/core';
 import fg from 'fast-glob';
 
 function makeFileEntry(filePath: string) {

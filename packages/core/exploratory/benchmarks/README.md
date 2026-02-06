@@ -1,4 +1,4 @@
-# Benchmarks: Jext vs jq vs JSONata
+# Benchmarks: Yexp vs jq vs JSONata
 
 Performance comparison of JSON query/transformation engines.
 
@@ -6,7 +6,7 @@ Performance comparison of JSON query/transformation engines.
 
 - **jq** - C-based CLI tool, industry standard
 - **JSONata** - JavaScript library, used by Node-RED
-- **Jext** - Our expression language (stack-based VM)
+- **Yexp** - Our expression language (stack-based VM)
 
 ## Quick Start
 
@@ -30,7 +30,7 @@ bun run bench
 
 ## Expected Results
 
-| Test | Jext | JSONata | jq (CLI) |
+| Test | Yexp | JSONata | jq (CLI) |
 |------|------|---------|----------|
 | Property Access | ~2µs | ~5µs | ~50ms* |
 | Filter | ~15µs | ~30µs | ~50ms* |
@@ -40,7 +40,7 @@ bun run bench
 
 \* jq is slow here due to subprocess overhead. When used as a C library, it's very fast.
 
-## Why Jext is Fast
+## Why Yexp is Fast
 
 1. **Compiled bytecode** - Parse once, run many times
 2. **Stack-based VM** - Efficient interpretation
@@ -63,7 +63,7 @@ bun run bench
 
 | Tool | Best For |
 |------|----------|
-| **Jext** | High-frequency queries, user rules, embedded logic |
+| **Yexp** | High-frequency queries, user rules, embedded logic |
 | **JSONata** | Complex transformations, Node-RED, data mapping |
 | **jq** | CLI scripts, one-off queries, shell pipelines |
 
@@ -73,9 +73,9 @@ For a typical web application evaluating user rules on every request:
 
 ```
 1000 requests/second, each evaluates 5 rules:
-- Jext: ~10µs × 5 = 50µs = 0.05ms total
+- Yexp: ~10µs × 5 = 50µs = 0.05ms total
 - JSONata: ~30µs × 5 = 150µs = 0.15ms total
 - jq: Not suitable (50ms overhead per rule)
 
-Jext adds negligible latency to your API!
+Yexp adds negligible latency to your API!
 ```

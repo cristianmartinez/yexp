@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Jext Playground',
-  description: 'Interactive playground for the Jext expression language',
+  title: 'Yexp Playground',
+  description: 'Interactive playground for the Yexp expression language',
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 /**
- * JIT (Just-In-Time) Compilation Example for Jext
+ * JIT (Just-In-Time) Compilation Example for Yexp
  *
- * This demonstrates how to compile Jext bytecode to native JavaScript functions
+ * This demonstrates how to compile Yexp bytecode to native JavaScript functions
  * for dramatically faster execution.
  */
 

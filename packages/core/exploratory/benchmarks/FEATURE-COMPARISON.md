@@ -1,8 +1,8 @@
-# Feature Comparison: Jext vs JSONata
+# Feature Comparison: Yexp vs JSONata
 
-## What Jext Has ✅
+## What Yexp Has ✅
 
-| Feature | Jext | JSONata |
+| Feature | Yexp | JSONata |
 |---------|------|---------|
 | Property access | `data.name` | `data.name` |
 | Array indexing | `items[0]` | `items[0]` |
@@ -20,7 +20,7 @@
 
 ---
 
-## What JSONata Has (That Jext Doesn't) ❌
+## What JSONata Has (That Yexp Doesn't) ❌
 
 ### 1. **Recursive Descent / Wildcards**
 ```javascript
@@ -28,7 +28,7 @@
 Account.Order.**.Price  // Get all Prices recursively
 *.name                   // All name properties at this level
 
-// Jext: ❌ Not supported (yet)
+// Yexp: ❌ Not supported (yet)
 ```
 
 ### 2. **String Concatenation Operator**
@@ -36,7 +36,7 @@ Account.Order.**.Price  // Get all Prices recursively
 // JSONata
 firstName & " " & lastName  // String concat with &
 
-// Jext
+// Yexp
 `${firstName} ${lastName}`  // Template strings (different syntax)
 ```
 
@@ -46,7 +46,7 @@ firstName & " " & lastName  // String concat with &
 [1..10]        // [1,2,3,4,5,6,7,8,9,10]
 [1..10].($*$)  // [1,4,9,16,25,36,49,64,81,100]
 
-// Jext: ❌ Not supported
+// Yexp: ❌ Not supported
 ```
 
 ### 4. **Extensive Built-in Functions**
@@ -101,7 +101,7 @@ $reduce([1,2,3], function($a, $b) { $a + $b }, 0)
 $sift(obj, function($v, $k) { $v > 10 })
 ```
 
-**Jext:** Only has built-in array methods (filter, map, etc.) via JS
+**Yexp:** Only has built-in array methods (filter, map, etc.) via JS
 
 ---
 
@@ -114,7 +114,7 @@ $sift(obj, function($v, $k) { $v > 10 })
   "isAdult": age >= 18
 }
 
-// Jext: ❌ Can't construct objects in expressions
+// Yexp: ❌ Can't construct objects in expressions
 ```
 
 ### 6. **Regex Support**
@@ -123,7 +123,7 @@ $sift(obj, function($v, $k) { $v > 10 })
 $match("hello world", /w.*d/)  → ["world"]
 $replace("hello", /l/g, "r")   → "herro"
 
-// Jext: ❌ No regex
+// Yexp: ❌ No regex
 ```
 
 ### 7. **Pattern Matching / Conditionals**
@@ -136,7 +136,7 @@ $replace("hello", /l/g, "r")   → "herro"
   $value >= 70 ? "C" : "F"
 )
 
-// Jext: Can use ternary but no multi-case
+// Yexp: Can use ternary but no multi-case
 score >= 90 ? "A" : score >= 80 ? "B" : "C"  // Nested ternary (ugly)
 ```
 
@@ -146,7 +146,7 @@ score >= 90 ? "A" : score >= 80 ? "B" : "C"  // Nested ternary (ugly)
 Account.Order[Product.Price > %.MinPrice]
 // % refers to parent context
 
-// Jext: ❌ Not supported
+// Yexp: ❌ Not supported
 ```
 
 ### 9. **Transform Operator**
@@ -154,7 +154,7 @@ Account.Order[Product.Price > %.MinPrice]
 // JSONata
 Account.Order ~> $map(function($v) { $v.Price * 1.1 })
 
-// Jext: Use regular .map()
+// Yexp: Use regular .map()
 Account.Order.map(v => v.Price * 1.1)
 ```
 
@@ -166,7 +166,7 @@ Account.Order.map(v => v.Price * 1.1)
   [1..5].$square($)
 )
 
-// Jext: ❌ Can't define functions in expressions
+// Yexp: ❌ Can't define functions in expressions
 ```
 
 ### 11. **Grouping & Aggregation**
@@ -176,7 +176,7 @@ Account.Order{
   Product.Category: $sum(Price)
 }
 
-// Jext: ❌ No grouping syntax
+// Yexp: ❌ No grouping syntax
 ```
 
 ---
@@ -189,7 +189,7 @@ Account.Order{
 - **Rich function library**: Batteries included
 - **Complex expressions**: Full programming language
 
-### Jext Philosophy:
+### Yexp Philosophy:
 - **Expression-focused**: Evaluate conditions and simple transforms
 - **JavaScript-like**: Familiar syntax for JS developers
 - **Minimal core**: Small, fast, composable
@@ -197,7 +197,7 @@ Account.Order{
 
 ---
 
-## Should Jext Add These Features?
+## Should Yexp Add These Features?
 
 | Feature | Priority | Complexity | Notes |
 |---------|----------|------------|-------|
@@ -213,7 +213,7 @@ Account.Order{
 
 ---
 
-## Jext's Advantages Over JSONata
+## Yexp's Advantages Over JSONata
 
 1. ✅ **Much faster** (2-6x)
 2. ✅ **Serializable bytecode** (can cache as JSON)
@@ -227,7 +227,7 @@ Account.Order{
 
 ## Recommendation
 
-**Keep Jext focused on:**
+**Keep Yexp focused on:**
 - Fast expression evaluation
 - User rules & conditions
 - Simple transformations
@@ -243,7 +243,7 @@ Account.Order{
 - Custom function definitions (security risk)
 - Complex SQL-like features (scope creep)
 
-**Jext's niche:** Fast, safe, cacheable expressions for user-defined rules.
+**Yexp's niche:** Fast, safe, cacheable expressions for user-defined rules.
 **JSONata's niche:** Complex data transformations and aggregations.
 
 Different tools for different jobs! 🎯
