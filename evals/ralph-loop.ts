@@ -46,6 +46,7 @@ interface IterationResult {
 }
 
 const DATASET: TestCase[] = [
+  // Basic filtering & mapping (10 tests)
   {
     id: "filter-active",
     input: "Get all active users",
@@ -65,22 +66,60 @@ const DATASET: TestCase[] = [
     context: { data: { users: "array<{premium: boolean}>" } },
   },
   {
-    id: "mutation-increment",
-    input: "Increment the counter",
-    expected: "state.count = state.count + 1",
-    context: { state: { count: "number" } },
+    id: "map-dot-shorthand",
+    input: "Extract all product names",
+    expected: "data.products |> map(.name)",
+    context: { data: { products: "array<{name: string}>" } },
   },
   {
-    id: "optional-chaining",
-    input: "Get user name or 'Guest' if not available",
-    expected: "state.user?.name ?? 'Guest'",
-    context: { state: { user: "object | null" } },
+    id: "filter-multiple-conditions",
+    input: "Find users who are active and have premium accounts",
+    expected: "data.users |> filter(.active && .premium)",
+    context: { data: { users: "array<{active: boolean, premium: boolean}>" } },
   },
   {
-    id: "recursive-descent",
-    input: "Find all email addresses at any depth",
-    expected: "data..email",
-    context: { data: "object" },
+    id: "map-arithmetic",
+    input: "Calculate discounted prices (20% off)",
+    expected: "data.items |> map(.price * 0.8)",
+    context: { data: { items: "array<{price: number}>" } },
+  },
+  {
+    id: "filter-comparison",
+    input: "Get products priced between $50 and $100",
+    expected: "data.products |> filter(.price >= 50 && .price <= 100)",
+    context: { data: { products: "array<{price: number}>" } },
+  },
+  {
+    id: "unique-values",
+    input: "Get unique category names from all products",
+    expected: "data.products |> map(.category) |> unique",
+    context: { data: { products: "array<{category: string}>" } },
+  },
+  {
+    id: "first-last",
+    input: "Get the newest order",
+    expected: "data.orders |> last",
+    context: { data: { orders: "array<{id: string}>" } },
+  },
+  {
+    id: "reverse-limit",
+    input: "Get the last 3 messages",
+    expected: "data.messages |> reverse |> limit(3)",
+    context: { data: { messages: "array<{text: string}>" } },
+  },
+
+  // Sorting & grouping (5 tests)
+  {
+    id: "sort-descending",
+    input: "Sort users by age descending",
+    expected: "data.users |> sort(-.age)",
+    context: { data: { users: "array<{age: number}>" } },
+  },
+  {
+    id: "sort-ascending",
+    input: "Sort products by price ascending",
+    expected: "data.products |> sort(.price)",
+    context: { data: { products: "array<{price: number}>" } },
   },
   {
     id: "groupby",
@@ -89,11 +128,56 @@ const DATASET: TestCase[] = [
     context: { data: { items: "array<{category: string}>" } },
   },
   {
-    id: "sort-lambda",
-    input: "Sort users by age descending",
-    // Accept both simple and lambda syntax for single-property numeric sort
-    expected: "data.users |> sort(-.age)", // or: sort((a, b) => b.age - a.age)
-    context: { data: { users: "array<{age: number}>" } },
+    id: "groupby-then-count",
+    input: "Count items per category",
+    expected: "data.items |> groupBy(.category) |> mapEntries((e) => { key: e.key, value: length(e.value) })",
+    context: { data: { items: "array<{category: string}>" } },
+  },
+  {
+    id: "uniqueby",
+    input: "Get unique users by email",
+    expected: "data.users |> uniqueBy(.email)",
+    context: { data: { users: "array<{email: string, name: string}>" } },
+  },
+
+  // Aggregation & math (5 tests)
+  {
+    id: "sum-prices",
+    input: "Calculate total revenue from all orders",
+    expected: "data.orders |> map(.total) |> add",
+    context: { data: { orders: "array<{total: number}>" } },
+  },
+  {
+    id: "average-score",
+    input: "Calculate average rating",
+    expected: "data.reviews |> map(.rating) |> add / length(data.reviews)",
+    context: { data: { reviews: "array<{rating: number}>" } },
+  },
+  {
+    id: "min-max",
+    input: "Find the cheapest product",
+    expected: "data.products |> minBy(.price)",
+    context: { data: { products: "array<{price: number, name: string}>" } },
+  },
+  {
+    id: "count-items",
+    input: "Count how many tasks are completed",
+    expected: "data.tasks |> filter(.completed) |> length",
+    context: { data: { tasks: "array<{completed: boolean}>" } },
+  },
+  {
+    id: "percentage",
+    input: "Calculate percentage of active users",
+    expected: "(data.users |> filter(.active) |> length) / length(data.users) * 100",
+    context: { data: { users: "array<{active: boolean}>" } },
+  },
+
+  // Optional chaining & nullish coalescing (5 tests)
+  {
+    id: "optional-chaining",
+    input: "Get user name or 'Guest' if not available",
+    expected: "state.user?.name ?? 'Guest'",
+    context: { state: { user: "object | null" } },
   },
   {
     id: "nested-safe-access",
@@ -109,10 +193,182 @@ const DATASET: TestCase[] = [
     },
   },
   {
-    id: "map-dot-shorthand",
-    input: "Extract all product names",
-    expected: "data.products |> map(.name)",
-    context: { data: { products: "array<{name: string}>" } },
+    id: "optional-array-access",
+    input: "Get first item name or 'No items'",
+    expected: "data.items[0]?.name ?? 'No items'",
+    context: { data: { items: "array<{name: string}>" } },
+  },
+  {
+    id: "chained-optionals",
+    input: "Get company name from user or 'N/A'",
+    expected: "state.user?.organization?.company?.name ?? 'N/A'",
+    context: { state: { user: "object | null" } },
+  },
+  {
+    id: "optional-with-default-number",
+    input: "Get retry count or default to 3",
+    expected: "state.config?.retries ?? 3",
+    context: { state: { config: "object | null" } },
+  },
+
+  // State mutations (5 tests)
+  {
+    id: "mutation-increment",
+    input: "Increment the counter",
+    expected: "state.count = state.count + 1",
+    context: { state: { count: "number" } },
+  },
+  {
+    id: "mutation-toggle",
+    input: "Toggle the loading flag",
+    expected: "state.loading = !state.loading",
+    context: { state: { loading: "boolean" } },
+  },
+  {
+    id: "mutation-append",
+    input: "Add a new item to the list",
+    expected: "state.items << data.newItem",
+    context: { state: { items: "array" }, data: { newItem: "object" } },
+  },
+  {
+    id: "mutation-object-merge",
+    input: "Update user profile with new data",
+    expected: "state.user = { ...state.user, ...data.updates }",
+    context: { state: { user: "object" }, data: { updates: "object" } },
+  },
+  {
+    id: "mutation-reset",
+    input: "Reset the form to initial values",
+    expected: "state.form = data.initialForm",
+    context: { state: { form: "object" }, data: { initialForm: "object" } },
+  },
+
+  // Recursive descent (3 tests)
+  {
+    id: "recursive-descent",
+    input: "Find all email addresses at any depth",
+    expected: "data..email",
+    context: { data: "object" },
+  },
+  {
+    id: "recursive-descent-filter",
+    input: "Find all IDs in the entire data structure",
+    expected: "data..id",
+    context: { data: "object" },
+  },
+  {
+    id: "recursive-descent-unique",
+    input: "Get all unique tag names from nested structure",
+    expected: "data..tags |> flatten |> unique",
+    context: { data: "object" },
+  },
+
+  // String operations (5 tests)
+  {
+    id: "string-concat",
+    input: "Create full name from first and last name",
+    expected: "`${state.firstName} ${state.lastName}`",
+    context: { state: { firstName: "string", lastName: "string" } },
+  },
+  {
+    id: "string-uppercase",
+    input: "Convert category to uppercase",
+    expected: "data.category |> toUpperCase",
+    context: { data: { category: "string" } },
+  },
+  {
+    id: "string-split-join",
+    input: "Convert comma-separated string to array",
+    expected: "data.tags |> split(',')",
+    context: { data: { tags: "string" } },
+  },
+  {
+    id: "string-trim",
+    input: "Remove whitespace from user input",
+    expected: "data.input |> trim",
+    context: { data: { input: "string" } },
+  },
+  {
+    id: "string-includes",
+    input: "Check if description contains the word 'premium'",
+    expected: "data.description |> includes('premium')",
+    context: { data: { description: "string" } },
+  },
+
+  // Object operations (5 tests)
+  {
+    id: "object-keys",
+    input: "Get all setting keys",
+    expected: "state.settings |> keys",
+    context: { state: { settings: "object" } },
+  },
+  {
+    id: "object-values",
+    input: "Get all configuration values",
+    expected: "data.config |> values",
+    context: { data: { config: "object" } },
+  },
+  {
+    id: "object-pick",
+    input: "Extract only name and email from user",
+    expected: "state.user |> pick(['name', 'email'])",
+    context: { state: { user: "object" } },
+  },
+  {
+    id: "object-has-key",
+    input: "Check if user has a phone number",
+    expected: "state.user |> has('phone')",
+    context: { state: { user: "object" } },
+  },
+  {
+    id: "object-merge",
+    input: "Merge default settings with user preferences",
+    expected: "{ ...data.defaults, ...state.preferences }",
+    context: { data: { defaults: "object" }, state: { preferences: "object" } },
+  },
+
+  // Complex chaining (7 tests)
+  {
+    id: "complex-filter-map-reduce",
+    input: "Calculate total value of active items in stock",
+    expected: "data.inventory |> filter(.active && .stock > 0) |> map(.price * .stock) |> add",
+    context: { data: { inventory: "array<{active: boolean, stock: number, price: number}>" } },
+  },
+  {
+    id: "complex-sort-limit-map",
+    input: "Get names of top 3 highest rated products",
+    expected: "data.products |> sort(-.rating) |> limit(3) |> map(.name)",
+    context: { data: { products: "array<{name: string, rating: number}>" } },
+  },
+  {
+    id: "complex-groupby-count",
+    input: "Count orders per status",
+    expected: "data.orders |> groupBy(.status) |> mapEntries((e) => { key: e.key, value: length(e.value) })",
+    context: { data: { orders: "array<{status: string}>" } },
+  },
+  {
+    id: "complex-nested-filter",
+    input: "Find users who have at least one completed task",
+    expected: "data.users |> filter((u) => u.tasks |> some(.completed))",
+    context: { data: { users: "array<{tasks: array<{completed: boolean}>}>" } },
+  },
+  {
+    id: "complex-flatten-filter",
+    input: "Get all tags from all posts that are published",
+    expected: "data.posts |> filter(.published) |> map(.tags) |> flatten |> unique",
+    context: { data: { posts: "array<{published: boolean, tags: array<string>}>" } },
+  },
+  {
+    id: "complex-reduce",
+    input: "Calculate weighted average of scores",
+    expected: "data.scores |> reduce(@ + value.score * value.weight, 0) / data.scores |> map(.weight) |> add",
+    context: { data: { scores: "array<{score: number, weight: number}>" } },
+  },
+  {
+    id: "complex-conditional-map",
+    input: "Apply different discounts based on membership level",
+    expected: "data.orders |> map(.memberLevel == 'gold' ? .total * 0.8 : .memberLevel == 'silver' ? .total * 0.9 : .total)",
+    context: { data: { orders: "array<{total: number, memberLevel: string}>" } },
   },
 ];
 
