@@ -167,8 +167,24 @@ describe('vm', () => {
     test('floor', () => expect(run('state.v |> floor', { state: { v: 3.7 } })).toBe(3));
     test('ceil', () => expect(run('state.v |> ceil', { state: { v: 3.2 } })).toBe(4));
     test('abs', () => expect(run('state.v |> abs', { state: { v: -5 } })).toBe(5));
-    test('type', () => expect(run('state.v |> type', { state: { v: 42 } })).toBe('number'));
-    test('type null', () => expect(run('null |> type')).toBe('null'));
-    test('type array', () => expect(run('[1] |> type')).toBe('array'));
+
+    describe('type()', () => {
+      test('number', () => expect(run('42 |> type')).toBe('number'));
+      test('string', () => expect(run('"hello" |> type')).toBe('string'));
+      test('boolean true', () => expect(run('true |> type')).toBe('boolean'));
+      test('boolean false', () => expect(run('false |> type')).toBe('boolean'));
+      test('null', () => expect(run('null |> type')).toBe('null'));
+      test('array', () => expect(run('[1, 2, 3] |> type')).toBe('array'));
+      test('object', () => expect(run('{ name: "Alice" } |> type')).toBe('object'));
+
+      test('with comparison', () => {
+        expect(run('state.v |> type == "number"', { state: { v: 42 } })).toBe(true);
+      });
+
+      test('filter by type', () => {
+        const result = run('[1, "hello", 2, "world", 3] |> filter((x) => type(x) == "number")');
+        expect(result).toEqual([1, 2, 3]);
+      });
+    });
   });
 });
