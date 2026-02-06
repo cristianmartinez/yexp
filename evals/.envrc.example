@@ -1,0 +1,25 @@
+# Copy this file to .envrc and fill in your API keys
+# Then run: direnv allow
+
+# Option 1: Direct Anthropic (default)
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Option 2: OpenRouter (unified API for multiple providers)
+# Get key from: https://openrouter.ai/keys
+# export USE_OPENROUTER="true"
+# export OPENROUTER_API_KEY="sk-or-v1-..."
+
+# Braintrust API Key (optional - only needed for cloud features)
+# Get from: https://www.braintrust.dev/
+# export BRAINTRUST_API_KEY="your-braintrust-key"
+
+# Model Configuration
+# For Anthropic Direct: claude-sonnet-4-5-20250929, claude-haiku-4-5-20251001, claude-opus-4-6
+# For OpenRouter: Use Anthropic model names (auto-converted), or:
+#   - anthropic/claude-3.5-sonnet, openai/gpt-4o, google/gemini-2.0-flash-exp
+export DEFAULT_MODEL="claude-sonnet-4-5-20250929"
+
+# Cost and Quality Targets
+export MAX_COST_PER_QUERY="0.001"  # $0.001 per query
+export TARGET_SCORE="0.95"          # 95% target accuracy
+export MAX_ITERATIONS="10"          # Max RALPH iterations

@@ -1,0 +1,24 @@
+{
+  "name": "evals",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "ralph": "bun run ralph-loop.ts",
+    "eval": "bun run yexp-eval.ts",
+    "optimize": "bun run prompt-optimizer.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.73.0",
+    "@openrouter/ai-sdk-provider": "^2.1.1",
+    "@yexp/core": "workspace:*",
+    "ai": "^6.0.74",
+    "braintrust": "^2.2.0"
+  }
+}

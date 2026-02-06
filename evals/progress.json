@@ -1,0 +1,354 @@
+[
+  {
+    "iteration": 1,
+    "prompt": "You are a yexp expression generator. Generate valid yexp expressions from natural language.\n\nYexp is an expression language with:\n- Context roots: state, data, env\n- Pipe operator: |>\n- Built-in functions: filter, map, reduce, etc.\n\nOutput ONLY the expression, no explanation.",
+    "totalTests": 10,
+    "passed": 4,
+    "avgScore": 0.735952380952381,
+    "failures": [
+      {
+        "testCase": {
+          "id": "filter-map-chain",
+          "input": "Calculate total price for items over $100",
+          "expected": "data.items |> filter(.price > 100) |> map(.price) |> add",
+          "context": {
+            "data": {
+              "items": "array<{price: number, name: string}>"
+            }
+          }
+        },
+        "generated": "data.items |> filter(x => x.price > 100) |> reduce((sum, x) => sum + x.price, 0)",
+        "passed": false,
+        "score": 0.75
+      },
+      {
+        "testCase": {
+          "id": "mutation-increment",
+          "input": "Increment the counter",
+          "expected": "state.count = state.count + 1",
+          "context": {
+            "state": {
+              "count": "number"
+            }
+          }
+        },
+        "generated": "state.count |> add(1)",
+        "passed": false,
+        "score": 0.6
+      },
+      {
+        "testCase": {
+          "id": "optional-chaining",
+          "input": "Get user name or 'Guest' if not available",
+          "expected": "state.user?.name ?? 'Guest'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user.name |> default:'Guest'",
+        "passed": false,
+        "score": 0.4
+      },
+      {
+        "testCase": {
+          "id": "recursive-descent",
+          "input": "Find all email addresses at any depth",
+          "expected": "data..email",
+          "context": {
+            "data": "object"
+          }
+        },
+        "generated": "data |> filter(value => typeof value === 'string' && value.match(/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/))",
+        "passed": false,
+        "score": 0.6666666666666666
+      },
+      {
+        "testCase": {
+          "id": "groupby",
+          "input": "Group items by category",
+          "expected": "data.items |> groupBy(.category)",
+          "context": {
+            "data": {
+              "items": "array<{category: string}>"
+            }
+          }
+        },
+        "generated": "data.items |> groupBy('category')",
+        "passed": false,
+        "score": 0.8
+      },
+      {
+        "testCase": {
+          "id": "nested-safe-access",
+          "input": "Get deeply nested property safely",
+          "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user |> get(\"name.firstName\")",
+        "passed": false,
+        "score": 0.14285714285714285
+      }
+    ],
+    "learnings": "Here's my analysis of the failure patterns:\n\nROOT CAUSES:\n1. Syntax Inconsistency\n- Incorrect lambda syntax (x => x.price vs .price)\n- Inconsistent optional chaining syntax\n- Mixing JavaScript-style with yexp-specific syntax\n\n2. Function Selection Errors\n- Using reduce where add is preferred\n- Using filter for recursive operations\n- Incorrect handling of mutations vs transformations\n\n3. Safe Navigation/Default Values\n- Poor handling of optional chaining\n- Inconsistent null coalescence syntax\n- Defaults not properly expressed\n\nSPECIFIC FIXES:\n\n1. Add syntax rules to prompt:\n```\nSyntax rules:\n- Use .property not x => x.property for property access\n- Use ?? for null coalescing\n- Use ?.for optional chaining\n- Use = for mutations\n- Use |> for method chaining\n```\n\n2. Add function clarifications:\n```\nCommon operations:\n- Addition: use add not reduce\n- Mutations: use = not transformations\n- Deep search: use .. not filter\n- Grouping: use groupBy(.property)\n```\n\nEXAMPLES NEEDED:\n\n1. Optional chaining:\n```\n\"Get user email if exists\"\nstate.user?.email ?? ''\n```\n\n2. Mutation:\n```\n\"Add 1 to counter\"\nstate.count = state.count + 1\n```\n\n3. Property access:\n```\n\"Get prices over 100\"\ndata.items |> filter(.price > 100)\n```\n\n4. Deep search:\n```\n\"Find all ids\"\ndata..id\n```\n\nThe key improvement would be adding explicit syntax rules and examples that demonstrate the correct patterns. The current failures show confusion between JavaScript-style and yexp-specific syntax that could be prevented with clearer guidelines.",
+    "cost": 0,
+    "timestamp": "2026-02-06T21:12:45.760Z"
+  },
+  {
+    "iteration": 2,
+    "prompt": "You are a yexp expression generator. Generate valid yexp expressions from natural language.\n\nYexp is an expression language with context roots: state, data, env.\n\nSyntax rules:\n- Use .property for property access (not x => x.property)\n- Use ?? for null coalescing (data.value ?? 'default')\n- Use ?. for optional chaining (user?.email)\n- Use = for mutations (state.count = 1)\n- Use |> for method chaining (data |> filter(.price > 0))\n- Use .. for recursive/deep operations (data..id)\n\nBuilt-in functions:\n- filter: Select matching items\n- map: Transform items\n- add: Sum values (not reduce)\n- groupBy: Group by property\n- flatten: Flatten nested arrays\n- sort: Sort items\n- first/last: Get first/last item\n\nExamples:\n- \"Get user's email if exists\": state.user?.email ?? ''\n- \"Increment counter\": state.count = state.count + 1\n- \"Get items over $100\": data.items |> filter(.price > 100)\n- \"Find all IDs recursively\": data..id\n- \"Group users by role\": data.users |> groupBy(.role)\n\nOutput ONLY the expression, no explanation.",
+    "totalTests": 10,
+    "passed": 7,
+    "avgScore": 0.8952380952380953,
+    "failures": [
+      {
+        "testCase": {
+          "id": "limit",
+          "input": "Get the first 5 premium users",
+          "expected": "data.users |> filter(.premium) |> limit(5)",
+          "context": {
+            "data": {
+              "users": "array<{premium: boolean}>"
+            }
+          }
+        },
+        "generated": "data.users |> filter(.premium) |> first(5)",
+        "passed": false,
+        "score": 0.8571428571428571
+      },
+      {
+        "testCase": {
+          "id": "sort-lambda",
+          "input": "Sort users by age descending",
+          "expected": "data.users |> sort((a, b) => b.age - a.age)",
+          "context": {
+            "data": {
+              "users": "array<{age: number}>"
+            }
+          }
+        },
+        "generated": "data.users |> sort(-.age)",
+        "passed": false,
+        "score": 0.6666666666666666
+      },
+      {
+        "testCase": {
+          "id": "nested-safe-access",
+          "input": "Get deeply nested property safely",
+          "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user?.profile?.contact?.email",
+        "passed": false,
+        "score": 0.42857142857142855
+      }
+    ],
+    "learnings": "Analyzing the new set of failures, here are the patterns and recommended fixes:\n\nROOT CAUSES:\n1. Function Signature Mismatches\n- limit() function not documented but needed\n- Incorrect handling of sort comparators\n- Using first() incorrectly as a limit function\n\n2. Complex Operation Patterns\n- Missing guidance on sort direction syntax\n- Unclear how to handle numeric limits\n- Incomplete understanding of nested safe access patterns\n\nSPECIFIC FIXES:\n\n1. Add missing built-in functions to prompt:\n```\nBuilt-in functions:\n- limit: Limit results to N items\n- first/last: Get single first/last item (not for limiting)\n- sort: Sort items (use -property for descending)\n```\n\n2. Add syntax rules for sorting:\n```\nSyntax rules:\n- Use -property for descending sort (sort(-.age))\n- Use property for ascending sort (sort(.age))\n```\n\n3. Add pattern for nested safe access:\n```\n- Use multiple ?. for deep optional chaining\n- Always include ?? default for nullable chains\n```\n\nEXAMPLES NEEDED:\n\n1. Limiting results:\n```\n\"Get first 3 items\"\ndata.items |> limit(3)\n```\n\n2. Sorting:\n```\n\"Sort by price descending\"\ndata.items |> sort(-.price)\n```\n\n3. Deep safe access:\n```\n\"Get theme with default\"\nstate.user?.settings?.theme ?? 'default'\n```\n\nKey improvements:\n1. Document limit() vs first() distinction\n2. Clear syntax for descending sorts\n3. Show complete nested safe access pattern with defaults\n\nThe main issues are around missing function documentation and unclear syntax patterns for common operations like sorting and limiting results.",
+    "cost": 0,
+    "timestamp": "2026-02-06T21:13:21.449Z"
+  },
+  {
+    "iteration": 3,
+    "prompt": "You are a yexp expression generator. Generate valid yexp expressions from natural language.\n\nYexp is an expression language with context roots: state, data, env.\n\nSyntax rules:\n- Use .property for property access (not x => x.property)\n- Use ?? for null coalescing (data.value ?? 'default')\n- Use ?. for optional chaining (user?.email)\n- Use = for mutations (state.count = 1)\n- Use |> for method chaining (data |> filter(.price > 0))\n- Use .. for recursive/deep operations (data..id)\n- Use -property for descending sort (sort(-.price))\n- Use property for ascending sort (sort(.age))\n- Use multiple ?. for deep optional chaining (user?.settings?.theme)\n- Always include ?? default for nullable chains\n\nBuilt-in functions:\n- filter: Select matching items\n- map: Transform items\n- add: Sum values (not reduce)\n- groupBy: Group by property\n- flatten: Flatten nested arrays\n- sort: Sort items (use -property for descending)\n- limit: Limit results to N items\n- first/last: Get single first/last item (not for limiting)\n\nExamples:\n- \"Get user's email if exists\": state.user?.email ?? ''\n- \"Increment counter\": state.count = state.count + 1\n- \"Get items over $100\": data.items |> filter(.price > 100)\n- \"Find all IDs recursively\": data..id\n- \"Group users by role\": data.users |> groupBy(.role)\n- \"Get first 3 expensive items\": data.items |> sort(-.price) |> limit(3)\n- \"Get user theme with default\": state.user?.settings?.theme ?? 'light'\n- \"Get most recent item\": data.items |> sort(-.date) |> first\n- \"Sort products by name\": data.products |> sort(.name)\n\nOutput ONLY the expression, no explanation.",
+    "totalTests": 10,
+    "passed": 8,
+    "avgScore": 0.9380952380952381,
+    "failures": [
+      {
+        "testCase": {
+          "id": "sort-lambda",
+          "input": "Sort users by age descending",
+          "expected": "data.users |> sort((a, b) => b.age - a.age)",
+          "context": {
+            "data": {
+              "users": "array<{age: number}>"
+            }
+          }
+        },
+        "generated": "data.users |> sort(-.age)",
+        "passed": false,
+        "score": 0.6666666666666666
+      },
+      {
+        "testCase": {
+          "id": "nested-safe-access",
+          "input": "Get deeply nested property safely",
+          "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user?.profile?.settings?.theme?.color ?? 'default'",
+        "passed": false,
+        "score": 0.7142857142857143
+      }
+    ],
+    "learnings": "Analyzing the two remaining failures:\n\nROOT CAUSES:\n1. Sort Expression Confusion\n- The generator uses simplified `-property` syntax when complex comparators are needed\n- Not clear when to use simplified vs lambda sort syntax\n\n2. Optional Chaining Depth\n- Adding unnecessary property levels (?.color) \n- Not clear when to stop the optional chain\n- Default values being too generic ('default' vs contextual defaults)\n\nSPECIFIC FIXES:\n\n1. Add sort syntax clarification:\n```\nSort syntax:\n- Use -property for basic descending sort (sort(-.price))\n- Use (a,b) => comparison for complex sorts\n- Numeric sorting uses simple -property syntax\n```\n\n2. Clarify optional chaining:\n```\nOptional chaining rules:\n- Chain only through known/expected properties\n- Always end with actual needed value\n- Use contextual defaults (e.g. 'light' for theme)\n```\n\nEXAMPLES NEEDED:\n\n1. Complex sort:\n```\n\"Sort by complex comparison\"\ndata.items |> sort((a,b) => b.value - a.value)\n```\n\n2. Proper optional chaining depth:\n```\n\"Get user theme setting\"\nstate.user?.settings?.theme ?? 'light'\n```\n\nKey improvements:\n1. Distinguish between simple and complex sort cases\n2. Show proper depth for optional chaining\n3. Demonstrate contextual default values\n\nThe main issues are around edge cases where the simplified syntax isn't sufficient (complex sorts) and ensuring proper depth/defaults for optional chaining.",
+    "cost": 0,
+    "timestamp": "2026-02-06T21:13:57.984Z"
+  },
+  {
+    "iteration": 4,
+    "prompt": "You are a yexp expression generator. Generate valid yexp expressions from natural language.\n\nYexp is an expression language with context roots: state, data, env.\n\nSyntax rules:\n- Use .property for property access (not x => x.property)\n- Use ?? for null coalescing (data.value ?? 'default')\n- Use ?. for optional chaining (user?.email)\n- Use = for mutations (state.count = 1)\n- Use |> for method chaining (data |> filter(.price > 0))\n- Use .. for recursive/deep operations (data..id)\n- Use property for ascending sort (sort(.age))\n- Chain only through known nullable properties\n- Use contextual defaults for null coalescing\n\nSort syntax:\n- Use -property for basic descending sort (sort(-.price))\n- Use (a,b) => a.x - b.x for custom numeric comparisons\n- Use (a,b) => b.x - a.x for custom descending sorts\n- Simple property sorting for basic cases only\n\nBuilt-in functions:\n- filter: Select matching items\n- map: Transform items\n- add: Sum values (not reduce)\n- groupBy: Group by property\n- flatten: Flatten nested arrays\n- sort: Sort items (use -property or custom comparator)\n- limit: Limit results to N items\n- first/last: Get single first/last item\n\nExamples:\n- \"Get user's email if exists\": state.user?.email ?? ''\n- \"Increment counter\": state.count = state.count + 1\n- \"Get items over $100\": data.items |> filter(.price > 100)\n- \"Find all IDs recursively\": data..id\n- \"Group users by role\": data.users |> groupBy(.role)\n- \"Sort products by name\": data.products |> sort(.name)\n- \"Sort by price descending\": data.items |> sort(-.price)\n- \"Sort by complex calculation\": data.items |> sort((a,b) => b.value/b.weight - a.value/a.weight)\n- \"Get user theme\": state.user?.theme ?? 'light'\n- \"Get nested theme\": state.user?.settings?.theme ?? 'light'\n- \"Most expensive items\": data.items |> sort(-.price) |> limit(3)\n- \"Latest transaction\": data.transactions |> sort(-.date) |> first\n\nOutput ONLY the expression, no explanation.",
+    "totalTests": 10,
+    "passed": 7,
+    "avgScore": 0.8970238095238094,
+    "failures": [
+      {
+        "testCase": {
+          "id": "filter-map-chain",
+          "input": "Calculate total price for items over $100",
+          "expected": "data.items |> filter(.price > 100) |> map(.price) |> add",
+          "context": {
+            "data": {
+              "items": "array<{price: number, name: string}>"
+            }
+          }
+        },
+        "generated": "data.items |> filter(.price > 100) |> add(.price)",
+        "passed": false,
+        "score": 0.875
+      },
+      {
+        "testCase": {
+          "id": "sort-lambda",
+          "input": "Sort users by age descending",
+          "expected": "data.users |> sort((a, b) => b.age - a.age)",
+          "context": {
+            "data": {
+              "users": "array<{age: number}>"
+            }
+          }
+        },
+        "generated": "data.users |> sort(-.age)",
+        "passed": false,
+        "score": 0.6666666666666666
+      },
+      {
+        "testCase": {
+          "id": "nested-safe-access",
+          "input": "Get deeply nested property safely",
+          "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user?.preferences?.display?.theme?.color ?? 'default'",
+        "passed": false,
+        "score": 0.42857142857142855
+      }
+    ],
+    "learnings": "Analyzing the 3 specific failures:\n\nROOT CAUSES:\n1. Function Composition/Chaining Pattern Errors\n- Test \"Calculate total price\" shows confusion between map+add vs direct add\n- Generator tries to shortcut operations into single steps\n- Missing pattern for aggregation after filtering\n\n2. Sort Comparator Choice\n- Generator defaults to simplified -property syntax\n- Not clear when to use lambda comparators vs simple syntax\n- Missing guidance on when simple sort isn't sufficient\n\n3. Default Value Selection\n- Over-generating property chains\n- Adding unnecessary property levels\n- Not using contextual defaults\n\nSPECIFIC FIXES:\n\n1. Add chain pattern rules:\n```\nChain rules:\n- Use map before add for numeric calculations\n- Chain only through known nullable properties \n- Use contextual defaults for null coalescing\n```\n\n2. Add sort syntax rules:\n```\nSort syntax:\n- Use -property for basic descending sort (sort(-.price))\n- Use (a,b) => a.x - b.x for custom numeric comparisons\n- Use (a,b) => b.x - a.x for custom descending sorts\n- Simple property sorting for basic cases only\n```\n\nEXAMPLES NEEDED:\n\n1. Calculation chains:\n```\n\"Calculate total price for items over $100\"\ndata.items |> filter(.price > 100) |> map(.price) |> add\n```\n\n2. Complex sorting:\n```\n\"Sort by complex calculation\"\ndata.items |> sort((a,b) => b.value/b.weight - a.value/a.weight)\n```\n\n3. Proper optional chaining:\n```\n\"Get nested theme\"\nstate.user?.settings?.theme ?? 'light'\n```\n\nMost impactful changes:\n1. Clarify when to use map+add vs direct add\n2. Clear rules for simple vs lambda sort syntax\n3. Guidelines for property chain depth and defaults\n\nThe key is being explicit about when to use complex patterns (map+add, lambda sorts) vs simplified syntax (-property, direct add).",
+    "cost": 0,
+    "timestamp": "2026-02-06T21:14:33.660Z"
+  },
+  {
+    "iteration": 5,
+    "prompt": "You are a yexp expression generator. Generate valid yexp expressions from natural language.\n\nYexp is an expression language with context roots: state, data, env.\n\nCore syntax:\n- .property for property access\n- ?? for null coalescing (data.value ?? 'default')\n- ?. for optional chaining (user?.email)\n- = for mutations (state.count = 1)\n- |> for method chaining (data |> filter(.price > 0))\n- .. for recursive/deep operations (data..id)\n\nChain patterns:\n- Use map(.property) before add for numeric calculations\n- Chain methods in logical order: filter -> map -> aggregate\n- Only chain through potentially null properties with ?.\n- Keep property chains to minimum depth needed\n- Use contextual default values in null coalescing\n\nSort patterns:\n- Simple ascending: sort(.property)\n- Simple descending: sort(-.property)\n- Numeric comparison: sort((a,b) => a.x - b.x)\n- Complex calculation: sort((a,b) => b.value/b.weight - a.value/a.weight)\n- Use lambda syntax when comparing computed values\n\nBuilt-in functions:\n- filter: Select matching items\n- map: Transform items\n- add: Sum values (requires map for calculations)\n- groupBy: Group by property\n- flatten: Flatten nested arrays\n- sort: Sort items\n- limit: Limit results to N items\n- first/last: Get single first/last item\n\nKey examples:\n- \"Calculate total price\": data.items |> map(.price) |> add\n- \"Total price over $100\": data.items |> filter(.price > 100) |> map(.price) |> add\n- \"Sort by efficiency ratio\": data.items |> sort((a,b) => b.value/b.cost - a.value/a.cost)\n- \"Sort by price\": data.items |> sort(-.price)\n- \"Get user theme\": state.user?.theme ?? 'default'\n- \"Get nested settings\": state.user?.preferences?.theme ?? env.defaultTheme\n- \"Latest transactions\": data.transactions |> sort(-.date) |> limit(5)\n- \"Deep ID search\": data..id\n- \"Group and count\": data.users |> groupBy(.role)\n\nCommon mistakes to avoid:\n- Don't use add without map for calculations\n- Don't chain properties unnecessarily (user.settings.theme vs user?.theme)\n- Don't use lambda sorts for simple property comparison\n- Don't omit null coalescing on nullable chains\n\nOutput ONLY the expression, no explanation.",
+    "totalTests": 10,
+    "passed": 8,
+    "avgScore": 0.9238095238095239,
+    "failures": [
+      {
+        "testCase": {
+          "id": "sort-lambda",
+          "input": "Sort users by age descending",
+          "expected": "data.users |> sort((a, b) => b.age - a.age)",
+          "context": {
+            "data": {
+              "users": "array<{age: number}>"
+            }
+          }
+        },
+        "generated": "data.users |> sort(-.age)",
+        "passed": false,
+        "score": 0.6666666666666666
+      },
+      {
+        "testCase": {
+          "id": "nested-safe-access",
+          "input": "Get deeply nested property safely",
+          "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user?.profile?.preferences?.theme?.color ?? 'default'",
+        "passed": false,
+        "score": 0.5714285714285714
+      }
+    ],
+    "learnings": "Analyzing the two specific failures:\n\nROOT CAUSES:\n1. Sort Expression Pattern Mismatch\n- Generator is using simplified sort(-.age) when lambda sort((a,b) => b.age - a.age) is needed\n- Not clear when to use simple vs lambda sort patterns\n- Missing guidance that simple descending sort isn't sufficient for numeric comparisons\n\n2. Optional Chaining Noise\n- Adding unnecessary properties (preferences, color) \n- Not clear when to stop the chain\n- Using generic 'default' instead of contextual defaults\n- Over-complicating the property access path\n\nSPECIFIC FIXES:\n\n1. Add explicit sort pattern rules:\n```\nSort patterns:\n- Simple ascending: sort(.property) \n- Simple descending: sort(-.property)\n- Numeric comparison: sort((a,b) => a.x - b.x)\n- Complex calculation: sort((a,b) => b.value/b.weight - a.value/a.weight)\n- Use lambda syntax when comparing computed values\n```\n\n2. Add optional chaining rules:\n```\nChain patterns:\n- Keep property chains to minimum depth needed\n- Chain only through potentially null properties with ?.\n- Use contextual default values in null coalescing\n```\n\nEXAMPLES NEEDED:\n\n1. Numeric sorting:\n```\n\"Sort users by age descending\"\ndata.users |> sort((a,b) => b.age - a.age)\n```\n\n2. Minimal optional chaining:\n```\n\"Get nested settings\"\nstate.user?.preferences?.theme ?? env.defaultTheme\n```\n\nMost impactful changes:\n1. Clear distinction between simple sort and numeric comparison sort patterns\n2. Guidance on minimal property chain depth\n3. Examples showing proper sort lambda syntax\n\nThe key improvement is being explicit about when lambda sort syntax is required vs when simple property sort is sufficient, and demonstrating minimal property chains with contextual defaults.",
+    "cost": 0,
+    "timestamp": "2026-02-06T21:15:20.384Z"
+  },
+  {
+    "iteration": 6,
+    "prompt": "You are a yexp expression generator. Generate valid yexp expressions from natural language.\n\nYexp is an expression language with context roots: state, data, env.\n\nCore syntax:\n- .property for property access\n- ?? for null coalescing (data.value ?? 'default')\n- ?. for optional chaining (user?.email)\n- = for mutations (state.count = 1)\n- |> for method chaining (data |> filter(.price > 0))\n- .. for recursive/deep operations (data..id)\n\nSort patterns:\n- Simple text/date ascending: sort(.property)\n- Simple text/date descending: sort(-.property)\n- Numeric ascending: sort((a,b) => a.value - b.value)\n- Numeric descending: sort((a,b) => b.value - a.value)\n- Complex calculation: sort((a,b) => b.value/b.weight - a.value/a.weight)\n- Always use lambda syntax for numeric comparisons\n\nChain patterns:\n- Access only required properties (user?.theme not user?.preferences?.theme)\n- Use ?. only for nullable properties\n- Use context-specific defaults (env.defaultTheme not 'default')\n- Stop chains at first required property\n- Use map(.property) before add for calculations\n\nBuilt-in functions:\n- filter: Select matching items\n- map: Transform items\n- add: Sum values (requires map for calculations)\n- groupBy: Group by property\n- flatten: Flatten nested arrays\n- sort: Sort items\n- limit: Limit results to N items\n- first/last: Get single first/last item\n\nKey examples:\n- \"Total price\": data.items |> map(.price) |> add\n- \"Sort users by age\": data.users |> sort((a,b) => b.age - a.age)\n- \"Sort products by name\": data.products |> sort(.name)\n- \"User theme with default\": state.user?.theme ?? env.defaultTheme\n- \"Latest transactions\": data.transactions |> sort(-.date) |> limit(5)\n- \"Group users by role\": data.users |> groupBy(.role)\n- \"All IDs\": data..id\n\nCommon mistakes fixed:\n- \"Sort by age descending\": \n  WRONG: data.users |> sort(-.age)\n  RIGHT: data.users |> sort((a,b) => b.age - a.age)\n\n- \"Get user theme\":\n  WRONG: state.user?.preferences?.settings?.theme ?? 'default'\n  RIGHT: state.user?.theme ?? env.defaultTheme\n\n- \"Calculate total\":\n  WRONG: data.items |> add\n  RIGHT: data.items |> map(.price) |> add\n\nOutput ONLY the expression, no explanation.",
+    "totalTests": 10,
+    "passed": 9,
+    "avgScore": 0.9428571428571428,
+    "failures": [
+      {
+        "testCase": {
+          "id": "nested-safe-access",
+          "input": "Get deeply nested property safely",
+          "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user?.address?.city?.name ?? env.defaultCity",
+        "passed": false,
+        "score": 0.42857142857142855
+      }
+    ],
+    "learnings": "Analyzing the single remaining failure:\n\nInput: \"Get deeply nested property safely\"\nExpected: state.user?.profile?.settings?.theme ?? 'light'\nGenerated: state.user?.address?.city?.name ?? env.defaultCity\n\nROOT CAUSES:\n1. Optional Chaining Pattern Mismatch\n- Generator adds arbitrary property chains (address.city)\n- Not respecting common/expected property hierarchies\n- Using env.default when simple string default is expected\n- Missing guidance on property chain depth best practices\n\nSPECIFIC FIXES:\n\n1. Add explicit chain depth guidance:\n```\nChain patterns:\n- Access only required properties (user?.theme not user?.preferences?.theme)\n- Use ?. only for nullable properties\n- Use context-specific defaults (env.defaultTheme not 'default')\n- Stop chains at first required property\n```\n\n2. Add common property hierarchies:\n```\nCommon hierarchies:\n- User: user?.profile?.settings?.theme\n- Product: product?.details?.price\n- Settings: settings?.display?.mode\n```\n\nEXAMPLES NEEDED:\n\n1. Minimal chain depth:\n```\n\"Get user theme\"\nstate.user?.theme ?? env.defaultTheme\n```\n\n2. Required depth chain:\n```\n\"Get profile setting\"\nstate.user?.profile?.settings?.theme ?? 'light'\n```\n\n3. Complex vs simple defaults:\n```\n\"Get display mode\"\nstate.settings?.mode ?? env.defaultMode  // System setting\nstate.user?.theme ?? 'light'            // Simple default\n```\n\nMost impactful changes:\n1. Clear guidance on when to use env defaults vs simple strings\n2. Examples showing proper property chain depth\n3. Common property hierarchy patterns\n\nThe key improvement is providing clear rules about property chain depth and when to use simple vs environment defaults. This should prevent the generator from creating arbitrary property chains.",
+    "cost": 0,
+    "timestamp": "2026-02-06T21:16:02.061Z"
+  },
+  {
+    "iteration": 7,
+    "prompt": "You are a yexp expression generator. Generate valid yexp expressions from natural language.\n\nYexp is an expression language with context roots: state, data, env.\n\nCore syntax:\n- .property for property access\n- ?? for null coalescing (data.value ?? 'default')\n- ?. for optional chaining (user?.email)\n- = for mutations (state.count = 1)\n- |> for method chaining (data |> filter(.price > 0))\n- .. for recursive/deep operations (data..id)\n\nChain patterns:\n- Use minimal necessary depth (user?.theme over user?.preferences?.theme)\n- Use ?. only for nullable properties\n- Use env.default for system settings, simple strings for UI defaults\n- Maximum chain depth is 4 levels deep\n- Stop chains at first required property\n\nCommon property hierarchies:\n- User: user?.profile?.settings?.theme\n- Product: product?.details?.price\n- Settings: settings?.display?.mode\n- Profile: profile?.contact?.address\n- Order: order?.shipping?.address\n\nDefault value patterns:\n- System settings: env.defaultTheme, env.defaultLanguage\n- UI elements: 'light', 'dark', 'default'\n- Numbers: 0, -1\n- Lists: []\n- Objects: {}\n\nSort patterns:\n- Simple text/date ascending: sort(.property)\n- Simple text/date descending: sort(-.property)\n- Numeric ascending: sort((a,b) => a.value - b.value)\n- Numeric descending: sort((a,b) => b.value - a.value)\n- Complex calculation: sort((a,b) => b.value/b.weight - a.value/a.weight)\n- Always use lambda syntax for numeric comparisons\n\nBuilt-in functions:\n- filter: Select matching items\n- map: Transform items\n- add: Sum values (requires map for calculations)\n- groupBy: Group by property\n- flatten: Flatten nested arrays\n- sort: Sort items\n- limit: Limit results to N items\n- first/last: Get single first/last item\n\nKey examples:\n- \"Total price\": data.items |> map(.price) |> add\n- \"Sort users by age\": data.users |> sort((a,b) => b.age - a.age)\n- \"Sort products by name\": data.products |> sort(.name)\n- \"User theme with default\": state.user?.theme ?? env.defaultTheme\n- \"Latest transactions\": data.transactions |> sort(-.date) |> limit(5)\n- \"Group users by role\": data.users |> groupBy(.role)\n- \"All IDs\": data..id\n- \"Get profile setting\": state.user?.profile?.settings?.theme ?? 'light'\n- \"Get system language\": state.settings?.language ?? env.defaultLanguage\n- \"Get display mode\": state.settings?.display?.mode ?? 'default'\n\nCommon mistakes fixed:\n- \"Deep property access\":\n  WRONG: state.user?.preferences?.settings?.theme?.color ?? 'default'\n  RIGHT: state.user?.theme ?? 'light'\n\n- \"System vs UI defaults\":\n  WRONG: state.settings?.language ?? 'en'\n  RIGHT: state.settings?.language ?? env.defaultLanguage\n\n- \"Calculate total\":\n  WRONG: data.items |> add\n  RIGHT: data.items |> map(.price) |> add\n\nOutput ONLY the expression, no explanation.",
+    "totalTests": 10,
+    "passed": 9,
+    "avgScore": 0.9714285714285713,
+    "failures": [
+      {
+        "testCase": {
+          "id": "nested-safe-access",
+          "input": "Get deeply nested property safely",
+          "expected": "state.user?.profile?.settings?.theme ?? 'light'",
+          "context": {
+            "state": {
+              "user": "object | null"
+            }
+          }
+        },
+        "generated": "state.user?.profile?.preferences?.theme ?? env.defaultTheme",
+        "passed": false,
+        "score": 0.7142857142857143
+      }
+    ],
+    "learnings": "Target achieved",
+    "cost": 0,
+    "timestamp": "2026-02-06T21:16:46.264Z"
+  }
+]
