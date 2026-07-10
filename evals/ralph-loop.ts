@@ -10,7 +10,7 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { LLMClient } from "./llm-client";
-import { compileExpr, run } from "@yexp/core";
+import { compile, run } from "@yexp/core";
 import { loadDataset, type TestCase } from "./dataset-loader";
 
 const llm = new LLMClient();
@@ -257,7 +257,7 @@ class RalphLoop {
 
         // Check if generated expression compiles
         try {
-          compileExpr(result.generated);
+          compile(result.generated);
           result.generatedCompiles = true;
         } catch (compileErr) {
           result.compilationError = compileErr instanceof Error ? compileErr.message : "Compilation failed";

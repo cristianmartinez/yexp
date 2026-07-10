@@ -8,7 +8,7 @@
 import { execSync } from 'node:child_process';
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { compile } from '../../src/compiler.js';
+import { compileAst } from '../../src/compiler.js';
 import { tokenize } from '../../src/lexer.js';
 import { parse } from '../../src/parser.js';
 import { evaluate } from '../../src/vm.js';
@@ -106,10 +106,10 @@ for (const expr of expressions) {
 
     // Measure compiler (requires AST)
     const ast = parse(tokens);
-    const compilerTime = measure(() => compile(ast), ITERATIONS);
+    const compilerTime = measure(() => compileAst(ast), ITERATIONS);
 
     // Measure VM (requires bytecode)
-    const bytecode = compile(ast);
+    const bytecode = compileAst(ast);
     const vmTime = measure(() => evaluate(bytecode, dummyContext), ITERATIONS);
 
     const total = lexerTime + parserTime + compilerTime + vmTime;

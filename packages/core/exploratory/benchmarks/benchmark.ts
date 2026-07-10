@@ -8,7 +8,7 @@ import { execSync } from 'child_process';
 import jsonata from 'jsonata';
 import { tokenize } from '../../src/lexer';
 import { parse } from '../../src/parser';
-import { compile } from '../../src/compiler';
+import { compileAst } from '../../src/compiler';
 import { evaluate } from '../../src/vm';
 import type { ExecutionContext } from '../../src/types';
 
@@ -115,7 +115,7 @@ const test1Results: any[] = [];
 
 // Yexp
 const yexpExpr1 = 'users[0].name';
-const yexpProgram1 = compile(parse(tokenize(yexpExpr1)));
+const yexpProgram1 = compileAst(parse(tokenize(yexpExpr1)));
 test1Results.push(
   benchmark('Yexp', () => {
     evaluate(yexpProgram1, { data: testData, state: {}, env: {} });
@@ -146,7 +146,7 @@ const test2Results: any[] = [];
 
 // Yexp
 const yexpExpr2 = 'users.filter(u => u.age > 28)';
-const yexpProgram2 = compile(parse(tokenize(yexpExpr2)));
+const yexpProgram2 = compileAst(parse(tokenize(yexpExpr2)));
 test2Results.push(
   benchmark('Yexp', () => {
     evaluate(yexpProgram2, { data: testData, state: {}, env: {} });
@@ -177,7 +177,7 @@ const test3Results: any[] = [];
 
 // Yexp
 const yexpExpr3 = 'users.map(u => u.name)';
-const yexpProgram3 = compile(parse(tokenize(yexpExpr3)));
+const yexpProgram3 = compileAst(parse(tokenize(yexpExpr3)));
 test3Results.push(
   benchmark('Yexp', () => {
     evaluate(yexpProgram3, { data: testData, state: {}, env: {} });
@@ -208,7 +208,7 @@ const test4Results: any[] = [];
 
 // Yexp
 const yexpExpr4 = 'users.filter(u => u.city == "NYC").map(u => u.score)';
-const yexpProgram4 = compile(parse(tokenize(yexpExpr4)));
+const yexpProgram4 = compileAst(parse(tokenize(yexpExpr4)));
 test4Results.push(
   benchmark('Yexp', () => {
     evaluate(yexpProgram4, { data: testData, state: {}, env: {} });
@@ -243,7 +243,7 @@ const test5Results: any[] = [];
 
 // Yexp
 const yexpExpr5 = 'users[0].score * 1.1 + 10';
-const yexpProgram5 = compile(parse(tokenize(yexpExpr5)));
+const yexpProgram5 = compileAst(parse(tokenize(yexpExpr5)));
 test5Results.push(
   benchmark('Yexp', () => {
     evaluate(yexpProgram5, { data: testData, state: {}, env: {} });

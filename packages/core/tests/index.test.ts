@@ -5,7 +5,7 @@ import {
   type ExprValue,
   compile,
   compileAst,
-  compileExpr,
+  compile,
   evaluate,
   isExprError,
   parse,
@@ -14,8 +14,8 @@ import {
 } from '../src/index.js';
 
 describe('public API', () => {
-  test('compileExpr produces a bytecode program', () => {
-    const program = compileExpr('1 + 2');
+  test('compile produces a bytecode program', () => {
+    const program = compile('1 + 2');
     expect(program.version).toBe(1);
     expect(program.constants).toContain(1);
     expect(program.constants).toContain(2);

@@ -8,7 +8,7 @@
  * Shows where each approach excels and provides recommendations.
  */
 
-import { compile } from '../../../src/compiler.js';
+import { compileAst } from '../../../src/compiler.js';
 import { tokenize } from '../../../src/lexer.js';
 import { parse } from '../../../src/parser.js';
 import { evaluate as evalBytecode } from '../../../src/vm.js';
@@ -41,7 +41,7 @@ const simpleJson: JsonCondition = {
 const simpleExpr = 'age >= 18 && age <= 65';
 const simpleContext = { age: 25 };
 
-const simpleBytecode = compile(parse(tokenize(simpleExpr)));
+const simpleBytecode = compileAst(parse(tokenize(simpleExpr)));
 
 // JSON
 let jsonStart = performance.now();
@@ -92,7 +92,7 @@ for (let round = 0; round < 1000; round++) {
 const jsonMany = performance.now() - jsonStart;
 
 // Expression approach: compile once, evaluate many times
-const bytecodes = conditions.map((c) => compile(parse(tokenize(c.expr))));
+const bytecodes = conditions.map((c) => compileAst(parse(tokenize(c.expr))));
 
 exprStart = performance.now();
 for (let round = 0; round < 1000; round++) {
@@ -141,7 +141,7 @@ const nestedJson: JsonCondition = {
 // Expression handles it naturally
 const nestedExpr = 'user.profile.age >= 18 && user.profile.country.code == "US"';
 
-const nestedBytecode = compile(parse(tokenize(nestedExpr)));
+const nestedBytecode = compileAst(parse(tokenize(nestedExpr)));
 
 // JSON with path parsing
 const jsonNestedStart = performance.now();

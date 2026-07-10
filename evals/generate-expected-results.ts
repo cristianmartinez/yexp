@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync } from "fs";
-import { compileExpr, run } from "@yexp/core";
+import { compile, run } from "@yexp/core";
 
 interface TestCase {
   id: string;
@@ -40,7 +40,7 @@ function generateExpectedResults() {
 
     try {
       // Try to compile the expected expression
-      compileExpr(testCase.expected);
+      compile(testCase.expected);
       result.expectedCompiles = true;
 
       // If we have sample data, run it to get expected result

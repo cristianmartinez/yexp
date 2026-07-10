@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { compile } from '../src/compiler.js';
+import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
 import type { BuiltinFn } from '../src/vm.js';
@@ -11,7 +11,7 @@ function run(
   input: any = null,
   options?: { functions?: Record<string, BuiltinFn> },
 ) {
-  const program = compile(parse(tokenize(source)));
+  const program = compileAst(parse(tokenize(source)));
   return evaluate(program, input, options);
 }
 

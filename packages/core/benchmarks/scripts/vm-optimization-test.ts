@@ -5,7 +5,7 @@
  * Test specific optimizations to improve VM performance against JSON
  */
 
-import { compile } from '../../src/compiler.js';
+import { compileAst } from '../../src/compiler.js';
 import { tokenize } from '../../src/lexer.js';
 import { parse } from '../../src/parser.js';
 import { evaluate as evalBytecode } from '../../src/vm.js';
@@ -17,7 +17,7 @@ const simpleExpr = 'age >= 18 && age <= 65';
 const context = { age: 25 };
 
 // Compile once
-const bytecode = compile(parse(tokenize(simpleExpr)));
+const bytecode = compileAst(parse(tokenize(simpleExpr)));
 
 console.log('📊 Bytecode Analysis:\n');
 console.log('Instructions:', bytecode.code.length);

@@ -815,6 +815,3 @@ export function compileAst(ast: ASTNode): BytecodeProgram {
 
   return { version: 1, slots, constants, code };
 }
-
-/** @deprecated Import `compileAst` from the public API instead. */
-export const compile = compileAst;

@@ -1,18 +1,18 @@
 import { describe, expect, test } from 'bun:test';
-import { compile } from '../src/compiler.js';
+import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
 import type { BytecodeProgram } from '../src/types.js';
 import { evaluate } from '../src/vm.js';
 
-function compileExpr(source: string): BytecodeProgram {
-  return compile(parse(tokenize(source)));
+function compileSource(source: string): BytecodeProgram {
+  return compileAst(parse(tokenize(source)));
 }
 
 describe('Recursive Descent Operator (..)', () => {
   describe('Basic recursive descent', () => {
     test('Find property at multiple depths', () => {
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -29,7 +29,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Find property in nested objects', () => {
-      const program = compileExpr('data..email');
+      const program = compileSource('data..email');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -46,7 +46,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Find property in array elements', () => {
-      const program = compileExpr('data..price');
+      const program = compileSource('data..price');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -61,7 +61,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Empty result when property not found', () => {
-      const program = compileExpr('data..nonexistent');
+      const program = compileSource('data..nonexistent');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -73,7 +73,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Property exists at root level', () => {
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -88,7 +88,7 @@ describe('Recursive Descent Operator (..)', () => {
 
   describe('Complex nesting', () => {
     test('Mixed arrays and objects', () => {
-      const program = compileExpr('data..id');
+      const program = compileSource('data..id');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -104,7 +104,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Multiple occurrences at different depths', () => {
-      const program = compileExpr('data..value');
+      const program = compileSource('data..value');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -132,7 +132,7 @@ describe('Recursive Descent Operator (..)', () => {
       }
       deepObj = { value: 'surface', deep: deepObj };
 
-      const program = compileExpr('data..value');
+      const program = compileSource('data..value');
       const result = evaluate(program, {
         state: {},
         data: deepObj,
@@ -150,7 +150,7 @@ describe('Recursive Descent Operator (..)', () => {
       }
       deepObj = { value: 'surface', deep: deepObj };
 
-      const program = compileExpr('data..value');
+      const program = compileSource('data..value');
       const result = evaluate(program, {
         state: {},
         data: deepObj,
@@ -163,7 +163,7 @@ describe('Recursive Descent Operator (..)', () => {
 
   describe('Integration with chaining', () => {
     test('Recursive descent + wildcard', () => {
-      const program = compileExpr('data..users[*].email');
+      const program = compileSource('data..users[*].email');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -180,7 +180,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Recursive descent + predicate', () => {
-      const program = compileExpr('data..items[.price > 15]');
+      const program = compileSource('data..items[.price > 15]');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -208,7 +208,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Recursive descent + property access', () => {
-      const program = compileExpr('data..user.name');
+      const program = compileSource('data..user.name');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -221,7 +221,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Multiple recursive descents', () => {
-      const program = compileExpr('data..groups..name');
+      const program = compileSource('data..groups..name');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -239,7 +239,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Recursive descent within specific path', () => {
-      const program = compileExpr('data.config..setting');
+      const program = compileSource('data.config..setting');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -260,7 +260,7 @@ describe('Recursive Descent Operator (..)', () => {
 
   describe('Optional variant (?..))', () => {
     test('Returns empty array on null', () => {
-      const program = compileExpr('data?..name');
+      const program = compileSource('data?..name');
       const result = evaluate(program, {
         state: {},
         data: null as any,
@@ -270,7 +270,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Returns empty array on undefined path', () => {
-      const program = compileExpr('data.missing?..name');
+      const program = compileSource('data.missing?..name');
       const result = evaluate(program, {
         state: {},
         data: {},
@@ -280,7 +280,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Works normally on valid object', () => {
-      const program = compileExpr('data?..name');
+      const program = compileSource('data?..name');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -292,7 +292,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Optional chaining before recursive descent', () => {
-      const program = compileExpr('data.config?..setting');
+      const program = compileSource('data.config?..setting');
       const result = evaluate(program, {
         state: {},
         data: {},
@@ -304,7 +304,7 @@ describe('Recursive Descent Operator (..)', () => {
 
   describe('Security', () => {
     test('Prevents prototype pollution via __proto__', () => {
-      const program = compileExpr('data..dangerous');
+      const program = compileSource('data..dangerous');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -318,7 +318,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Prevents access to constructor', () => {
-      const program = compileExpr('data..prop');
+      const program = compileSource('data..prop');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -336,7 +336,7 @@ describe('Recursive Descent Operator (..)', () => {
       const child: any = { name: 'Child', parent: obj };
       obj.child = child;
 
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: obj,
@@ -353,7 +353,7 @@ describe('Recursive Descent Operator (..)', () => {
         deepObj = { level: i, nested: deepObj };
       }
 
-      const program = compileExpr('data..found');
+      const program = compileSource('data..found');
       const result = evaluate(program, {
         state: {},
         data: deepObj,
@@ -367,7 +367,7 @@ describe('Recursive Descent Operator (..)', () => {
       const arr: any[] = [{ name: 'Item 1' }];
       arr.push(arr); // Creates circular reference
 
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: { items: arr },
@@ -380,7 +380,7 @@ describe('Recursive Descent Operator (..)', () => {
 
   describe('Edge cases', () => {
     test('Primitives return empty array', () => {
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: 42 as any,
@@ -390,7 +390,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Empty objects return empty array', () => {
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: {},
@@ -400,7 +400,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Empty arrays return empty array', () => {
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: [] as any,
@@ -410,7 +410,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Arrays do not have properties themselves', () => {
-      const program = compileExpr('data..length');
+      const program = compileSource('data..length');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -424,7 +424,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Null values in arrays', () => {
-      const program = compileExpr('data..name');
+      const program = compileSource('data..name');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -436,7 +436,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Property with null value is collected', () => {
-      const program = compileExpr('data..value');
+      const program = compileSource('data..value');
       const result = evaluate(program, {
         state: {},
         data: {
@@ -449,7 +449,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Recursive descent on string returns empty', () => {
-      const program = compileExpr('data..x');
+      const program = compileSource('data..x');
       const result = evaluate(program, {
         state: {},
         data: 'string value' as any,
@@ -459,7 +459,7 @@ describe('Recursive Descent Operator (..)', () => {
     });
 
     test('Recursive descent on boolean returns empty', () => {
-      const program = compileExpr('data..x');
+      const program = compileSource('data..x');
       const result = evaluate(program, {
         state: {},
         data: true as any,

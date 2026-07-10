@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
-import { compile as compileAst } from '../src/compiler.js';
+import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
 import type { BytecodeProgram } from '../src/types.js';
 import { evaluate } from '../src/vm.js';
 
-function compileExpr(source: string): BytecodeProgram {
+function compileSource(source: string): BytecodeProgram {
   return compileAst(parse(tokenize(source)));
 }
 
@@ -13,7 +13,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
   describe('Wildcard Syntax [*]', () => {
     describe('Basic Wildcard on Arrays', () => {
       test('Get property from all array elements', () => {
-        const program = compileExpr('data.users[*].name');
+        const program = compileSource('data.users[*].name');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -29,7 +29,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard on empty array returns empty array', () => {
-        const program = compileExpr('data.users[*].name');
+        const program = compileSource('data.users[*].name');
         const result = evaluate(program, {
           state: {},
           data: { users: [] },
@@ -39,7 +39,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard on array without following property returns array', () => {
-        const program = compileExpr('data.numbers[*]');
+        const program = compileSource('data.numbers[*]');
         const result = evaluate(program, {
           state: {},
           data: { numbers: [1, 2, 3, 4, 5] },
@@ -49,7 +49,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard with nested property access', () => {
-        const program = compileExpr('data.users[*].profile.bio');
+        const program = compileSource('data.users[*].profile.bio');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -65,7 +65,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard with missing properties returns nulls', () => {
-        const program = compileExpr('data.users[*].email');
+        const program = compileSource('data.users[*].email');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -83,7 +83,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Wildcard on Objects', () => {
       test('Wildcard on object returns all values as array', () => {
-        const program = compileExpr('data.config[*]');
+        const program = compileSource('data.config[*]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -99,7 +99,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard on object with property access', () => {
-        const program = compileExpr('data.users[*].name');
+        const program = compileSource('data.users[*].name');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -114,7 +114,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard on empty object returns empty array', () => {
-        const program = compileExpr('data.obj[*]');
+        const program = compileSource('data.obj[*]');
         const result = evaluate(program, {
           state: {},
           data: { obj: {} },
@@ -126,7 +126,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Nested Wildcards', () => {
       test('Double wildcard flattens nested arrays', () => {
-        const program = compileExpr('data.orders[*].items[*].name');
+        const program = compileSource('data.orders[*].items[*].name');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -151,7 +151,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Triple nested wildcard', () => {
-        const program = compileExpr('data.a[*].b[*].c[*]');
+        const program = compileSource('data.a[*].b[*].c[*]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -175,7 +175,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Optional Wildcard ?.[*]', () => {
       test('Optional wildcard on null returns empty array', () => {
-        const program = compileExpr('data.users?.[*].name');
+        const program = compileSource('data.users?.[*].name');
         const result = evaluate(program, {
           state: {},
           data: { users: null },
@@ -185,7 +185,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Optional wildcard on undefined returns empty array', () => {
-        const program = compileExpr('data.missing?.[*].name');
+        const program = compileSource('data.missing?.[*].name');
         const result = evaluate(program, {
           state: {},
           data: {},
@@ -195,7 +195,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Optional wildcard on valid array works normally', () => {
-        const program = compileExpr('data.users?.[*].name');
+        const program = compileSource('data.users?.[*].name');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -207,7 +207,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Chain of optional wildcards', () => {
-        const program = compileExpr('data.a?.[*].b?.[*].c');
+        const program = compileSource('data.a?.[*].b?.[*].c');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -222,7 +222,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Wildcard with Expressions', () => {
       test('Wildcard result can be piped', () => {
-        const program = compileExpr('data.users[*].age |> map((age) => age + 1)');
+        const program = compileSource('data.users[*].age |> map((age) => age + 1)');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -234,7 +234,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard result can be used in further operations', () => {
-        const program = compileExpr('data.items[*].price');
+        const program = compileSource('data.items[*].price');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -246,7 +246,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard with filter after', () => {
-        const program = compileExpr('data.users[*].age |> filter((age) => age > 25)');
+        const program = compileSource('data.users[*].age |> filter((age) => age > 25)');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -258,7 +258,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard with length property', () => {
-        const program = compileExpr('data.users[*].name |> length');
+        const program = compileSource('data.users[*].name |> length');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -272,7 +272,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Edge Cases', () => {
       test('Wildcard on primitive wraps in array', () => {
-        const program = compileExpr('data.value[*]');
+        const program = compileSource('data.value[*]');
         const result = evaluate(program, {
           state: {},
           data: { value: 42 },
@@ -282,7 +282,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard on string wraps in array', () => {
-        const program = compileExpr('data.str[*]');
+        const program = compileSource('data.str[*]');
         const result = evaluate(program, {
           state: {},
           data: { str: 'hello' },
@@ -292,7 +292,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard on boolean wraps in array', () => {
-        const program = compileExpr('data.flag[*]');
+        const program = compileSource('data.flag[*]');
         const result = evaluate(program, {
           state: {},
           data: { flag: true },
@@ -302,7 +302,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard on array of primitives', () => {
-        const program = compileExpr('data.nums[*]');
+        const program = compileSource('data.nums[*]');
         const result = evaluate(program, {
           state: {},
           data: { nums: [1, 2, 3, 4, 5] },
@@ -312,7 +312,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard with index access after', () => {
-        const program = compileExpr('data.users[*].tags[0]');
+        const program = compileSource('data.users[*].tags[0]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -328,7 +328,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Multiple wildcards in single expression', () => {
-        const program = compileExpr('data.groups[*].users[*].name');
+        const program = compileSource('data.groups[*].users[*].name');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -351,7 +351,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
   describe('Predicate Syntax [.condition]', () => {
     describe('Basic Predicates', () => {
       test('Filter with simple comparison', () => {
-        const program = compileExpr('data.users[.age > 18]');
+        const program = compileSource('data.users[.age > 18]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -370,7 +370,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Filter with property access after', () => {
-        const program = compileExpr('data.users[.age > 18].name');
+        const program = compileSource('data.users[.age > 18].name');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -386,7 +386,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Filter with equality comparison', () => {
-        const program = compileExpr(`data.users[.status == "active"]`);
+        const program = compileSource(`data.users[.status == "active"]`);
         const result = evaluate(program, {
           state: {},
           data: {
@@ -407,7 +407,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Complex Predicates', () => {
       test('Filter with AND condition', () => {
-        const program = compileExpr('data.users[.age > 18 && .active]');
+        const program = compileSource('data.users[.age > 18 && .active]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -423,7 +423,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Filter with OR condition', () => {
-        const program = compileExpr('data.users[.age < 20 || .age > 60]');
+        const program = compileSource('data.users[.age < 20 || .age > 60]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -442,7 +442,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Filter with nested property access', () => {
-        const program = compileExpr('data.users[.profile.verified]');
+        const program = compileSource('data.users[.profile.verified]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -463,7 +463,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Optional Predicates ?.[.condition]', () => {
       test('Optional predicate on null returns empty array', () => {
-        const program = compileExpr('data.users?.[.age > 18]');
+        const program = compileSource('data.users?.[.age > 18]');
         const result = evaluate(program, {
           state: {},
           data: { users: null },
@@ -473,7 +473,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Optional predicate on valid array works normally', () => {
-        const program = compileExpr('data.users?.[.age > 18]');
+        const program = compileSource('data.users?.[.age > 18]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -490,7 +490,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Combining Wildcards and Predicates', () => {
       test('Wildcard after predicate', () => {
-        const program = compileExpr('data.groups[.active][*].users');
+        const program = compileSource('data.groups[.active][*].users');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -506,7 +506,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Multiple predicates in chain', () => {
-        const program = compileExpr('data.users[.age > 18][.active]');
+        const program = compileSource('data.users[.age > 18][.active]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -522,7 +522,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Wildcard property access after predicate', () => {
-        const program = compileExpr('data.users[.age > 18][*].tags');
+        const program = compileSource('data.users[.age > 18][*].tags');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -540,7 +540,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
 
     describe('Edge Cases', () => {
       test('Predicate with boolean property', () => {
-        const program = compileExpr('data.items[.available]');
+        const program = compileSource('data.items[.available]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -559,7 +559,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Predicate with negation', () => {
-        const program = compileExpr('data.users[!.banned]');
+        const program = compileSource('data.users[!.banned]');
         const result = evaluate(program, {
           state: {},
           data: {
@@ -578,7 +578,7 @@ describe('Wildcard and Predicate Array Syntax', () => {
       });
 
       test('Filter that matches nothing returns empty array', () => {
-        const program = compileExpr('data.users[.age > 100]');
+        const program = compileSource('data.users[.age > 100]');
         const result = evaluate(program, {
           state: {},
           data: {

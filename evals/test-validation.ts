@@ -3,7 +3,7 @@
  */
 
 import { loadDataset } from "./dataset-loader";
-import { compileExpr, run } from "@yexp/core";
+import { compile, run } from "@yexp/core";
 
 function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;
@@ -52,7 +52,7 @@ testCases.forEach((testCase) => {
 
   const exactCompiles = (() => {
     try {
-      compileExpr(testCase.expected);
+      compile(testCase.expected);
       return true;
     } catch {
       return false;
@@ -86,7 +86,7 @@ testCases.forEach((testCase) => {
 
     const altCompiles = (() => {
       try {
-        compileExpr(alternativeExpr);
+        compile(alternativeExpr);
         return true;
       } catch {
         return false;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { compile } from '../src/compiler.js';
+import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
 import type { ExecutionContext, ExprError } from '../src/types.js';
@@ -12,7 +12,7 @@ function run(source: string, ctx?: Partial<ExecutionContext>) {
     env: {},
     ...ctx,
   };
-  const program = compile(parse(tokenize(source)));
+  const program = compileAst(parse(tokenize(source)));
   return evaluate(program, context);
 }
 

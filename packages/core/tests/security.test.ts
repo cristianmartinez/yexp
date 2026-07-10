@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { compileExpr, evaluate } from '../src/index.js';
+import { compile, evaluate } from '../src/index.js';
 import type { ExecutionContext } from '../src/types.js';
 
 /**
@@ -12,7 +12,7 @@ import type { ExecutionContext } from '../src/types.js';
 describe('Security Vulnerabilities', () => {
   describe('HIGH SEVERITY: Prototype Pollution', () => {
     test('EXPLOIT 1: Object spread can pollute Object.prototype via __proto__', () => {
-      const program = compileExpr('{__proto__: {polluted: true}}');
+      const program = compile('{__proto__: {polluted: true}}');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -28,7 +28,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 2: fromEntries can pollute via __proto__ key', () => {
-      const program = compileExpr(`fromEntries([{key: "__proto__", value: {isAdmin: true}}])`);
+      const program = compile(`fromEntries([{key: "__proto__", value: {isAdmin: true}}])`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -44,7 +44,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 3: Object spread with constructor pollution', () => {
-      const program = compileExpr('{constructor: {prototype: {hacked: true}}}');
+      const program = compile('{constructor: {prototype: {hacked: true}}}');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -60,7 +60,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 4: Nested prototype pollution via state mutation', () => {
-      const program = compileExpr('state.user = {__proto__: {evil: true}}');
+      const program = compile('state.user = {__proto__: {evil: true}}');
       const context: ExecutionContext = {
         state: { user: {} },
         data: {},
@@ -85,7 +85,7 @@ describe('Security Vulnerabilities', () => {
         nestedArray = [nestedArray];
       }
 
-      const program = compileExpr('data.nested |> flatten');
+      const program = compile('data.nested |> flatten');
       const context: ExecutionContext = {
         state: {},
         data: { nested: nestedArray },
@@ -105,7 +105,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 6: flatten() with infinite depth parameter', () => {
-      const program = compileExpr('data.arr |> flatten(999999999)');
+      const program = compile('data.arr |> flatten(999999999)');
       const context: ExecutionContext = {
         state: {},
         data: { arr: [[[[[1]]]]] },
@@ -121,7 +121,7 @@ describe('Security Vulnerabilities', () => {
 
   describe('MEDIUM SEVERITY: Denial of Service - Memory Exhaustion', () => {
     test('EXPLOIT 7: repeat() with huge count allocates gigabytes', () => {
-      const program = compileExpr(`"x" |> repeat(999999999)`);
+      const program = compile(`"x" |> repeat(999999999)`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -148,7 +148,7 @@ describe('Security Vulnerabilities', () => {
       // Create array with 100k elements
       const largeArray = new Array(100000).fill(1);
 
-      const program = compileExpr('[...data.arr, ...data.arr, ...data.arr, ...data.arr]');
+      const program = compile('[...data.arr, ...data.arr, ...data.arr, ...data.arr]');
       const context: ExecutionContext = {
         state: {},
         data: { arr: largeArray },
@@ -162,7 +162,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 9: padStart/padEnd with huge length', () => {
-      const program = compileExpr(`"x" |> padStart(10000000, "A")`);
+      const program = compile(`"x" |> padStart(10000000, "A")`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -186,7 +186,7 @@ describe('Security Vulnerabilities', () => {
   describe('MEDIUM SEVERITY: Recursive Lambda Bombs', () => {
     test('EXPLOIT 10: Deeply nested reduce calls', () => {
       // This creates quadratic complexity: O(n²)
-      const program = compileExpr(`
+      const program = compile(`
         data.items |> reduce((acc, x) =>
           data.items |> reduce((a, b) => [a, b], []),
         [])
@@ -210,7 +210,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 11: Nested map/filter chains', () => {
-      const program = compileExpr(`
+      const program = compile(`
         data.items
           |> map((x) => data.items |> map((y) => x + y))
           |> flatten
@@ -230,7 +230,7 @@ describe('Security Vulnerabilities', () => {
 
     test('EXPLOIT 12: Recursive lambda via reduce', () => {
       // Attempt to create recursive structure
-      const program = compileExpr(`
+      const program = compile(`
         data.arr |> reduce((acc, x) =>
           acc.length < 100 ?
             data.arr |> reduce((a, b) => a + b, 0) :
@@ -253,7 +253,7 @@ describe('Security Vulnerabilities', () => {
 
   describe('LOW SEVERITY: Property Access Vulnerabilities', () => {
     test('EXPLOIT 13: Access __proto__ via path resolution', () => {
-      const program = compileExpr('state.__proto__');
+      const program = compile('state.__proto__');
       const context: ExecutionContext = {
         state: { user: 'test' },
         data: {},
@@ -271,7 +271,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 14: Access constructor via keys()', () => {
-      const program = compileExpr('state.obj |> keys');
+      const program = compile('state.obj |> keys');
       const context: ExecutionContext = {
         state: { obj: { constructor: { prototype: { hack: true } }, normal: 'value' } },
         data: {},
@@ -289,7 +289,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 15: Entries exposes __proto__ objects', () => {
-      const program = compileExpr('state.obj |> entries');
+      const program = compile('state.obj |> entries');
       const context: ExecutionContext = {
         state: {
           obj: {
@@ -310,7 +310,7 @@ describe('Security Vulnerabilities', () => {
 
   describe('MEDIUM SEVERITY: Type Confusion Attacks', () => {
     test('EXPLOIT 16: Array index with floating point', () => {
-      const program = compileExpr('data.arr[1.5]');
+      const program = compile('data.arr[1.5]');
       const context: ExecutionContext = {
         state: {},
         data: { arr: ['a', 'b', 'c'] },
@@ -324,7 +324,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 17: Negative array indices', () => {
-      const program = compileExpr('data.arr[-1]');
+      const program = compile('data.arr[-1]');
       const context: ExecutionContext = {
         state: {},
         data: { arr: ['a', 'b', 'c'] },
@@ -340,7 +340,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 18: Very large array index', () => {
-      const program = compileExpr('data.arr[9999999999]');
+      const program = compile('data.arr[9999999999]');
       const context: ExecutionContext = {
         state: {},
         data: { arr: [1, 2, 3] },
@@ -358,7 +358,7 @@ describe('Security Vulnerabilities', () => {
 
   describe('Edge Cases and Boundary Conditions', () => {
     test('EXPLOIT 19: Empty string repeat with max count', () => {
-      const program = compileExpr(`"" |> repeat(999999999)`);
+      const program = compile(`"" |> repeat(999999999)`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -370,7 +370,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EXPLOIT 20: Flatten empty array with infinite depth', () => {
-      const program = compileExpr('[] |> flatten');
+      const program = compile('[] |> flatten');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -383,7 +383,7 @@ describe('Security Vulnerabilities', () => {
 
     test('EXPLOIT 21: Nested spreads with circular reference simulation', () => {
       // Can't create true circular refs, but can simulate deep nesting
-      const program = compileExpr('{...state.a, ...state.b, ...state.c, ...state.d}');
+      const program = compile('{...state.a, ...state.b, ...state.c, ...state.d}');
       const largeObj = Object.fromEntries(Array.from({ length: 1000 }, (_, i) => [`key${i}`, i]));
 
       const context: ExecutionContext = {
@@ -400,7 +400,7 @@ describe('Security Vulnerabilities', () => {
 
   describe('Injection Prevention (Positive Tests)', () => {
     test('SECURE: No eval() execution', () => {
-      const program = compileExpr(`"eval('console.log(1)')"`);
+      const program = compile(`"eval('console.log(1)')"`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -414,7 +414,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURE: No Function constructor access', () => {
-      const program = compileExpr(`"Function('return 1')()'"`);
+      const program = compile(`"Function('return 1')()'"`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -428,7 +428,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURE: No global scope access', () => {
-      const program = compileExpr('state.process');
+      const program = compile('state.process');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -444,7 +444,7 @@ describe('Security Vulnerabilities', () => {
 
   describe('Critical Edge Cases', () => {
     test('EDGE: fromEntries with duplicate keys - last value wins', () => {
-      const program = compileExpr(`fromEntries([
+      const program = compile(`fromEntries([
         {key: "id", value: 1},
         {key: "name", value: "first"},
         {key: "id", value: 2},
@@ -463,7 +463,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: reduce without initial value on empty array', () => {
-      const program = compileExpr('[] |> reduce((acc, x) => acc + x)');
+      const program = compile('[] |> reduce((acc, x) => acc + x)');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -481,7 +481,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Null coalescing vs falsy values - 0', () => {
-      const program = compileExpr('0 ?? 999');
+      const program = compile('0 ?? 999');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -495,7 +495,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Null coalescing vs falsy values - empty string', () => {
-      const program = compileExpr(`"" ?? "default"`);
+      const program = compile(`"" ?? "default"`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -509,7 +509,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Null coalescing vs falsy values - false', () => {
-      const program = compileExpr('false ?? true');
+      const program = compile('false ?? true');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -531,7 +531,7 @@ describe('Security Vulnerabilities', () => {
 
       // Build path: state.a.a.a.a...a.value
       const path = `state.${'a.'.repeat(150)}value`;
-      const program = compileExpr(path);
+      const program = compile(path);
       const context: ExecutionContext = {
         state: deepObj,
         data: {},
@@ -548,7 +548,7 @@ describe('Security Vulnerabilities', () => {
 
     test('EDGE: Lambda mutating captured state', () => {
       // Use ternary to perform mutation and return value
-      const program = compileExpr('data.items |> map((x) => state.counter = state.counter + x)');
+      const program = compile('data.items |> map((x) => state.counter = state.counter + x)');
       const context: ExecutionContext = {
         state: { counter: 0 },
         data: { items: [1, 2, 3] },
@@ -564,7 +564,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Error propagation through map chain', () => {
-      const program = compileExpr('data.items |> map((x) => x / 0) |> filter((x) => x > 0)');
+      const program = compile('data.items |> map((x) => x / 0) |> filter((x) => x > 0)');
       const context: ExecutionContext = {
         state: {},
         data: { items: [1, 2, 3] },
@@ -580,7 +580,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Special numeric values - Infinity', () => {
-      const program = compileExpr('1 / 0');
+      const program = compile('1 / 0');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -596,7 +596,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Special numeric values - NaN from invalid operations', () => {
-      const program = compileExpr('0 / 0');
+      const program = compile('0 / 0');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -612,7 +612,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Empty string as object key via fromEntries', () => {
-      const program = compileExpr(
+      const program = compile(
         `fromEntries([{key: "", value: "empty"}, {key: "a", value: "normal"}])`,
       );
       const context: ExecutionContext = {
@@ -628,7 +628,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: fromEntries with empty string key', () => {
-      const program = compileExpr(`fromEntries([{key: "", value: "empty"}])`);
+      const program = compile(`fromEntries([{key: "", value: "empty"}])`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -642,7 +642,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Numeric string keys vs array indices via fromEntries', () => {
-      const program = compileExpr(`fromEntries([
+      const program = compile(`fromEntries([
         {key: "0", value: "zero"},
         {key: "1", value: "one"},
         {key: "2", value: "two"}
@@ -661,7 +661,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Mixed type array in add() function', () => {
-      const program = compileExpr(`[1, "2", 3, "4"] |> add`);
+      const program = compile(`[1, "2", 3, "4"] |> add`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -680,7 +680,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Optional chaining with very deep null', () => {
-      const program = compileExpr('state.a?.b?.c?.d?.e?.f?.g?.h?.i?.j?.value');
+      const program = compile('state.a?.b?.c?.d?.e?.f?.g?.h?.i?.j?.value');
       const context: ExecutionContext = {
         state: { a: null },
         data: {},
@@ -694,7 +694,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: sort with inconsistent comparator', () => {
-      const program = compileExpr('data.items |> sort((a, b) => a > b ? 1 : -1)');
+      const program = compile('data.items |> sort((a, b) => a > b ? 1 : -1)');
       const context: ExecutionContext = {
         state: {},
         data: { items: [3, 1, 4, 1, 5, 9, 2, 6] },
@@ -711,7 +711,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: min/max with no arguments via empty spread', () => {
-      const program = compileExpr('min(...[])');
+      const program = compile('min(...[])');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -729,7 +729,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: groupBy with null keys', () => {
-      const program = compileExpr('data.items |> groupBy((x) => x.category)');
+      const program = compile('data.items |> groupBy((x) => x.category)');
       const context: ExecutionContext = {
         state: {},
         data: {
@@ -750,7 +750,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Unicode and emoji in object keys via fromEntries', () => {
-      const program = compileExpr(`fromEntries([
+      const program = compile(`fromEntries([
         {key: "🔥", value: "fire"},
         {key: "🎉", value: "party"},
         {key: "名前", value: "name"}
@@ -768,7 +768,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Very large integer precision loss', () => {
-      const program = compileExpr('9007199254740992 + 1');
+      const program = compile('9007199254740992 + 1');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -783,7 +783,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Array with null values (simulating sparse array)', () => {
-      const program = compileExpr('data.arr |> map((x) => x == null ? 0 : x * 2)');
+      const program = compile('data.arr |> map((x) => x == null ? 0 : x * 2)');
       const context: ExecutionContext = {
         state: {},
         data: { arr: [1, null, 3, null, 5] }, // null values instead of holes
@@ -800,7 +800,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Ternary with errors in non-selected branch', () => {
-      const program = compileExpr(`true ? "safe" : (1 / 0)`);
+      const program = compile(`true ? "safe" : (1 / 0)`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -814,7 +814,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Logical OR with error in non-selected branch', () => {
-      const program = compileExpr(`"truthy" || (1 / 0)`);
+      const program = compile(`"truthy" || (1 / 0)`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -829,7 +829,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('EDGE: Logical AND with error in non-selected branch', () => {
-      const program = compileExpr('false && (1 / 0)');
+      const program = compile('false && (1 / 0)');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -845,7 +845,7 @@ describe('Security Vulnerabilities', () => {
 
   describe('Additional Security Edge Cases', () => {
     test('SECURITY: Division by very small numbers approaching infinity', () => {
-      const program = compileExpr('1 / 0.0000000001');
+      const program = compile('1 / 0.0000000001');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -861,7 +861,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Division approaching infinity with tiny denominator', () => {
-      const program = compileExpr('data.x / data.y');
+      const program = compile('data.x / data.y');
       const context: ExecutionContext = {
         state: {},
         data: { x: 1, y: 0.000000000001 },
@@ -878,7 +878,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Mixed type array in add() - numbers and strings', () => {
-      const program = compileExpr(`[1, 2, "3", 4] |> add`);
+      const program = compile(`[1, 2, "3", 4] |> add`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -897,7 +897,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Mixed type array in add() - with objects', () => {
-      const program = compileExpr('[1, {a: 1}, 3] |> add');
+      const program = compile('[1, {a: 1}, 3] |> add');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -913,7 +913,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Mixed type array in add() - with null', () => {
-      const program = compileExpr('[1, null, 3] |> add');
+      const program = compile('[1, null, 3] |> add');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -927,7 +927,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Unicode property access via bracket notation', () => {
-      const program = compileExpr('state[data.key]');
+      const program = compile('state[data.key]');
       const context: ExecutionContext = {
         state: { '🔥': 'fire_value' },
         data: { key: '🔥' },
@@ -941,7 +941,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Unicode keys work with object operations', () => {
-      const program = compileExpr('state.obj |> keys |> length');
+      const program = compile('state.obj |> keys |> length');
       const context: ExecutionContext = {
         state: {
           obj: {
@@ -961,7 +961,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: keys() with unicode properties', () => {
-      const program = compileExpr('state.obj |> keys');
+      const program = compile('state.obj |> keys');
       const context: ExecutionContext = {
         state: {
           obj: {
@@ -988,7 +988,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: entries() with unicode keys preserves data', () => {
-      const program = compileExpr('state.obj |> entries');
+      const program = compile('state.obj |> entries');
       const context: ExecutionContext = {
         state: {
           obj: {
@@ -1016,7 +1016,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Unicode in nested paths via bracket access', () => {
-      const program = compileExpr('state.user[data.nameKey].first');
+      const program = compile('state.user[data.nameKey].first');
       const context: ExecutionContext = {
         state: {
           user: {
@@ -1038,7 +1038,7 @@ describe('Security Vulnerabilities', () => {
 
     test('SECURITY: Very long unicode string as key', () => {
       const longUnicodeKey = '🔥'.repeat(1000);
-      const program = compileExpr(`fromEntries([{key: data.longKey, value: "test"}])`);
+      const program = compile(`fromEntries([{key: data.longKey, value: "test"}])`);
       const context: ExecutionContext = {
         state: {},
         data: { longKey: longUnicodeKey },
@@ -1062,7 +1062,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Array with only null values in reduce', () => {
-      const program = compileExpr('[null, null, null] |> reduce((acc, x) => acc, 0)');
+      const program = compile('[null, null, null] |> reduce((acc, x) => acc, 0)');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -1076,7 +1076,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Map over array with mixed nulls and values', () => {
-      const program = compileExpr('[1, null, 2, null, 3] |> map((x) => x)');
+      const program = compile('[1, null, 2, null, 3] |> map((x) => x)');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -1090,7 +1090,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Filter with null values', () => {
-      const program = compileExpr('[1, null, 2, null, 3] |> filter((x) => x != null)');
+      const program = compile('[1, null, 2, null, 3] |> filter((x) => x != null)');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -1104,7 +1104,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Arithmetic with very large numbers', () => {
-      const program = compileExpr('999999999999 * 999999999999');
+      const program = compile('999999999999 * 999999999999');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -1121,7 +1121,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Negative zero handling', () => {
-      const program = compileExpr('-0');
+      const program = compile('-0');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -1137,7 +1137,7 @@ describe('Security Vulnerabilities', () => {
 
     test('SECURITY: Unicode keys with similar characters', () => {
       // Test that different unicode keys are treated as different
-      const program = compileExpr('(state[data.key1] == null) && (state[data.key2] != null)');
+      const program = compile('(state[data.key1] == null) && (state[data.key2] != null)');
       const context: ExecutionContext = {
         state: {
           café: 'value1', // Regular cafe with é
@@ -1156,7 +1156,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Empty array operations chain', () => {
-      const program = compileExpr(
+      const program = compile(
         '[] |> map((x) => x * 2) |> filter((x) => x > 0) |> reduce((a, b) => a + b, 0)',
       );
       const context: ExecutionContext = {
@@ -1172,7 +1172,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Object with special method names as keys', () => {
-      const program = compileExpr(`fromEntries([
+      const program = compile(`fromEntries([
         {key: "toString", value: "safe"},
         {key: "valueOf", value: "safe"},
         {key: "hasOwnProperty", value: "safe"}
@@ -1201,7 +1201,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Access to Object.prototype methods exposes prototype chain', () => {
-      const program = compileExpr('state.toString');
+      const program = compile('state.toString');
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -1218,7 +1218,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Comparison of different types', () => {
-      const program = compileExpr(`"123" == 123`);
+      const program = compile(`"123" == 123`);
       const context: ExecutionContext = {
         state: {},
         data: {},
@@ -1232,7 +1232,7 @@ describe('Security Vulnerabilities', () => {
     });
 
     test('SECURITY: Very deep optional chaining with mixed null/values', () => {
-      const program = compileExpr('state.a?.b?.c?.d?.e');
+      const program = compile('state.a?.b?.c?.d?.e');
       const context: ExecutionContext = {
         state: {
           a: {

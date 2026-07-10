@@ -31,9 +31,6 @@ export function compile(source: string): BytecodeProgram {
   return compileAst(parse(tokenize(source)));
 }
 
-/** @deprecated Use `compile` instead. */
-export const compileExpr = compile;
-
 export function run(source: string, context: ExecutionContext): ExprValue {
   const program = compile(source);
   return evaluate(program, context);

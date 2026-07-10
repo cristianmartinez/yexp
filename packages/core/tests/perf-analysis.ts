@@ -1,4 +1,4 @@
-import { compile } from '../src/compiler.js';
+import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
 import { evaluate } from '../src/vm.js';
@@ -74,18 +74,18 @@ console.log('Phase 3: COMPILATION');
 const ast1 = parse(tokenize('data..name'));
 const ast2 = parse(tokenize('data..users[*].email'));
 const ast3 = parse(tokenize('data?..name'));
-measure('  Simple expr (data..name)', () => compile(ast1));
-measure('  Complex expr (data..users[*].email)', () => compile(ast2));
-measure('  Optional variant (data?..name)', () => compile(ast3));
+measure('  Simple expr (data..name)', () => compileAst(ast1));
+measure('  Complex expr (data..users[*].email)', () => compileAst(ast2));
+measure('  Optional variant (data?..name)', () => compileAst(ast3));
 console.log('');
 
 // Phase 4: Evaluation (VM execution) - THIS IS THE CRITICAL PHASE
 console.log('Phase 4: EVALUATION (VM) - CRITICAL PHASE');
 
-const program1 = compile(parse(tokenize('data..name')));
-const program2 = compile(parse(tokenize('data..value')));
-const program3 = compile(parse(tokenize('data..id')));
-const program4 = compile(parse(tokenize('data..email')));
+const program1 = compileAst(parse(tokenize('data..name')));
+const program2 = compileAst(parse(tokenize('data..value')));
+const program3 = compileAst(parse(tokenize('data..id')));
+const program4 = compileAst(parse(tokenize('data..email')));
 
 console.log('\n  Scenario: Small nested structure (5 matches)');
 measure('    data..name', () => evaluate(program1, { state: {}, data: smallData, env: {} }), 10000);
@@ -108,7 +108,7 @@ let _simpleResult;
 measure(
   '  Full pipeline',
   () => {
-    _simpleResult = evaluate(compile(parse(tokenize(simpleExpr))), {
+    _simpleResult = evaluate(compileAst(parse(tokenize(simpleExpr))), {
       state: {},
       data: smallData,
       env: {},
@@ -123,7 +123,7 @@ let _wildcardResult;
 measure(
   '  Full pipeline',
   () => {
-    _wildcardResult = evaluate(compile(parse(tokenize(wildcardExpr))), {
+    _wildcardResult = evaluate(compileAst(parse(tokenize(wildcardExpr))), {
       state: {},
       data: smallData,
       env: {},
@@ -138,7 +138,7 @@ let _recursiveResult;
 measure(
   '  Full pipeline',
   () => {
-    _recursiveResult = evaluate(compile(parse(tokenize(recursiveExpr))), {
+    _recursiveResult = evaluate(compileAst(parse(tokenize(recursiveExpr))), {
       state: {},
       data: smallData,
       env: {},

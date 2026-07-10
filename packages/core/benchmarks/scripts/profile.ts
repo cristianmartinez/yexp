@@ -11,7 +11,7 @@
  *   - speedscope (npx speedscope CPU.*.cpuprofile)
  */
 
-import { compile } from '../../src/compiler.js';
+import { compileAst } from '../../src/compiler.js';
 import { tokenize } from '../../src/lexer.js';
 import { parse } from '../../src/parser.js';
 import { evaluate } from '../../src/vm.js';
@@ -68,7 +68,7 @@ for (let i = 0; i < ITERATIONS; i++) {
   for (const expr of expressions) {
     const tokens = tokenize(expr);
     const ast = parse(tokens);
-    const program = compile(ast);
+    const program = compileAst(ast);
     evaluate(program, context);
   }
 }
@@ -78,7 +78,7 @@ console.timeEnd('full-pipeline');
 console.log('\nProfiling evaluate-only (pre-compiled):');
 const programs = expressions.map((expr) => ({
   expr,
-  program: compile(parse(tokenize(expr))),
+  program: compileAst(parse(tokenize(expr))),
 }));
 
 console.time('evaluate-only');
@@ -105,10 +105,10 @@ for (const expr of expressions) {
 
   const ast = parse(tokens);
   console.time('    compile');
-  for (let i = 0; i < ITERATIONS; i++) compile(ast);
+  for (let i = 0; i < ITERATIONS; i++) compileAst(ast);
   console.timeEnd('    compile');
 
-  const program = compile(ast);
+  const program = compileAst(ast);
   console.time('    evaluate');
   for (let i = 0; i < ITERATIONS; i++) evaluate(program, context);
   console.timeEnd('    evaluate');

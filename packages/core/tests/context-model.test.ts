@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { compile } from '../src/compiler.js';
+import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
 import { evaluate } from '../src/vm.js';
@@ -13,7 +13,7 @@ import { evaluate } from '../src/vm.js';
  */
 
 function run(source: string, input: any, options?: { context?: any; env?: any }) {
-  const program = compile(parse(tokenize(source)));
+  const program = compileAst(parse(tokenize(source)));
   return evaluate(program, input, options);
 }
 
@@ -385,13 +385,13 @@ describe('New Context Model', () => {
 
   describe('Backward compatibility', () => {
     test('old API with data namespace still works', () => {
-      const program = compile(parse(tokenize('data.name')));
+      const program = compileAst(parse(tokenize('data.name')));
       const result = evaluate(program, { data: { name: 'Alice' }, state: {}, env: {} });
       expect(result).toBe('Alice');
     });
 
     test('old API with env namespace still works', () => {
-      const program = compile(parse(tokenize('env.URL')));
+      const program = compileAst(parse(tokenize('env.URL')));
       const result = evaluate(program, { data: {}, state: {}, env: { URL: 'test.com' } });
       expect(result).toBe('test.com');
     });

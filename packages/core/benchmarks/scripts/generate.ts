@@ -7,7 +7,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { compile } from '../../src/compiler.js';
+import { compileAst } from '../../src/compiler.js';
 import { tokenize } from '../../src/lexer.js';
 import { parse } from '../../src/parser.js';
 import type { ASTNode, BytecodeProgram } from '../../src/types.js';
@@ -47,7 +47,7 @@ for (const expr of expressions) {
     };
 
     // Generate bytecode
-    const bytecode = compile(ast);
+    const bytecode = compileAst(ast);
     bytecodeMap[expr.id] = {
       source: expr.source,
       bytecode,

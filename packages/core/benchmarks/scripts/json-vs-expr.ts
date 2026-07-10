@@ -3,7 +3,7 @@
  * Benchmark: JSON conditions vs Compiled expressions
  */
 
-import { compile } from '../../src/compiler.js';
+import { compileAst } from '../../src/compiler.js';
 import { tokenize } from '../../src/lexer.js';
 import { parse } from '../../src/parser.js';
 import { evaluate as evalBytecode } from '../../src/vm.js';
@@ -124,7 +124,7 @@ for (const testCase of testCases) {
   // Compile expression once
   const tokens = tokenize(testCase.expr);
   const ast = parse(tokens);
-  const bytecode = compile(ast);
+  const bytecode = compileAst(ast);
   console.log(`   Bytecode:   ${bytecode.code.length} instructions\n`);
 
   // Warmup

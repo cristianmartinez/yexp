@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
-import { compile } from '../src/compiler.js';
+import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
 import { Opcode } from '../src/types.js';
 
 function c(source: string) {
-  return compile(parse(tokenize(source)));
+  return compileAst(parse(tokenize(source)));
 }
 
 function opcodes(source: string): Opcode[] {

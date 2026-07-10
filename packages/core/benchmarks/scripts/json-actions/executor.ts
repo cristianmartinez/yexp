@@ -4,7 +4,7 @@
  * Handles imperative operations like assignments, sequences, conditionals
  */
 
-import { compile } from '../../../src/compiler.js';
+import { compileAst } from '../../../src/compiler.js';
 import { tokenize } from '../../../src/lexer.js';
 import { parse } from '../../../src/parser.js';
 import { evaluate as evalExpr } from '../../../src/vm.js';
@@ -70,7 +70,7 @@ function evaluateValue(value: JsonValue, context: any): any {
 
     case 'yexp': {
       // Use Expr to evaluate expressions (read-only)
-      const bytecode = compile(parse(tokenize(value.expr)));
+      const bytecode = compileAst(parse(tokenize(value.expr)));
       return evalExpr(bytecode, context as any);
     }
 
