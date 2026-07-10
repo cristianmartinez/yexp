@@ -150,7 +150,7 @@ export function HomePlayground() {
   }, [playing, lastIndex]);
 
   return (
-    <div className="rounded-xl border border-border bg-card">
+    <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
       {/* Expression input */}
       <div className="border-b border-border p-4 sm:p-5">
         <label htmlFor="expr" className="text-xs font-medium text-muted-foreground">
