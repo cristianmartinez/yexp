@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
-import { tokenize, parse, compile, evaluate, Opcode, type ExprValue } from '@yexp/core';
+import { compile, evaluate, Opcode, type ExprValue } from '@yexp/core';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
@@ -74,7 +74,7 @@ function commonPrefix(a: ExprValue[], b: ExprValue[]): number {
 function useExecution(source: string) {
   return useMemo(() => {
     try {
-      const program = compile(parse(tokenize(source)));
+      const program = compile(source);
       const steps: Step[] = [];
       let prevCodeIndex = 0;
       let prevStack: ExprValue[] = [];

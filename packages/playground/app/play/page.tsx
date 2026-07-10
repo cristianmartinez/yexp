@@ -73,7 +73,7 @@ export default function PlaygroundPage() {
     try {
       const tokens = tokenize(expression);
       const ast = parse(tokens);
-      const program = compile(ast);
+      const program = compile(expression);
       const value = evaluate(program, parsedContext);
       return { value, error: null, bytecode: program, ast, tokens };
     } catch (e: any) {

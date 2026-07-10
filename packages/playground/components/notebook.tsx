@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { tokenize, parse, compile, evaluate } from '@yexp/core';
+import { compile, evaluate } from '@yexp/core';
 import type { ExecutionContext, BytecodeProgram } from '@yexp/core';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,9 +58,7 @@ export function Notebook({ initialContext }: NotebookProps) {
           $$: results, // All previous results
         } as any as ExecutionContext;
 
-        const tokens = tokenize(cell.expression);
-        const ast = parse(tokens);
-        const program = compile(ast);
+        const program = compile(cell.expression);
         const value = evaluate(program, executionContext);
 
         results.push(value);

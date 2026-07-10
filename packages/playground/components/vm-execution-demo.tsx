@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { tokenize, parse, compile } from '@yexp/core';
+import { compile } from '@yexp/core';
 import type { ExecutionContext } from '@yexp/core';
 import { VMExecutionPlayer } from './vm-execution-player';
 import { YexpEditor } from './yexp-editor';
@@ -28,9 +28,7 @@ export function VMExecutionDemo({
   const { program, context, error } = useMemo(() => {
     try {
       const ctx = JSON.parse(contextJSON) as ExecutionContext;
-      const tokens = tokenize(expression);
-      const ast = parse(tokens);
-      const prog = compile(ast);
+      const prog = compile(expression);
 
       return {
         program: prog,

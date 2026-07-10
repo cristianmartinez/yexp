@@ -12,7 +12,7 @@ export class CompileError extends Error {
   }
 }
 
-export function compile(ast: ASTNode): BytecodeProgram {
+export function compileAst(ast: ASTNode): BytecodeProgram {
   const slots: string[] = [];
   const constants: ExprValue[] = [];
   const code: Instruction[] = [];
@@ -435,7 +435,7 @@ export function compile(ast: ASTNode): BytecodeProgram {
   }
 
   function compileLambda(node: { params: string[]; body: ASTNode }): void {
-    const subProgram = compile(node.body);
+    const subProgram = compileAst(node.body);
     const lambdaValue: LambdaValue = {
       __lambda: true,
       program: subProgram,
@@ -815,3 +815,6 @@ export function compile(ast: ASTNode): BytecodeProgram {
 
   return { version: 1, slots, constants, code };
 }
+
+/** @deprecated Import `compileAst` from the public API instead. */
+export const compile = compileAst;

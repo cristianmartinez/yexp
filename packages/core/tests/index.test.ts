@@ -4,6 +4,7 @@ import {
   type ExprError,
   type ExprValue,
   compile,
+  compileAst,
   compileExpr,
   evaluate,
   isExprError,
@@ -29,7 +30,7 @@ describe('public API', () => {
   test('individual pipeline exports work together', () => {
     const tokens = tokenize('3 * 4');
     const ast = parse(tokens);
-    const program = compile(ast);
+    const program = compileAst(ast);
     const result = evaluate(program, { state: {}, data: {}, env: {} });
     expect(result).toBe(12);
   });

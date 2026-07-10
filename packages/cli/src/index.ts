@@ -10,7 +10,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { tokenize, parse, compile, evaluate } from '@yexp/core';
+import { compile, evaluate } from '@yexp/core';
 import { cliFunctions } from './functions.js';
 import { formatOutput } from './format.js';
 
@@ -171,9 +171,7 @@ async function main() {
     }
 
     // Compile and evaluate expression
-    const tokens = tokenize(finalExpression);
-    const ast = parse(tokens);
-    const program = compile(ast);
+    const program = compile(finalExpression);
 
     // Use new API: pass input directly instead of wrapping in context
     const result = evaluate(program, inputData, { functions: cliFunctions });
