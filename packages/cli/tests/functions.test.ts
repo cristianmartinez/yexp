@@ -1,12 +1,16 @@
 import { describe, expect, test } from 'bun:test';
+import { join } from 'node:path';
 import { cliFunctions } from '../src/functions.js';
 
 const { glob, read, lines, grep } = cliFunctions;
+const cliRoot = join(import.meta.dir, '..');
+const packageJson = join(cliRoot, 'package.json');
+const sourceGlob = join(cliRoot, 'src', '*.ts');
 
 describe('CLI functions', () => {
   describe('glob', () => {
     test('returns file entries matching pattern', () => {
-      const result = glob!('packages/cli/src/*.ts') as any[];
+      const result = glob!(sourceGlob) as any[];
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toHaveProperty('path');
@@ -30,7 +34,7 @@ describe('CLI functions', () => {
 
   describe('read', () => {
     test('reads file contents', () => {
-      const result = read!('packages/cli/package.json');
+      const result = read!(packageJson);
       expect(typeof result).toBe('string');
       expect(result as string).toContain('yexp-cli');
     });
@@ -48,7 +52,7 @@ describe('CLI functions', () => {
 
   describe('lines', () => {
     test('returns array of {num, text} objects', () => {
-      const result = lines!('packages/cli/package.json') as any[];
+      const result = lines!(packageJson) as any[];
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toHaveProperty('num', 1);
@@ -56,7 +60,7 @@ describe('CLI functions', () => {
     });
 
     test('line numbers start at 1', () => {
-      const result = lines!('packages/cli/package.json') as any[];
+      const result = lines!(packageJson) as any[];
       expect(result[0].num).toBe(1);
       expect(result[1].num).toBe(2);
     });
@@ -69,7 +73,7 @@ describe('CLI functions', () => {
 
   describe('grep', () => {
     test('finds literal string matches', () => {
-      const result = grep!('yexp-cli', 'packages/cli/package.json') as any[];
+      const result = grep!('yexp-cli', packageJson) as any[];
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toHaveProperty('path');
@@ -79,12 +83,12 @@ describe('CLI functions', () => {
     });
 
     test('supports regex patterns', () => {
-      const result = grep!('/export\\s+const/', 'packages/cli/src/*.ts') as any[];
+      const result = grep!('/export\\s+const/', sourceGlob) as any[];
       expect(Array.isArray(result)).toBe(true);
     });
 
     test('returns empty array for no matches', () => {
-      const result = grep!('ZZZZNOTFOUNDZZZ', 'packages/cli/src/*.ts') as any[];
+      const result = grep!('ZZZZNOTFOUNDZZZ', sourceGlob) as any[];
       expect(result).toEqual([]);
     });
 

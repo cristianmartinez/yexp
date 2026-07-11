@@ -5,7 +5,6 @@ import {
   type ExprValue,
   compile,
   compileAst,
-  compile,
   evaluate,
   isExprError,
   parse,
@@ -170,21 +169,21 @@ describe('integration', () => {
   });
 
   describe('equality operators', () => {
-    test('loose equality (==) with type coercion', () => {
+    test('equality (==) does not coerce types', () => {
       expect(run('1 == 1', ctx())).toBe(true);
-      expect(run('1 == "1"', ctx())).toBe(true); // Type coercion
-      expect(run('0 == false', ctx())).toBe(true); // Type coercion
-      expect(run('null == undefined', ctx())).toBe(true); // Type coercion
+      expect(run('1 == "1"', ctx())).toBe(false);
+      expect(run('0 == false', ctx())).toBe(false);
+      expect(run('null == undefined', ctx())).toBe(true);
       expect(run('1 == 2', ctx())).toBe(false);
       expect(run('"hello" == "world"', ctx())).toBe(false);
     });
 
-    test('loose inequality (!=) with type coercion', () => {
+    test('inequality (!=) does not coerce types', () => {
       expect(run('1 != 2', ctx())).toBe(true);
       expect(run('1 != "2"', ctx())).toBe(true);
-      expect(run('1 != "1"', ctx())).toBe(false); // Type coercion
-      expect(run('0 != false', ctx())).toBe(false); // Type coercion
-      expect(run('null != undefined', ctx())).toBe(false); // Type coercion
+      expect(run('1 != "1"', ctx())).toBe(true);
+      expect(run('0 != false', ctx())).toBe(true);
+      expect(run('null != undefined', ctx())).toBe(false);
     });
 
     test('strict equality (===) without type coercion', () => {
@@ -210,7 +209,7 @@ describe('integration', () => {
 
     test('equality with context values', () => {
       expect(run('state.value == 5', ctx({ value: 5 }))).toBe(true);
-      expect(run('state.value == "5"', ctx({ value: 5 }))).toBe(true); // Loose
+      expect(run('state.value == "5"', ctx({ value: 5 }))).toBe(false);
       expect(run('state.value === 5', ctx({ value: 5 }))).toBe(true);
       expect(run('state.value === "5"', ctx({ value: 5 }))).toBe(false); // Strict
     });
@@ -222,10 +221,9 @@ describe('integration', () => {
         { id: 2, status: 'active' },
       ];
 
-      // Loose equality
+      // Equality never coerces operand types.
       expect(run('data.items |> filter(x => x.id == 1)', ctx({}, { items }))).toEqual([
         { id: 1, status: 'active' },
-        { id: '1', status: 'inactive' }, // Matches due to type coercion
       ]);
 
       // Strict equality
