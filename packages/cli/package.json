@@ -6,18 +6,16 @@
   "bin": {
     "yexp": "dist/index.js"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "README.md"
   ],
   "publishConfig": {
     "access": "public",
-    "provenance": true
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node",
+    "build": "bun build src/index.ts --outdir dist --target node --packages external",
     "build:bin": "bun build src/index.ts --compile --outfile dist/yexp",
     "prepublishOnly": "bun run build && bun test",
     "dev": "bun run src/index.ts",

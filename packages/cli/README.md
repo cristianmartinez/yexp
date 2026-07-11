@@ -5,7 +5,7 @@ Command-line interface for Yexp expression language.
 ## Installation
 
 ```bash
-# From npm (when published)
+# From npm
 npm install -g yexp-cli
 
 # From source
@@ -149,18 +149,6 @@ echo '{}' | yexp 'grep("/export\\s+const/", "src/**/*.ts")'
 | Performance | ⚡ Very fast | Fast (C implementation) |
 | Lambda functions | `x => x.age` | `\| .age` |
 | Use case | Embedded + CLI | CLI-focused |
-
-## Performance
-
-Yexp is optimized for speed with compiled bytecode:
-
-```bash
-# Benchmark: 100,000 evaluations
-yexp 'users[0].name'  # ~0.3µs per eval
-jq '.users[0].name'   # ~50ms per eval (subprocess overhead)
-```
-
-For CLI usage, both are fast enough. Yexp shines when embedded in applications.
 
 ## Development
 

@@ -7,14 +7,15 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
+  "sideEffects": false,
   "files": ["dist", "README.md"],
   "publishConfig": {
     "access": "public",
-    "provenance": true
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",

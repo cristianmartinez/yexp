@@ -12,7 +12,8 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "playground": "turbo dev --filter=@yexp/playground",
-    "playground:build": "turbo build --filter=@yexp/playground"
+    "playground:build": "turbo build --filter=@yexp/playground",
+    "release:check": "node scripts/verify-release.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",

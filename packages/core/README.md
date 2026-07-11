@@ -1,206 +1,105 @@
 # yexp
 
-A fast, portable JSON expression language with bytecode compilation.
+A portable expression language that compiles JavaScript-like syntax to bytecode and evaluates it without `eval()` or generated JavaScript.
 
-## Features
-
-- 🚀 **Fast**: Compiles expressions to bytecode for optimal performance
-- 🔒 **Safe**: No arbitrary code execution, bounded and deterministic
-- 📦 **Portable**: Pure TypeScript, runs anywhere
-- 🎯 **Type-safe**: Full TypeScript support with strict types
-- 🔄 **Serializable**: Expressions compile to JSON-serializable bytecode
-
-## Installation
+## Install
 
 ```bash
 npm install yexp
-# or
-bun add yexp
 ```
 
-## Quick Start
+## Use
 
-```typescript
+```ts
 import { compile, evaluate } from 'yexp';
 
-// Compile expression to bytecode
-const program = compile('user.age > 18 && user.verified');
+const program = compile('$.price * $.quantity');
+const result = evaluate(program, { price: 12, quantity: 3 });
 
-// Evaluate with context
-const result = evaluate(program, {
-  user: { age: 25, verified: true }
-});
-
-console.log(result); // true
+console.log(result); // 36
 ```
 
-## Usage
+Compile once and reuse the program with different inputs:
 
-### Basic Expressions
+```ts
+const isAdult = compile('$.age >= 18');
 
-```typescript
-import { compile, evaluate } from 'yexp';
-
-// Arithmetic
-compile('price * (1 + tax)');
-evaluate(program, { price: 100, tax: 0.1 }); // 110
-
-// String operations
-compile('user.name.toUpperCase()');
-evaluate(program, { user: { name: 'Alice' } }); // "ALICE"
-
-// Array operations
-compile('items.filter(x => x.price > 10).map(x => x.name)');
+evaluate(isAdult, { age: 21 }); // true
+evaluate(isAdult, { age: 16 }); // false
 ```
 
-### Compilation Pipeline
+Auxiliary context and environment values are explicit:
 
-```typescript
-import { tokenize, parse, compile } from 'yexp';
+```ts
+const program = compile('$.ownerId == $context.userId && $env.region == "eu"');
 
-// 1. Tokenize
-const tokens = tokenize('user.age > 18');
+evaluate(program, { ownerId: 'user_1' }, {
+  context: { userId: 'user_1' },
+  env: { region: 'eu' },
+}); // true
+```
 
-// 2. Parse to AST
+## Language
+
+Yexp supports:
+
+- Arithmetic, comparisons, logical operators, null coalescing, and ternaries
+- Object, array, string, and template literals
+- Property access, optional chaining, wildcards, and recursive descent
+- Pipes and method-call syntax
+- Lambdas and collection operations such as `map`, `filter`, and `reduce`
+- A fixed registry of built-in operations
+- Host-provided functions through evaluation options
+
+Equality never coerces operand types: `1 == "1"` is `false`.
+
+## Compilation pipeline
+
+```ts
+import { compile, compileAst, parse, tokenize } from 'yexp';
+
+const tokens = tokenize('$.items |> length');
 const ast = parse(tokens);
+const program = compileAst(ast);
 
-// 3. Compile to bytecode
-const program = compile('user.age > 18');
-// Or: const program = compileAST(ast);
+// Equivalent convenience API:
+const sameProgram = compile('$.items |> length');
 ```
 
-### Execution Context
+Compiled programs contain a bytecode version, slots, constants, and instructions. They are JSON-serializable, but applications should treat them as derived artifacts and regenerate them when the bytecode version changes.
 
-```typescript
-const program = compile('state.count + data.value');
+## Debug execution
 
-const result = evaluate(program, {
-  state: { count: 10 },
-  data: { value: 5 }
-}); // 15
-```
+```ts
+const program = compile('$.price * 2');
 
-### Debug Mode
-
-```typescript
-import { evaluate } from 'yexp';
-
-const program = compile('x * 2 + y');
-
-evaluate(program, { x: 5, y: 3 }, {
-  onStep: (state) => {
-    console.log('IP:', state.ip);
-    console.log('Stack:', state.stack);
-  }
+evaluate(program, { price: 10 }, {
+  onStep: ({ ip, stack }) => {
+    console.log(ip, stack);
+  },
 });
 ```
 
-## Expression Syntax
+## Security boundary
 
-### Operators
+The default runtime does not expose JavaScript globals, Node.js APIs, the filesystem, `eval()`, or `Function()`.
 
-- Arithmetic: `+`, `-`, `*`, `/`, `%`, `**`
-- Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
-- Logical: `&&`, `||`, `!`
-- Ternary: `condition ? true_value : false_value`
+Yexp is not yet a complete untrusted-code resource sandbox. Some operations can consume significant CPU or memory, and time-dependent or random built-ins are not deterministic. Apply application-level input limits and execution isolation when evaluating expressions supplied by untrusted users. Host functions extend the runtime's authority and must be reviewed as part of the host application's security model.
 
-### Property Access
+See the repository's [security documentation](https://github.com/cristianmartinez/yexp/blob/main/docs/security.md) for the current threat model.
 
-```typescript
-// Dot notation
-user.profile.name
+## API
 
-// Bracket notation
-user["profile"]["name"]
+- `compile(source)` parses and compiles source text.
+- `compileAst(ast)` compiles an existing AST.
+- `evaluate(program, input, options?)` evaluates bytecode.
+- `run(source, context)` provides the legacy state/data context entry point while the public context model is being consolidated.
+- `tokenize(source)` and `parse(tokens)` expose the lower-level frontend.
 
-// Array indexing
-users[0].name
-```
+## CLI
 
-### Built-in Functions
-
-```typescript
-// String methods
-str.toUpperCase()
-str.toLowerCase()
-str.trim()
-str.split(separator)
-str.includes(substring)
-
-// Array methods
-arr.map(x => x * 2)
-arr.filter(x => x > 10)
-arr.reduce((a, b) => a + b, 0)
-arr.length
-arr.includes(value)
-
-// Object methods
-Object.keys(obj)
-Object.values(obj)
-Object.entries(obj)
-```
-
-## Performance
-
-Yexp uses bytecode compilation for optimal performance:
-
-```typescript
-const program = compile('user.age > 18'); // Compile once
-
-// Evaluate many times (fast!)
-for (const user of users) {
-  const result = evaluate(program, { user });
-}
-```
-
-Benchmark: ~0.1-0.3µs per evaluation on modern hardware.
-
-## Safety Guarantees
-
-- ✅ No arbitrary code execution
-- ✅ Deterministic evaluation
-- ✅ Bounded computation (no loops or recursion)
-- ✅ Serializable bytecode
-- ✅ Frontend/backend parity
-
-## API Reference
-
-### `compile(expression: string): BytecodeProgram`
-
-Compiles an expression string to bytecode.
-
-### `evaluate(program: BytecodeProgram, context: ExecutionContext, options?: EvalOptions): ExprValue`
-
-Evaluates a compiled program with the given context.
-
-### `tokenize(expression: string): Token[]`
-
-Tokenizes an expression string.
-
-### `parse(tokens: Token[]): ASTNode`
-
-Parses tokens into an AST.
-
-## TypeScript Support
-
-Full type definitions included:
-
-```typescript
-import type {
-  BytecodeProgram,
-  ExecutionContext,
-  ExprValue,
-  ASTNode,
-  Token
-} from 'yexp';
-```
+Install [`yexp-cli`](https://www.npmjs.com/package/yexp-cli) for the `yexp` command.
 
 ## License
 
 MIT
-
-## Links
-
-- [GitHub Repository](https://github.com/cristianmartinez/yexp)
-- [CLI Tool](yexp-cli)
-- [Documentation](https://github.com/cristianmartinez/yexp#readme)
