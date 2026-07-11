@@ -8,13 +8,17 @@ const requestedTag = process.argv[2] ?? process.env.GITHUB_REF_NAME;
 
 const failures = [];
 
-if (core.name !== 'yexp') failures.push(`expected core package name yexp, received ${core.name}`);
-if (cli.name !== 'yexp-cli') failures.push(`expected CLI package name yexp-cli, received ${cli.name}`);
+if (core.name !== '@cristianmartinez/yexp') {
+  failures.push(`expected core package name @cristianmartinez/yexp, received ${core.name}`);
+}
+if (cli.name !== '@cristianmartinez/yexp-cli') {
+  failures.push(`expected CLI package name @cristianmartinez/yexp-cli, received ${cli.name}`);
+}
 if (core.version !== cli.version) {
   failures.push(`package versions differ: yexp=${core.version}, yexp-cli=${cli.version}`);
 }
-if (cli.dependencies?.yexp !== `^${core.version}`) {
-  failures.push(`yexp-cli must depend on yexp@^${core.version}`);
+if (cli.dependencies?.['@cristianmartinez/yexp'] !== `^${core.version}`) {
+  failures.push(`@cristianmartinez/yexp-cli must depend on @cristianmartinez/yexp@^${core.version}`);
 }
 
 if (requestedTag) {

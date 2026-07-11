@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { tokenize, parse, compile, evaluate } from 'yexp';
+import { tokenize, parse, compile, evaluate } from '@cristianmartinez/yexp';
 import { Code2, PlayCircle, Database, AlertCircle, FileCode } from 'lucide-react';
 import { YexpEditor } from '@/components/yexp-editor';
 import { JsonEditor } from '@/components/json-editor';

@@ -1,5 +1,5 @@
 {
-  "name": "yexp",
+  "name": "@cristianmartinez/yexp",
   "version": "0.0.1",
   "description": "Fast, portable JSON expression language with bytecode compilation",
   "type": "module",

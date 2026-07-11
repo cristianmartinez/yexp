@@ -1,5 +1,5 @@
 {
-  "name": "yexp-cli",
+  "name": "@cristianmartinez/yexp-cli",
   "version": "0.0.1",
   "type": "module",
   "description": "CLI for Yexp expression language",
@@ -22,7 +22,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "yexp": "^0.0.1",
+    "@cristianmartinez/yexp": "^0.0.1",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {

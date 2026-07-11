@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
-import { compile, evaluate, Opcode, type ExprValue } from 'yexp';
+import { compile, evaluate, Opcode, type ExprValue } from '@cristianmartinez/yexp';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 

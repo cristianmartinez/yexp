@@ -62,7 +62,7 @@ export default function HomePage() {
 
             <div className="mt-10 flex w-full items-center gap-3 rounded-md border bg-muted/30 px-3.5 py-2.5 font-mono text-sm sm:inline-flex sm:w-auto">
               <Terminal className="size-4 shrink-0 text-muted-foreground" />
-              <code className="min-w-0 truncate">bun add yexp</code>
+              <code className="min-w-0 truncate">bun add @cristianmartinez/yexp</code>
             </div>
           </div>
         </section>

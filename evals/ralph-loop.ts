@@ -10,7 +10,7 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { LLMClient } from "./llm-client";
-import { compile, run } from "yexp";
+import { compile, run } from "@cristianmartinez/yexp";
 import { loadDataset, type TestCase } from "./dataset-loader";
 
 const llm = new LLMClient();

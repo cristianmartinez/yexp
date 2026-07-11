@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
-import type { BytecodeProgram, ExecutionContext } from 'yexp';
+import type { BytecodeProgram, ExecutionContext } from '@cristianmartinez/yexp';
 import { VMStepper } from '../lib/vm-stepper';
 import { Button } from './ui/button';
 import { Card } from './ui/card';

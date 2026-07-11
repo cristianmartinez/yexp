@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { compile, evaluate } from 'yexp';
-import type { ExecutionContext, BytecodeProgram } from 'yexp';
+import { compile, evaluate } from '@cristianmartinez/yexp';
+import type { ExecutionContext, BytecodeProgram } from '@cristianmartinez/yexp';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';

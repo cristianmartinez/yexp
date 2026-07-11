@@ -5,13 +5,13 @@ A portable expression language that compiles JavaScript-like syntax to bytecode 
 ## Install
 
 ```bash
-npm install yexp
+npm install @cristianmartinez/yexp
 ```
 
 ## Use
 
 ```ts
-import { compile, evaluate } from 'yexp';
+import { compile, evaluate } from '@cristianmartinez/yexp';
 
 const program = compile('$.price * $.quantity');
 const result = evaluate(program, { price: 12, quantity: 3 });
@@ -56,7 +56,7 @@ Equality never coerces operand types: `1 == "1"` is `false`.
 ## Compilation pipeline
 
 ```ts
-import { compile, compileAst, parse, tokenize } from 'yexp';
+import { compile, compileAst, parse, tokenize } from '@cristianmartinez/yexp';
 
 const tokens = tokenize('$.items |> length');
 const ast = parse(tokens);
@@ -98,7 +98,7 @@ See the repository's [security documentation](https://github.com/cristianmartine
 
 ## CLI
 
-Install [`yexp-cli`](https://www.npmjs.com/package/yexp-cli) for the `yexp` command.
+Install [`@cristianmartinez/yexp-cli`](https://www.npmjs.com/package/@cristianmartinez/yexp-cli) for the `yexp` command.
 
 ## License
 

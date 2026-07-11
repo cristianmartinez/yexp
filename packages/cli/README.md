@@ -1,4 +1,4 @@
-# yexp-cli
+# @cristianmartinez/yexp-cli
 
 Command-line interface for Yexp expression language.
 
@@ -6,7 +6,7 @@ Command-line interface for Yexp expression language.
 
 ```bash
 # From npm
-npm install -g yexp-cli
+npm install -g @cristianmartinez/yexp-cli
 
 # From source
 cd packages/cli

@@ -6,9 +6,9 @@ const withNextra = nextra({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['yexp'],
+  transpilePackages: ['@cristianmartinez/yexp'],
   experimental: {
-    optimizePackageImports: ['yexp'],
+    optimizePackageImports: ['@cristianmartinez/yexp'],
   },
   webpack: (config) => {
     // Handle yexp ES modules properly
