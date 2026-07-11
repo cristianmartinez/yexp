@@ -1,5 +1,5 @@
 {
-  "name": "@yexp/cli",
+  "name": "yexp-cli",
   "version": "0.0.1",
   "type": "module",
   "description": "CLI for Yexp expression language",
@@ -9,14 +9,19 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": ["dist", "README.md"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",
     "build:bin": "bun build src/index.ts --compile --outfile dist/yexp",
+    "prepublishOnly": "bun run build && bun test",
     "dev": "bun run src/index.ts",
     "test": "bun test"
   },
   "dependencies": {
-    "@yexp/core": "^0.0.1",
+    "yexp": "^0.0.1",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
@@ -27,6 +32,9 @@
   "keywords": ["yexp", "json", "query", "expression", "cli", "jq"],
   "author": "Cristian Martinez <dev.cmartinez@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/cristianmartinez/yexp.git",

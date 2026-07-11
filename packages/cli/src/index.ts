@@ -10,7 +10,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { compile, evaluate } from '@yexp/core';
+import { compile, evaluate } from 'yexp';
 import { cliFunctions } from './functions.js';
 import { formatOutput } from './format.js';
 

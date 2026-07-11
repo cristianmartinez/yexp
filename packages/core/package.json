@@ -1,5 +1,5 @@
 {
-  "name": "@yexp/core",
+  "name": "yexp",
   "version": "0.0.1",
   "description": "Fast, portable JSON expression language with bytecode compilation",
   "type": "module",
@@ -12,8 +12,13 @@
     }
   },
   "files": ["dist", "README.md"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "bun run build && bun test",
     "test": "bun test",
     "lint": "biome check src/ tests/",
     "check": "tsc --noEmit"
@@ -31,6 +36,9 @@
   ],
   "author": "Cristian Martinez <dev.cmartinez@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/cristianmartinez/yexp.git",

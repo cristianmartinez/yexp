@@ -7,15 +7,15 @@ Get up and running with Yexp in minutes.
 Install Yexp via npm or bun:
 
 ```bash
-npm install @yexp/core
+npm install yexp
 # or
-bun add @yexp/core
+bun add yexp
 ```
 
 ## Basic Usage
 
 ```typescript
-import { run } from '@yexp/core'
+import { run } from 'yexp'
 
 // Prepare your input data
 const input = {
@@ -55,7 +55,7 @@ run('$.items.length', input, options)  // 3
 For better performance, compile expressions once and reuse:
 
 ```typescript
-import { tokenize, parse, compile, evaluate } from '@yexp/core'
+import { tokenize, parse, compile, evaluate } from 'yexp'
 
 // Compile to bytecode
 const program = compile(parse(tokenize('$.items |> filter(x => x > 2)')))

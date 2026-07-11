@@ -39,10 +39,6 @@ export default function HomePage() {
       <main>
         <section className="mx-auto max-w-5xl px-5 pb-16 pt-20 sm:px-8 sm:pb-24 sm:pt-28">
           <div className="max-w-3xl">
-            <div className="mb-7 flex items-center gap-2 font-mono text-xs text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              open source · v0.0.1
-            </div>
             <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.04em] sm:text-6xl">
               Expressions for data,
               <br className="hidden sm:block" /> without executing code.
@@ -66,7 +62,7 @@ export default function HomePage() {
 
             <div className="mt-10 flex w-full items-center gap-3 rounded-md border bg-muted/30 px-3.5 py-2.5 font-mono text-sm sm:inline-flex sm:w-auto">
               <Terminal className="size-4 shrink-0 text-muted-foreground" />
-              <code className="min-w-0 truncate">bun add @yexp/core</code>
+              <code className="min-w-0 truncate">bun add yexp</code>
             </div>
           </div>
         </section>

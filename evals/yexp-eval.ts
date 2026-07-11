@@ -7,7 +7,7 @@ import { Eval } from "braintrust";
 import Anthropic from "@anthropic-ai/sdk";
 
 // Import yexp parser/compiler when available
-// import { compile, evaluate } from "@yexp/core";
+// import { compile, evaluate } from "yexp";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,

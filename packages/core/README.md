@@ -1,4 +1,4 @@
-# @yexp/core
+# yexp
 
 A fast, portable JSON expression language with bytecode compilation.
 
@@ -13,15 +13,15 @@ A fast, portable JSON expression language with bytecode compilation.
 ## Installation
 
 ```bash
-npm install @yexp/core
+npm install yexp
 # or
-bun add @yexp/core
+bun add yexp
 ```
 
 ## Quick Start
 
 ```typescript
-import { compile, evaluate } from '@yexp/core';
+import { compile, evaluate } from 'yexp';
 
 // Compile expression to bytecode
 const program = compile('user.age > 18 && user.verified');
@@ -39,7 +39,7 @@ console.log(result); // true
 ### Basic Expressions
 
 ```typescript
-import { compile, evaluate } from '@yexp/core';
+import { compile, evaluate } from 'yexp';
 
 // Arithmetic
 compile('price * (1 + tax)');
@@ -56,7 +56,7 @@ compile('items.filter(x => x.price > 10).map(x => x.name)');
 ### Compilation Pipeline
 
 ```typescript
-import { tokenize, parse, compile } from '@yexp/core';
+import { tokenize, parse, compile } from 'yexp';
 
 // 1. Tokenize
 const tokens = tokenize('user.age > 18');
@@ -83,7 +83,7 @@ const result = evaluate(program, {
 ### Debug Mode
 
 ```typescript
-import { evaluate } from '@yexp/core';
+import { evaluate } from 'yexp';
 
 const program = compile('x * 2 + y');
 
@@ -192,7 +192,7 @@ import type {
   ExprValue,
   ASTNode,
   Token
-} from '@yexp/core';
+} from 'yexp';
 ```
 
 ## License
@@ -202,5 +202,5 @@ MIT
 ## Links
 
 - [GitHub Repository](https://github.com/cristianmartinez/yexp)
-- [CLI Tool](@yexp/cli)
+- [CLI Tool](yexp-cli)
 - [Documentation](https://github.com/cristianmartinez/yexp#readme)

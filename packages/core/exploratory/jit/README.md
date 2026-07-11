@@ -18,7 +18,7 @@ bun run demo.ts
 ## Example
 
 ```typescript
-import { tokenize, parse, compile } from '@yexp/core';
+import { tokenize, parse, compile } from 'yexp';
 import { compileToOptimizedJS } from './jit-example';
 
 const program = compile(parse(tokenize('data.price * 1.1')));

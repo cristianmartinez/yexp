@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync } from "fs";
-import { compile, run } from "@yexp/core";
+import { compile, run } from "yexp";
 
 interface TestCase {
   id: string;

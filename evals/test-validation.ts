@@ -3,7 +3,7 @@
  */
 
 import { loadDataset } from "./dataset-loader";
-import { compile, run } from "@yexp/core";
+import { compile, run } from "yexp";
 
 function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;

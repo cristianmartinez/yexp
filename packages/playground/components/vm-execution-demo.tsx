@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { compile } from '@yexp/core';
-import type { ExecutionContext } from '@yexp/core';
+import { compile } from 'yexp';
+import type { ExecutionContext } from 'yexp';
 import { VMExecutionPlayer } from './vm-execution-player';
 import { YexpEditor } from './yexp-editor';
 import { JsonEditor } from './json-editor';
