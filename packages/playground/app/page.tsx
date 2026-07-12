@@ -12,7 +12,7 @@ const capabilities = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground selection:bg-[#FF006F] selection:text-white">
       <header className="border-b border-border/70">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5 sm:px-8">
           <Link href="/" className="flex items-center gap-2.5" aria-label="Yexp home">
@@ -49,20 +49,34 @@ export default function HomePage() {
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Button asChild>
-                <Link href="/play">
-                  Try the playground
-                  <ArrowUpRight className="size-4" />
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
+            <Button asChild className="rounded-sm">
+              <Link href="/play">
+                Try the playground
+                <ArrowUpRight className="size-4 text-[#FF006F]" />
+              </Link>
+            </Button>
+            <Button variant="outline" asChild className="rounded-sm hover:border-[#FF006F]/60">
                 <Link href="/docs">Read the docs</Link>
               </Button>
             </div>
 
-            <div className="mt-10 flex w-full items-center gap-3 rounded-md border bg-muted/30 px-3.5 py-2.5 font-mono text-sm sm:inline-flex sm:w-auto">
-              <Terminal className="size-4 shrink-0 text-muted-foreground" />
-              <code className="min-w-0 truncate">bun add @cristianmartinez/yexp</code>
+            <div className="mt-10 flex max-w-xl flex-col overflow-hidden rounded-sm border border-[#FF006F]/30 bg-muted/30 font-mono text-sm">
+              <div className="flex min-w-0 items-center gap-3 px-3.5 py-2.5">
+                <Terminal className="size-4 shrink-0 text-[#FF006F]" />
+                <code className="min-w-0 flex-1 truncate">npm install @cristianmartinez/yexp</code>
+                <a
+                  href="https://www.npmjs.com/package/@cristianmartinez/yexp"
+                  className="shrink-0 text-xs text-[#FF006F] transition-opacity hover:opacity-70"
+                >
+                  npm ↗
+                </a>
+              </div>
+              <div className="flex min-w-0 items-center gap-3 border-t px-3.5 py-2.5 text-muted-foreground">
+                <span className="w-4 shrink-0 text-center">$</span>
+                <code className="min-w-0 flex-1 truncate">
+                  npm install -g @cristianmartinez/yexp-cli
+                </code>
+              </div>
             </div>
           </div>
         </section>
@@ -71,14 +85,14 @@ export default function HomePage() {
           <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8 sm:py-20">
             <div className="mb-7 flex items-end justify-between gap-4">
               <div>
-                <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="font-mono text-xs uppercase tracking-[0.16em] text-[#FF006F]">
                   Inspect the runtime
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight">Source to stack</h2>
               </div>
               <Link
                 href="/play"
-                className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"
+                className="hidden text-sm text-muted-foreground transition-colors hover:text-[#FF006F] sm:block"
               >
                 Open full playground →
               </Link>
@@ -104,7 +118,7 @@ export default function HomePage() {
                 Compile once, evaluate anywhere your application runs.
               </p>
             </div>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="rounded-sm hover:border-[#FF006F]/60">
               <Link href="/docs/getting-started">Get started</Link>
             </Button>
           </div>

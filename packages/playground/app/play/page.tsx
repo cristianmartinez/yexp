@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { Suspense, useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { tokenize, parse, compile, evaluate } from '@cristianmartinez/yexp';
 import { Code2, PlayCircle, Database, AlertCircle, FileCode } from 'lucide-react';
@@ -22,7 +22,7 @@ import {
 import { examples, type Example } from '@/lib/examples';
 import Split from 'react-split';
 
-export default function PlaygroundPage() {
+function PlaygroundContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const exampleId = searchParams?.get('example');
@@ -308,5 +308,13 @@ export default function PlaygroundPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PlaygroundPage() {
+  return (
+    <Suspense fallback={<div className="h-screen bg-background" />}>
+      <PlaygroundContent />
+    </Suspense>
   );
 }
