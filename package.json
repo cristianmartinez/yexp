@@ -12,11 +12,13 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "playground": "turbo dev --filter=@yexp/playground",
+    "playground:portless": "portless yexp bun run --cwd packages/playground dev",
     "playground:build": "turbo build --filter=@yexp/playground",
     "release:check": "node scripts/verify-release.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
+    "portless": "^0.15.1",
     "turbo": "^2.0.0",
     "typescript": "^5.7.0"
   },

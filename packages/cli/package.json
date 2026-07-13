@@ -1,15 +1,12 @@
 {
-  "name": "@cristianmartinez/yexp-cli",
+  "name": "yexp",
   "version": "0.0.1",
   "type": "module",
-  "description": "CLI for Yexp expression language",
+  "description": "Query and transform JSON with familiar expressions",
   "bin": {
     "yexp": "dist/index.js"
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "files": ["dist", "README.md"],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -17,9 +14,10 @@
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node --packages external",
     "build:bin": "bun build src/index.ts --compile --outfile dist/yexp",
-    "prepublishOnly": "bun run build && bun test",
+    "prepublishOnly": "bun run test",
     "dev": "bun run src/index.ts",
-    "test": "bun test"
+    "test": "bun run build && bun test --bail",
+    "check": "tsc --noEmit --project tsconfig.json"
   },
   "dependencies": {
     "@cristianmartinez/yexp": "^0.0.1",
@@ -30,14 +28,7 @@
     "@types/node": "^20.10.0",
     "typescript": "^5.7.0"
   },
-  "keywords": [
-    "yexp",
-    "json",
-    "query",
-    "expression",
-    "cli",
-    "jq"
-  ],
+  "keywords": ["yexp", "json", "query", "expression", "cli", "jq"],
   "author": "Cristian Martinez <dev.cmartinez@gmail.com>",
   "license": "MIT",
   "engines": {

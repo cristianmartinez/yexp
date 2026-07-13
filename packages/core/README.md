@@ -98,7 +98,7 @@ See the repository's [security documentation](https://github.com/cristianmartine
 
 ## CLI
 
-Install [`@cristianmartinez/yexp-cli`](https://www.npmjs.com/package/@cristianmartinez/yexp-cli) for the `yexp` command.
+Install [`yexp`](https://www.npmjs.com/package/yexp) globally or run it directly with `npx yexp` for the `yexp` command.
 
 ## License
 

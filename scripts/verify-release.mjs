@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
-const readPackage = async (path) => JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8'));
+const readPackage = async (path) =>
+  JSON.parse(await readFile(new URL(path, import.meta.url), 'utf8'));
 
 const core = await readPackage('../packages/core/package.json');
 const cli = await readPackage('../packages/cli/package.json');
@@ -11,14 +12,14 @@ const failures = [];
 if (core.name !== '@cristianmartinez/yexp') {
   failures.push(`expected core package name @cristianmartinez/yexp, received ${core.name}`);
 }
-if (cli.name !== '@cristianmartinez/yexp-cli') {
-  failures.push(`expected CLI package name @cristianmartinez/yexp-cli, received ${cli.name}`);
+if (cli.name !== 'yexp') {
+  failures.push(`expected CLI package name yexp, received ${cli.name}`);
 }
 if (core.version !== cli.version) {
   failures.push(`package versions differ: yexp=${core.version}, yexp-cli=${cli.version}`);
 }
 if (cli.dependencies?.['@cristianmartinez/yexp'] !== `^${core.version}`) {
-  failures.push(`@cristianmartinez/yexp-cli must depend on @cristianmartinez/yexp@^${core.version}`);
+  failures.push(`yexp must depend on @cristianmartinez/yexp@^${core.version}`);
 }
 
 if (requestedTag) {
