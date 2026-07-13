@@ -34,12 +34,11 @@ function sanitizeObject(obj: ExprObject): ExprObject {
   return safe;
 }
 
-function invokeLambda(
+function invokeLambdaSlow(
   lambda: LambdaValue,
   context: ExecutionContext,
   args: ExprValue[],
 ): ExprValue {
-  // Mutate-and-restore: avoid object spread allocation per invocation
   const ctx = context as Record<string, ExprValue | undefined>;
   const params = lambda.params;
   const saved: (ExprValue | undefined)[] = [];
@@ -48,11 +47,52 @@ function invokeLambda(
     saved[i] = ctx[key];
     ctx[key] = args[i] ?? null;
   }
-  const result = evaluate(lambda.program, context);
-  for (let i = 0; i < params.length; i++) {
-    ctx[params[i]!] = saved[i];
+  try {
+    return evaluateProgram(lambda.program, context, {});
+  } finally {
+    for (let i = 0; i < params.length; i++) {
+      ctx[params[i]!] = saved[i];
+    }
   }
-  return result;
+}
+
+function invokeLambda1(lambda: LambdaValue, context: ExecutionContext, arg: ExprValue): ExprValue {
+  if (lambda.params.length !== 1) return invokeLambdaSlow(lambda, context, [arg]);
+
+  const ctx = context as Record<string, ExprValue | undefined>;
+  const key = lambda.params[0]!;
+  const saved = ctx[key];
+  ctx[key] = arg;
+  try {
+    return evaluateProgram(lambda.program, context, {});
+  } finally {
+    ctx[key] = saved;
+  }
+}
+
+function invokeLambda2(
+  lambda: LambdaValue,
+  context: ExecutionContext,
+  first: ExprValue,
+  second: ExprValue,
+): ExprValue {
+  if (lambda.params.length !== 2) {
+    return invokeLambdaSlow(lambda, context, [first, second]);
+  }
+
+  const ctx = context as Record<string, ExprValue | undefined>;
+  const firstKey = lambda.params[0]!;
+  const secondKey = lambda.params[1]!;
+  const savedFirst = ctx[firstKey];
+  const savedSecond = ctx[secondKey];
+  ctx[firstKey] = first;
+  ctx[secondKey] = second;
+  try {
+    return evaluateProgram(lambda.program, context, {});
+  } finally {
+    ctx[firstKey] = savedFirst;
+    ctx[secondKey] = savedSecond;
+  }
 }
 
 const BUILTINS = new Map<string, BuiltinFn>([
@@ -667,7 +707,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'filter requires an array');
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'filter requires a lambda');
       return collection.filter((item) => {
-        const result = invokeLambda(lambda, ctx, [item]);
+        const result = invokeLambda1(lambda, ctx, item);
         return isTruthy(result);
       });
     },
@@ -677,7 +717,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
     (ctx, collection, lambda) => {
       if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'map requires an array');
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'map requires a lambda');
-      return collection.map((item) => invokeLambda(lambda, ctx, [item]));
+      return collection.map((item) => invokeLambda1(lambda, ctx, item));
     },
   ],
   [
@@ -686,7 +726,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'find requires an array');
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'find requires a lambda');
       for (const item of collection) {
-        if (isTruthy(invokeLambda(lambda, ctx, [item]))) return item;
+        if (isTruthy(invokeLambda1(lambda, ctx, item))) return item;
       }
       return null;
     },
@@ -698,7 +738,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'reduce requires a lambda');
       let acc = initial ?? null;
       for (const item of collection) {
-        acc = invokeLambda(lambda, ctx, [acc, item]);
+        acc = invokeLambda2(lambda, ctx, acc, item);
       }
       return acc;
     },
@@ -709,7 +749,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'every requires an array');
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'every requires a lambda');
       for (const item of collection) {
-        if (!isTruthy(invokeLambda(lambda, ctx, [item]))) return false;
+        if (!isTruthy(invokeLambda1(lambda, ctx, item))) return false;
       }
       return true;
     },
@@ -720,7 +760,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!Array.isArray(collection)) return makeError('TYPE_ERROR', 'some requires an array');
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'some requires a lambda');
       for (const item of collection) {
-        if (isTruthy(invokeLambda(lambda, ctx, [item]))) return true;
+        if (isTruthy(invokeLambda1(lambda, ctx, item))) return true;
       }
       return false;
     },
@@ -738,7 +778,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
         return copy;
       }
       copy.sort((a, b) => {
-        const result = invokeLambda(lambda, ctx, [a, b]);
+        const result = invokeLambda2(lambda, ctx, a, b);
         return typeof result === 'number' ? result : 0;
       });
       return copy;
@@ -751,7 +791,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'flatMap requires a lambda');
       const result: ExprValue[] = [];
       for (const item of collection) {
-        const mapped = invokeLambda(lambda, ctx, [item]);
+        const mapped = invokeLambda1(lambda, ctx, item);
         if (Array.isArray(mapped)) {
           result.push(...mapped);
         } else {
@@ -768,7 +808,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'groupBy requires a lambda');
       const groups = new Map<string, ExprValue[]>();
       for (const item of collection) {
-        const key = invokeLambda(lambda, ctx, [item]);
+        const key = invokeLambda1(lambda, ctx, item);
         const keyStr = String(key);
         if (!groups.has(keyStr)) {
           groups.set(keyStr, []);
@@ -790,7 +830,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       const seen = new Set<string>();
       const result: ExprValue[] = [];
       for (const item of collection) {
-        const key = invokeLambda(lambda, ctx, [item]);
+        const key = invokeLambda1(lambda, ctx, item);
         const keyStr = String(key);
         if (!seen.has(keyStr)) {
           seen.add(keyStr);
@@ -807,10 +847,10 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'minBy requires a lambda');
       if (collection.length === 0) return null;
       let minItem = collection[0]!;
-      let minValue = invokeLambda(lambda, ctx, [minItem]);
+      let minValue = invokeLambda1(lambda, ctx, minItem);
       for (let i = 1; i < collection.length; i++) {
         const item = collection[i]!;
-        const value = invokeLambda(lambda, ctx, [item]);
+        const value = invokeLambda1(lambda, ctx, item);
         if (typeof value === 'number' && typeof minValue === 'number' && value < minValue) {
           minValue = value;
           minItem = item;
@@ -826,10 +866,10 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'maxBy requires a lambda');
       if (collection.length === 0) return null;
       let maxItem = collection[0]!;
-      let maxValue = invokeLambda(lambda, ctx, [maxItem]);
+      let maxValue = invokeLambda1(lambda, ctx, maxItem);
       for (let i = 1; i < collection.length; i++) {
         const item = collection[i]!;
-        const value = invokeLambda(lambda, ctx, [item]);
+        const value = invokeLambda1(lambda, ctx, item);
         if (typeof value === 'number' && typeof maxValue === 'number' && value > maxValue) {
           maxValue = value;
           maxItem = item;
@@ -851,7 +891,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
       const result: ExprObject = {};
       for (const [key, value] of Object.entries(obj)) {
         const entry = { key, value } as ExprObject;
-        const transformed = invokeLambda(lambda, ctx, [entry]);
+        const transformed = invokeLambda1(lambda, ctx, entry);
         if (
           typeof transformed === 'object' &&
           transformed !== null &&
@@ -872,7 +912,7 @@ const HO_BUILTINS = new Map<string, HOBuiltinFn>([
     'select',
     (ctx, v, lambda) => {
       if (!isLambdaValue(lambda)) return makeError('TYPE_ERROR', 'select requires a lambda');
-      const result = invokeLambda(lambda, ctx, [v]);
+      const result = invokeLambda1(lambda, ctx, v);
       return isTruthy(result) ? v : null;
     },
   ],
@@ -934,6 +974,15 @@ export function evaluate(
     };
   }
   const customFns = options?.functions;
+  return evaluateProgram(program, context, evalOptions, customFns);
+}
+
+function evaluateProgram(
+  program: BytecodeProgram,
+  context: ExecutionContext,
+  evalOptions: { onStep?: (state: { ip: number; stack: readonly ExprValue[] }) => void },
+  customFns?: Record<string, BuiltinFn>,
+): ExprValue {
   const stack: StackValue[] = [];
   const { code, constants, slots: slotPaths } = program;
 
