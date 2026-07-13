@@ -1,8 +1,12 @@
 import { readFileSync, statSync } from 'node:fs';
-import { resolve, basename, extname } from 'node:path';
+import { basename, extname, resolve } from 'node:path';
 import type { BuiltinFn } from '@cristianmartinez/yexp';
 import { makeError } from '@cristianmartinez/yexp';
 import fg from 'fast-glob';
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
 function makeFileEntry(filePath: string) {
   const abs = resolve(filePath);
@@ -31,8 +35,8 @@ const read: BuiltinFn = (path) => {
   }
   try {
     return readFileSync(resolve(path), 'utf-8');
-  } catch (err: any) {
-    return makeError('TYPE_ERROR', `read failed: ${err.message}`);
+  } catch (error) {
+    return makeError('TYPE_ERROR', `read failed: ${errorMessage(error)}`);
   }
 };
 
@@ -43,8 +47,8 @@ const lines: BuiltinFn = (path) => {
   try {
     const content = readFileSync(resolve(path), 'utf-8');
     return content.split('\n').map((text, i) => ({ num: i + 1, text }));
-  } catch (err: any) {
-    return makeError('TYPE_ERROR', `lines failed: ${err.message}`);
+  } catch (error) {
+    return makeError('TYPE_ERROR', `lines failed: ${errorMessage(error)}`);
   }
 };
 
@@ -67,17 +71,18 @@ const grep: BuiltinFn = (pattern, pathGlob) => {
     matcher = (line) => (line.includes(pattern) ? pattern : null);
   }
 
-  const results: any[] = [];
+  const results: Array<{ path: string; line: string; num: number; match: string }> = [];
   for (const file of files) {
     try {
       const content = readFileSync(resolve(file), 'utf-8');
       const fileLines = content.split('\n');
       for (let i = 0; i < fileLines.length; i++) {
-        const match = matcher(fileLines[i]!);
+        const line = fileLines[i] ?? '';
+        const match = matcher(line);
         if (match !== null) {
           results.push({
             path: resolve(file),
-            line: fileLines[i],
+            line,
             num: i + 1,
             match,
           });

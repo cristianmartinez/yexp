@@ -1,3 +1,5 @@
+import type { ExprValue } from '@cristianmartinez/yexp';
+
 const ansi = {
   reset: '\x1b[0m',
   bold: '\x1b[1m',
@@ -8,14 +10,15 @@ const ansi = {
   white: '\x1b[37m',
 };
 
-function colorizeJson(value: any, indent: number = 0): string {
+function colorizeJson(value: ExprValue, indent = 0): string {
   const pad = '  '.repeat(indent);
   const padInner = '  '.repeat(indent + 1);
 
   if (value === null) return `${ansi.dim}null${ansi.reset}`;
   if (typeof value === 'boolean') return `${ansi.cyan}${value}${ansi.reset}`;
   if (typeof value === 'number') return `${ansi.yellow}${value}${ansi.reset}`;
-  if (typeof value === 'string') return `${ansi.green}"${JSON.stringify(value).slice(1, -1)}"${ansi.reset}`;
+  if (typeof value === 'string')
+    return `${ansi.green}"${JSON.stringify(value).slice(1, -1)}"${ansi.reset}`;
 
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
@@ -24,10 +27,12 @@ function colorizeJson(value: any, indent: number = 0): string {
   }
 
   if (typeof value === 'object') {
-    const keys = Object.keys(value);
+    const objectValue = value as Record<string, ExprValue>;
+    const keys = Object.keys(objectValue);
     if (keys.length === 0) return '{}';
     const entries = keys.map(
-      (k) => `${padInner}${ansi.bold}${ansi.white}"${k}"${ansi.reset}: ${colorizeJson(value[k], indent + 1)}`,
+      (k) =>
+        `${padInner}${ansi.bold}${ansi.white}"${k}"${ansi.reset}: ${colorizeJson(objectValue[k] ?? null, indent + 1)}`,
     );
     return `{\n${entries.join(',\n')}\n${pad}}`;
   }
@@ -37,17 +42,17 @@ function colorizeJson(value: any, indent: number = 0): string {
 
 export interface FormatOptions {
   compact?: boolean;
-  raw?: boolean;
+  rawOutput?: boolean;
   noColor?: boolean;
 }
 
-export function formatOutput(value: any, options: FormatOptions): string {
-  if (options.raw && typeof value === 'string') {
+export function formatOutput(value: ExprValue, options: FormatOptions): string {
+  if (options.rawOutput && typeof value === 'string') {
     return value;
   }
 
   if (options.compact) {
-    return JSON.stringify(value);
+    return JSON.stringify(value) ?? 'null';
   }
 
   const useColor = !options.noColor && !process.env.NO_COLOR && process.stdout.isTTY;
@@ -55,5 +60,5 @@ export function formatOutput(value: any, options: FormatOptions): string {
     return colorizeJson(value);
   }
 
-  return JSON.stringify(value, null, 2);
+  return JSON.stringify(value, null, 2) ?? 'null';
 }

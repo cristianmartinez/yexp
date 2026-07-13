@@ -1,164 +1,132 @@
-# @cristianmartinez/yexp-cli
+# yexp
 
-Command-line interface for Yexp expression language.
+Query and transform JSON from the terminal with familiar JavaScript-like expressions. Yexp compiles expressions to bytecode and evaluates them without `eval()` or generated JavaScript.
 
-## Installation
+## Run it
 
-```bash
-# From npm
-npm install -g @cristianmartinez/yexp-cli
-
-# From source
-cd packages/cli
-bun install
-bun run build
-npm link
-```
-
-## Usage
+Use it once without installing:
 
 ```bash
-# Basic property access (jq-style with '.')
-echo '{"name": "Alice", "age": 30}' | yexp '.name'
-# Output: "Alice"
-
-# Array indexing
-echo '{"users": [{"name": "Alice"}, {"name": "Bob"}]}' | yexp '.users[0].name'
-# Output: "Alice"
-
-# From file
-yexp '.users[0].name' data.json
-
-# Filter and map
-echo '{"users": [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]}' | \
-  yexp '.users.filter(u => u.age > 25).map(u => u.name)'
-# Output: ["Alice"]
-
-# Arithmetic
-echo '{"price": 100, "tax": 0.1}' | yexp '.price * (1 + .tax)'
-# Output: 110
-
-# Template strings (use '$' to access input)
-echo '{"name": "Alice"}' | yexp '`Hello, ${$.name}!`'
-# Output: "Hello, Alice!"
-
-# Access input explicitly with '$'
-echo '{"name": "Alice"}' | yexp '$.name'
-# Output: "Alice"
+printf '{"name":"Ada","active":true}\n' | npx yexp '.name'
+# "Ada"
 ```
+
+Or install the `yexp` binary globally:
+
+```bash
+npm install --global yexp
+yexp --version
+```
+
+The npm package and executable intentionally share the same name: `yexp`.
+
+## Shell pipelines
+
+Yexp reads JSON from stdin and writes results to stdout. Diagnostics are written to stderr, and color is disabled automatically when stdout is piped.
+
+```bash
+curl -s https://api.example.com/users \
+  | yexp -c '.users.filter(user => user.active).map(user => user.name)' \
+  | gzip > active-users.json.gz
+```
+
+Read one or more files instead of stdin:
+
+```bash
+yexp '.orders.map(order => order.total) |> add' january.json february.json
+```
+
+## JSON streams and NDJSON
+
+Each JSON value is evaluated independently, including newline-delimited JSON:
+
+```bash
+printf '{"id":1,"active":true}\n{"id":2,"active":false}\n' \
+  | yexp -c '.id'
+# 1
+# 2
+```
+
+Use `--slurp` to collect all input values into one array before evaluation:
+
+```bash
+cat events.ndjson | yexp -s '$.map(event => event.type) |> unique'
+```
+
+Use `--raw-input` to treat input lines as strings and `--raw-output` to write strings without JSON quotes:
+
+```bash
+printf 'Ada\nGrace\n' | yexp -Rr '$.toUpperCase()'
+```
+
+## Expressions
+
+The input value is available as `$`. At the command line, a leading `.` is accepted as shorthand for `$.`:
+
+```bash
+printf '{"price":12,"quantity":3}\n' | yexp '.price * .quantity'
+# 36
+
+printf '{"users":[{"name":"Ada","age":30},{"name":"Linus","age":19}]}\n' \
+  | yexp '.users.filter(user => user.age >= 21).map(user => user.name)'
+# [
+#   "Ada"
+# ]
+```
+
+Yexp supports arithmetic, comparisons, logical operators, ternaries, property access, optional chaining, arrays, objects, lambdas, and collection functions such as `map`, `filter`, `reduce`, and `groupBy`.
 
 ## Options
 
-- `-c, --compact` - Compact output (no pretty-printing)
-- `-r, --raw` - Raw output (don't JSON-encode strings)
-- `-f, --file <path>` - Read from file instead of stdin
-- `-h, --help` - Show help
-- `-v, --version` - Show version
-
-## Examples
-
-### Filter Users by Age
-```bash
-cat users.json | yexp 'users.filter(u => u.age >= 21)'
+```text
+-c, --compact-output      Write compact JSON
+-r, --raw-output          Write strings without JSON quotes
+-R, --raw-input           Read each input line as a string
+-s, --slurp               Collect all inputs into one array
+-n, --null-input          Evaluate once with null input
+-e, --exit-status         Exit 1 when the last result is false or null
+-j, --join-output         Do not write a newline after each result
+-M, --monochrome-output   Disable color output
+-f, --file <path>         Read an input file (positional files are preferred)
+-h, --help                Show help
+-v, --version             Show version
 ```
 
-### Calculate Total
-```bash
-echo '{"items": [{"price": 10}, {"price": 20}]}' | \
-  yexp 'items.map(i => i.price).reduce((a, b) => a + b, 0)'
-```
+Grouped short flags work as expected, such as `-cRr`.
 
-### Extract Nested Data
-```bash
-yexp '$.orders[0].items.map(i => i.name)' orders.json
-# Or use jq-style leading dot:
-yexp '.orders[0].items.map(i => i.name)' orders.json
-```
+## Exit status
 
-### Conditional Logic
-```bash
-echo '{"score": 85}' | yexp 'score >= 90 ? "A" : score >= 80 ? "B" : "C"'
-# Output: "B"
-```
+The CLI uses stable exit codes so shell scripts can distinguish failures:
 
-## File System Functions
+| Code | Meaning |
+| ---: | --- |
+| `0` | Successful evaluation |
+| `1` | Last result was `false` or `null` with `--exit-status` |
+| `2` | Invalid CLI usage or internal process failure |
+| `3` | Expression failed to compile |
+| `4` | Input could not be read or parsed |
+| `5` | Expression evaluation failed |
 
-The CLI includes built-in functions for file exploration, making yexp a composable alternative to `find` and `grep`.
+## Filesystem functions
 
-### `glob(pattern)`
+The CLI host adds explicit filesystem functions that are not available in the portable core runtime:
 
-Find files matching a glob pattern. Returns an array of file entries.
+- `glob(pattern)` returns file metadata for matching paths.
+- `read(path)` returns a file as a string.
+- `lines(path)` returns `{ num, text }` objects.
+- `grep(pattern, pathGlob?)` searches matching files.
 
 ```bash
-echo '{}' | yexp 'glob("src/**/*.ts") |> map(.name)'
-# Output: ["index.ts", "functions.ts"]
-
-echo '{}' | yexp 'glob("src/**/*.ts") |> filter(.size > 10000) |> sort(.size)'
-# Find large TypeScript files
-
-echo '{}' | yexp 'glob("**/*.ts") |> filter(.modified > now() - 86400000)'
-# Files modified in the last 24 hours
+yexp -n 'glob("src/**/*.ts").map(file => file.path)'
+yexp -n 'grep("TODO", "src/**/*.ts").map(match => match.path) |> unique'
 ```
 
-Each file entry has: `path`, `name`, `ext`, `size`, `modified`, `type`.
+These functions give the CLI filesystem authority. The embedded `@cristianmartinez/yexp` runtime does not expose the filesystem by default.
 
-### `read(path)`
+## Scope relative to jq
 
-Read a file's contents as a string.
+Yexp aims for jq-grade terminal integration while keeping a familiar expression syntax and a reusable embedded runtime. The CLI processes NDJSON incrementally and has explicit stream framing, shell-safe output, and stable process behavior. Full jq parity is not claimed yet: generator semantics, bounded-memory parsing of pretty-printed single documents and slurped input, and some jq filters still require core language work.
 
-```bash
-echo '{}' | yexp 'read("package.json") |> length'
-# Output: 726
+## License
 
-echo '{}' | yexp 'read("tsconfig.json")'
-# Output: raw file contents
-```
-
-### `lines(path)`
-
-Read a file as an array of `{num, text}` objects.
-
-```bash
-echo '{}' | yexp 'lines("src/index.ts") |> filter(.text.includes("import")) |> map(.num)'
-# Output: [1, 2, 3]
-
-echo '{}' | yexp 'lines("src/index.ts") |> length'
-# Count lines in a file
-```
-
-### `grep(pattern, pathGlob?)`
-
-Search file contents for a pattern. Returns `{path, line, num, match}` objects.
-
-```bash
-echo '{}' | yexp 'grep("TODO", "src/**/*.ts") |> groupBy(.path)'
-# Find all TODOs grouped by file
-
-echo '{}' | yexp 'grep("evaluate", "packages/core/src/*.ts") |> map(.path) |> unique'
-# Find files containing "evaluate"
-
-echo '{}' | yexp 'grep("/export\\s+const/", "src/**/*.ts")'
-# Regex pattern (wrap in /slashes/)
-```
-
-## Comparison with jq
-
-| Feature | yexp | jq |
-|---------|------|-----|
-| Syntax | JavaScript-like | Custom DSL |
-| Performance | ⚡ Very fast | Fast (C implementation) |
-| Lambda functions | `x => x.age` | `\| .age` |
-| Use case | Embedded + CLI | CLI-focused |
-
-## Development
-
-```bash
-# Run without building
-bun run dev 'expression' < input.json
-
-# Build
-bun run build
-
-# Test
-bun test
-```
+MIT
