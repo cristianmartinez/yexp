@@ -1,10 +1,10 @@
 # Getting Started
 
-Get up and running with Yexp in minutes.
+Yexp has two public surfaces: an embeddable TypeScript runtime and a terminal-native JSON tool.
 
-## Installation
+## Use Yexp in an application
 
-Install Yexp via npm or bun:
+Install the core package:
 
 ```bash
 npm install @cristianmartinez/yexp
@@ -12,61 +12,108 @@ npm install @cristianmartinez/yexp
 bun add @cristianmartinez/yexp
 ```
 
-## Basic Usage
+Compile an expression, then evaluate the reusable program against your data:
 
 ```typescript
-import { run } from '@cristianmartinez/yexp'
+import { compile, evaluate } from '@cristianmartinez/yexp'
 
-// Prepare your input data
-const input = {
+const affordableProducts = compile(
+  '$.products.filter(product => product.price < 100)'
+)
+
+const result = evaluate(affordableProducts, {
   products: [
     { name: 'Laptop', price: 999 },
     { name: 'Mouse', price: 25 },
     { name: 'Keyboard', price: 75 }
   ]
-}
+})
 
-// Evaluate an expression (use $ to access input)
-const result = run('$.products.filter(p => p.price < 100)', input)
 console.log(result)
-// Output: [{ name: 'Mouse', price: 25 }, { name: 'Keyboard', price: 75 }]
+// [{ name: 'Mouse', price: 25 }, { name: 'Keyboard', price: 75 }]
 ```
 
-## Context Access
-
-Yexp provides three ways to access data in expressions:
-
-- **`$`** - Access the main input data
-- **`$context`** - Access auxiliary context (optional)
-- **`$env`** - Access environment variables (optional)
+Compiled programs are JSON-serializable and can be reused with different inputs:
 
 ```typescript
-const input = { items: [1, 2, 3] }
-const options = {
-  context: { userId: 'usr_123' },
-  env: { API_URL: 'https://api.example.com' }
-}
+const isAdult = compile('$.age >= 18')
 
-run('$.items.length', input, options)  // 3
+evaluate(isAdult, { age: 21 }) // true
+evaluate(isAdult, { age: 16 }) // false
 ```
 
-## Compilation & Execution
+## Context and environment
 
-For better performance, compile expressions once and reuse:
+The primary input is available through `$`. Auxiliary application context and environment values are explicit:
 
 ```typescript
-import { tokenize, parse, compile, evaluate } from '@cristianmartinez/yexp'
+const canEdit = compile(
+  '$.ownerId == $context.userId && $env.region == "eu"'
+)
 
-// Compile to bytecode
-const program = compile(parse(tokenize('$.items |> filter(x => x > 2)')))
-
-// Execute multiple times (fast!)
-const result1 = evaluate(program, input1)
-const result2 = evaluate(program, input2)
+evaluate(canEdit, { ownerId: 'user_1' }, {
+  context: { userId: 'user_1' },
+  env: { region: 'eu' }
+}) // true
 ```
 
-## Next Steps
+## Use Yexp in the terminal
+
+Run the CLI once with npx:
+
+```bash
+printf '{"name":"Ada","active":true}\n' | npx yexp '.name'
+# "Ada"
+```
+
+Or install the binary globally:
+
+```bash
+npm install --global yexp
+yexp --version
+```
+
+Yexp reads JSON from stdin or files and writes results to stdout, so it composes with normal shell tools:
+
+```bash
+curl -s https://api.example.com/users \
+  | yexp -c '.users.filter(user => user.active)' \
+  | gzip > active-users.json.gz
+```
+
+Newline-delimited JSON is evaluated one value at a time:
+
+```bash
+printf '{"id":1}\n{"id":2}\n' | yexp -c '.id'
+# 1
+# 2
+```
+
+Useful terminal flags include:
+
+- `-c` for compact JSON output
+- `-r` for raw string output
+- `-R` to read input lines as strings
+- `-s` to slurp all inputs into one array
+- `-n` to evaluate once without reading input
+- `-e` to express a true/false result through the process exit status
+
+Run `yexp --help` for the complete CLI contract.
+
+## Lower-level compilation pipeline
+
+The parser and compiler are also available separately:
+
+```typescript
+import { tokenize, parse, compileAst } from '@cristianmartinez/yexp'
+
+const tokens = tokenize('$.items |> length')
+const ast = parse(tokens)
+const program = compileAst(ast)
+```
+
+## Next steps
 
 - [Learn the syntax](/docs/syntax)
-- [Explore built-in functions](/docs/functions)
-- [Try the playground](/)
+- [Inspect the VM](/docs/vm-execution)
+- [Try the playground](/play)

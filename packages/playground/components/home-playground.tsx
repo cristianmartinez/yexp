@@ -163,7 +163,7 @@ export function HomePlayground() {
           autoComplete="off"
           autoCapitalize="off"
           onChange={(e) => setSource(e.target.value)}
-          className="mt-1.5 w-full rounded-sm border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:border-[#FF006F] focus:ring-1 focus:ring-[#FF006F]"
+          className="mt-1.5 w-full rounded-sm border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:ring-1 focus:ring-ring"
         />
         <div className="mt-3 flex flex-wrap gap-1.5">
           {PRESETS.map((p) => (
@@ -174,8 +174,8 @@ export function HomePlayground() {
               className={cn(
                 'max-w-full truncate rounded-sm border px-2.5 py-1 font-mono text-xs transition-colors',
                 p === source
-                  ? 'border-[#FF006F] bg-[#FF006F] text-white'
-                  : 'border-border text-muted-foreground hover:border-[#FF006F]/60 hover:text-foreground',
+                  ? 'border-foreground bg-foreground text-background'
+                  : 'border-border text-muted-foreground hover:text-foreground',
               )}
             >
               {p}
@@ -218,7 +218,7 @@ export function HomePlayground() {
               </Button>
               <Button
                 size="icon"
-                className="h-8 w-8 rounded-sm bg-[#FF006F] text-white hover:bg-[#FF006F]/90"
+                className="h-8 w-8 rounded-sm"
                 aria-label={playing ? 'Pause' : 'Play'}
                 onClick={() => {
                   if (clamped >= lastIndex) setIndex(0);
@@ -255,7 +255,7 @@ export function HomePlayground() {
                 setIndex(Number(e.target.value));
               }}
               aria-label="Timeline"
-              className="mt-3 w-full accent-[#FF006F]"
+              className="mt-3 w-full accent-foreground"
             />
 
             {/* Op pills double as a scrubbable timeline */}
@@ -270,9 +270,9 @@ export function HomePlayground() {
                   }}
                   title={`Step ${i + 1}`}
                   className={cn(
-                    'shrink-0 rounded-sm px-2 py-1 font-mono text-[11px] transition-colors',
+                    'shrink-0 rounded-sm border border-transparent px-2 py-1 font-mono text-[11px] transition-colors',
                     i === clamped
-                      ? 'bg-[#FF006F] text-white'
+                      ? 'border-foreground bg-foreground text-background'
                       : i < clamped
                         ? 'bg-muted text-muted-foreground'
                         : 'text-muted-foreground/60 hover:text-foreground',
@@ -298,8 +298,8 @@ export function HomePlayground() {
                     <li
                       key={i}
                       className={cn(
-                        'flex items-baseline gap-2 rounded-sm px-2 py-1',
-                        active && 'bg-[#FF006F] text-white',
+                        'flex items-baseline gap-2 rounded-sm border border-transparent px-2 py-1',
+                        active && 'border-foreground bg-foreground text-background',
                         !active && past && 'text-muted-foreground/50',
                       )}
                     >
@@ -374,7 +374,7 @@ export function HomePlayground() {
               {step?.done && (
                 <div className="mt-4 border-t border-border pt-4">
                   <h4 className="mb-2 text-xs font-medium text-muted-foreground">Result</h4>
-                  <div className="rounded-sm border border-[#FF006F] bg-muted px-3 py-2 font-mono text-sm">
+                  <div className="rounded-sm border border-foreground bg-muted px-3 py-2 font-mono text-sm">
                     {formatValue(step.result)}
                   </div>
                 </div>
