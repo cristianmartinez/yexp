@@ -2,12 +2,12 @@
  * Unified LLM client supporting both Anthropic and OpenRouter
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateText } from "ai";
+import Anthropic from '@anthropic-ai/sdk';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { generateText } from 'ai';
 
 interface Message {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
 }
 
@@ -33,25 +33,25 @@ export class LLMClient {
   private defaultModel: string;
 
   constructor() {
-    this.useOpenRouter = process.env.USE_OPENROUTER === "true";
-    this.defaultModel = process.env.DEFAULT_MODEL || "claude-sonnet-4-5-20250929";
+    this.useOpenRouter = process.env.USE_OPENROUTER === 'true';
+    this.defaultModel = process.env.DEFAULT_MODEL || 'claude-sonnet-4-5-20250929';
 
     if (this.useOpenRouter) {
       if (!process.env.OPENROUTER_API_KEY) {
-        throw new Error("OPENROUTER_API_KEY not set but USE_OPENROUTER=true");
+        throw new Error('OPENROUTER_API_KEY not set but USE_OPENROUTER=true');
       }
       this.openrouter = createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY,
       });
-      console.log("✅ Using OpenRouter");
+      console.log('✅ Using OpenRouter');
     } else {
       if (!process.env.ANTHROPIC_API_KEY) {
-        throw new Error("ANTHROPIC_API_KEY not set");
+        throw new Error('ANTHROPIC_API_KEY not set');
       }
       this.anthropic = new Anthropic({
         apiKey: process.env.ANTHROPIC_API_KEY,
       });
-      console.log("✅ Using Anthropic SDK");
+      console.log('✅ Using Anthropic SDK');
     }
   }
 
@@ -66,12 +66,12 @@ export class LLMClient {
       return this.generateWithAnthropic(model, options);
     }
 
-    throw new Error("No LLM client configured");
+    throw new Error('No LLM client configured');
   }
 
   private async generateWithAnthropic(
     model: string,
-    options: GenerateOptions
+    options: GenerateOptions,
   ): Promise<GenerateResult> {
     const message = await this.anthropic!.messages.create({
       model,
@@ -81,7 +81,7 @@ export class LLMClient {
     });
 
     const response = message.content[0];
-    const text = response.type === "text" ? response.text : "";
+    const text = response.type === 'text' ? response.text : '';
 
     return {
       text,
@@ -94,13 +94,13 @@ export class LLMClient {
 
   private async generateWithOpenRouter(
     model: string,
-    options: GenerateOptions
+    options: GenerateOptions,
   ): Promise<GenerateResult> {
     // Map Anthropic model names to OpenRouter format
     const modelMap: Record<string, string> = {
-      "claude-sonnet-4-5-20250929": "anthropic/claude-3.5-sonnet",
-      "claude-haiku-4-5-20251001": "anthropic/claude-3-haiku",
-      "claude-opus-4-6": "anthropic/claude-opus-4-latest",
+      'claude-sonnet-4-5-20250929': 'anthropic/claude-3.5-sonnet',
+      'claude-haiku-4-5-20251001': 'anthropic/claude-3-haiku',
+      'claude-opus-4-6': 'anthropic/claude-opus-4-latest',
     };
 
     const openrouterModel = modelMap[model] || model;
@@ -132,21 +132,17 @@ export class LLMClient {
   getAvailableModels(): string[] {
     if (this.useOpenRouter) {
       return [
-        "anthropic/claude-3.5-sonnet",
-        "anthropic/claude-3-haiku",
-        "anthropic/claude-opus-4-latest",
-        "openai/gpt-4o",
-        "google/gemini-3-flash-preview",
-        "google/gemini-2.5-flash",
-        "meta-llama/llama-3.3-70b-instruct",
+        'anthropic/claude-3.5-sonnet',
+        'anthropic/claude-3-haiku',
+        'anthropic/claude-opus-4-latest',
+        'openai/gpt-4o',
+        'google/gemini-3-flash-preview',
+        'google/gemini-2.5-flash',
+        'meta-llama/llama-3.3-70b-instruct',
       ];
     }
 
-    return [
-      "claude-sonnet-4-5-20250929",
-      "claude-haiku-4-5-20251001",
-      "claude-opus-4-6",
-    ];
+    return ['claude-sonnet-4-5-20250929', 'claude-haiku-4-5-20251001', 'claude-opus-4-6'];
   }
 
   /**
@@ -155,24 +151,23 @@ export class LLMClient {
   calculateCost(model: string, inputTokens: number, outputTokens: number): number {
     const costs: Record<string, { input: number; output: number }> = {
       // Anthropic direct
-      "claude-sonnet-4-5-20250929": { input: 3.0, output: 15.0 },
-      "claude-haiku-4-5-20251001": { input: 0.8, output: 4.0 },
-      "claude-opus-4-6": { input: 15.0, output: 75.0 },
+      'claude-sonnet-4-5-20250929': { input: 3.0, output: 15.0 },
+      'claude-haiku-4-5-20251001': { input: 0.8, output: 4.0 },
+      'claude-opus-4-6': { input: 15.0, output: 75.0 },
       // OpenRouter
-      "anthropic/claude-3.5-sonnet": { input: 3.0, output: 15.0 },
-      "anthropic/claude-3-haiku": { input: 0.8, output: 4.0 },
-      "anthropic/claude-opus-4-latest": { input: 15.0, output: 75.0 },
-      "openai/gpt-4o": { input: 2.5, output: 10.0 },
-      "google/gemini-3-flash-preview": { input: 0.0, output: 0.0 }, // Free preview
-      "google/gemini-2.5-flash": { input: 0.075, output: 0.30 },
-      "google/gemini-2.0-flash-001": { input: 0.075, output: 0.30 },
-      "meta-llama/llama-3.3-70b-instruct": { input: 0.18, output: 0.18 },
+      'anthropic/claude-3.5-sonnet': { input: 3.0, output: 15.0 },
+      'anthropic/claude-3-haiku': { input: 0.8, output: 4.0 },
+      'anthropic/claude-opus-4-latest': { input: 15.0, output: 75.0 },
+      'openai/gpt-4o': { input: 2.5, output: 10.0 },
+      'google/gemini-3-flash-preview': { input: 0.0, output: 0.0 }, // Free preview
+      'google/gemini-2.5-flash': { input: 0.075, output: 0.3 },
+      'google/gemini-2.0-flash-001': { input: 0.075, output: 0.3 },
+      'meta-llama/llama-3.3-70b-instruct': { input: 0.18, output: 0.18 },
     };
 
     const modelCost = costs[model] || { input: 3.0, output: 15.0 };
     return (
-      (inputTokens / 1_000_000) * modelCost.input +
-      (outputTokens / 1_000_000) * modelCost.output
+      (inputTokens / 1_000_000) * modelCost.input + (outputTokens / 1_000_000) * modelCost.output
     );
   }
 }

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import { once } from 'node:events';
 import { createReadStream } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { once } from 'node:events';
 import type { Readable } from 'node:stream';
 import { StringDecoder } from 'node:string_decoder';
 import {
@@ -31,7 +31,7 @@ const HELP = `yexp - query and transform JSON with familiar expressions
 
 USAGE
   yexp [OPTIONS] <expression> [file ...]
-  npx yexp [OPTIONS] <expression> [file ...]
+  npx @cristianmartinez/yexp-cli [OPTIONS] <expression> [file ...]
 
 INPUT
   Reads JSON values from files or stdin. Multiple values and NDJSON are supported.
@@ -55,7 +55,7 @@ EXAMPLES
   yexp '.users.filter(user => user.active)' data.json
   printf '{"id":1}\n{"id":2}\n' | yexp -c '.id'
   printf 'one\ntwo\n' | yexp -Rr '$'
-  npx yexp '.items.map(item => item.price) |> add' order.json
+  npx @cristianmartinez/yexp-cli '.items.map(item => item.price) |> add' order.json
 
 EXIT STATUS
   0 success, 1 false/null with -e, 2 usage, 3 compile, 4 input, 5 runtime

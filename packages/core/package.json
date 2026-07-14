@@ -12,7 +12,7 @@
     }
   },
   "sideEffects": false,
-  "files": ["dist", "README.md"],
+  "files": ["dist", "README.md", "LICENSE"],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -21,7 +21,7 @@
     "build": "tsc --project tsconfig.build.json",
     "prepublishOnly": "bun run build && bun test",
     "test": "bun test",
-    "lint": "biome check src/ tests/",
+    "lint": "biome check src/ tests/ --diagnostic-level=error",
     "check": "tsc --noEmit --project tsconfig.build.json"
   },
   "keywords": [
@@ -38,7 +38,7 @@
   "author": "Cristian Martinez <dev.cmartinez@gmail.com>",
   "license": "MIT",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "repository": {
     "type": "git",

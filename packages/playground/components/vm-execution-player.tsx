@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
 import type { BytecodeProgram, ExecutionContext } from '@cristianmartinez/yexp';
+import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { VMStepper } from '../lib/vm-stepper';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -50,7 +50,7 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
   const stepperRef = useRef<VMStepper>(new VMStepper(program, context));
   const [, setRenderCounter] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(500); // ms per step
+  const speed = 500; // ms per step
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const stepper = stepperRef.current;
@@ -246,7 +246,6 @@ export function VMExecutionPlayer({ program, context }: VMExecutionPlayerProps) 
               </div>
             </div>
           )}
-
         </Card>
       </div>
     </div>
