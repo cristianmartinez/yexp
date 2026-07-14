@@ -5,11 +5,11 @@ import { getPageMap } from 'nextra/page-map';
 const navbar = (
   <Navbar
     logo={<span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Yexp</span>}
-    projectLink="https://github.com/cristianmartinez/Expr"
+    projectLink="https://github.com/cristianmartinez/yexp"
   />
 );
 
-const footer = <Footer>Yexp Expression Engine</Footer>;
+const footer = <Footer>Yexp — familiar expressions for serious data queries.</Footer>;
 
 export default async function DocsLayout({
   children,
@@ -22,7 +22,7 @@ export default async function DocsLayout({
     <Layout
       navbar={navbar}
       pageMap={pageMap}
-      docsRepositoryBase="https://github.com/cristianmartinez/Expr/tree/main/packages/playground"
+      docsRepositoryBase="https://github.com/cristianmartinez/yexp/tree/main/packages/playground/content"
       footer={footer}
     >
       {children}
