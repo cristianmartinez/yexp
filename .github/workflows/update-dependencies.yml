@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -61,3 +62,5 @@ jobs:
               --title 'build(deps): update Bun dependencies' \
               --body 'Updates dependencies within the repository declared version ranges and refreshes both Bun lockfiles. CI validates the resulting packages and application.'
           fi
+
+          gh workflow run ci.yml --ref "$branch"
