@@ -19,10 +19,10 @@
     "ci": "bun run format:check && bun run lint && bun run check && bun run test"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.5.3",
     "portless": "^0.15.3",
     "turbo": "^2.10.5",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   },
   "overrides": {
     "@xmldom/xmldom": "0.9.10",

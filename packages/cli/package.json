@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "bun-types": "^1.3.8",
-    "@types/node": "^22.20.0",
-    "typescript": "^5.9.3"
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
   },
   "keywords": ["yexp", "json", "query", "expression", "cli", "jq"],
   "author": "Cristian Martinez <dev.cmartinez@gmail.com>",
