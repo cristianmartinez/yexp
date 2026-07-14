@@ -83,7 +83,13 @@ export default function HomePage() {
       <header className="border-b border-border/70">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:px-8">
           <Link href="/" className="flex items-center gap-2.5" aria-label="Yexp home">
-            <Image src="/yexp-logo.svg" alt="" width={22} height={22} className="dark:invert" />
+            <Image
+              src="/yexp-logo.svg"
+              alt=""
+              width={22}
+              height={22}
+              className="h-[22px] w-[22px] dark:invert"
+            />
             <span className="font-mono text-sm font-semibold tracking-tight">yexp</span>
           </Link>
 

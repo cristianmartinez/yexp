@@ -22,7 +22,7 @@ export default async function DocsLayout({
     <Layout
       navbar={navbar}
       pageMap={pageMap}
-      docsRepositoryBase="https://github.com/cristianmartinez/yexp/tree/main/packages/playground/content"
+      docsRepositoryBase="https://github.com/cristianmartinez/yexp/tree/main/packages/playground"
       footer={footer}
     >
       {children}

@@ -11,7 +11,13 @@ export function PageHeader({ currentPage }: PageHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <Image src="/yexp-logo.svg" alt="Yexp" width={40} height={40} className="dark:invert" />
+        <Image
+          src="/yexp-logo.svg"
+          alt="Yexp"
+          width={40}
+          height={40}
+          className="h-10 w-10 dark:invert"
+        />
         <h1 className="text-sm font-bold text-primary">YEXP</h1>
       </Link>
       <div className="flex gap-2">
