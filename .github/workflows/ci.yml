@@ -96,3 +96,29 @@ jobs:
 
       - name: Execute CLI package with Node.js
         run: printf '{"name":"Ada"}\n' | node packages/cli/dist/index.js '.name' | grep -q '"Ada"'
+
+  report-dispatched-statuses:
+    name: Report dispatched CI statuses
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && needs.quality.result == 'success' && needs.node-smoke.result == 'success' }}
+    needs: [quality, node-smoke]
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+    steps:
+      - name: Report required checks to the pull request commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          report_status() {
+            gh api \
+              --method POST \
+              "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+              -f state=success \
+              -f context="$1" \
+              -f description='Passed in dispatched CI' \
+              -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          }
+
+          report_status 'Quality and packages'
+          report_status 'Node 22 package smoke'
+          report_status 'Node 24 package smoke'
