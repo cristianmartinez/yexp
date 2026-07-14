@@ -28,10 +28,12 @@ jobs:
         with:
           bun-version: 1.3.6
 
-      - name: Update locked dependencies
-        run: |
-          bun update
-          bun update --cwd evals
+      - name: Update workspace dependencies
+        run: bun update
+
+      - name: Update evaluation-tool dependencies
+        working-directory: evals
+        run: bun update
 
       - name: Create or refresh dependency pull request
         env:
