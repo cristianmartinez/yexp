@@ -104,7 +104,7 @@ console.log('\n=== Full Pipeline Comparison ===\n');
 // Compare full pipeline (lex + parse + compile + eval) for different operators
 console.log('Regular property access (data.users[0].name):');
 const simpleExpr = 'data.users[0].name';
-let _simpleResult;
+let _simpleResult: unknown;
 measure(
   '  Full pipeline',
   () => {
@@ -119,7 +119,7 @@ measure(
 
 console.log('\nWildcard (data.users[*].name):');
 const wildcardExpr = 'data.users[*].name';
-let _wildcardResult;
+let _wildcardResult: unknown;
 measure(
   '  Full pipeline',
   () => {
@@ -134,7 +134,7 @@ measure(
 
 console.log('\nRecursive descent (data..name):');
 const recursiveExpr = 'data..name';
-let _recursiveResult;
+let _recursiveResult: unknown;
 measure(
   '  Full pipeline',
   () => {

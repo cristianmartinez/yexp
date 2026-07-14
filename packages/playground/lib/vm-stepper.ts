@@ -1,7 +1,7 @@
 // Uses the actual VM from yexp with debug mode enabled
 // This ensures the playground visualizer always matches production behavior
 
-import type { BytecodeProgram, ExprValue, ExecutionContext } from '@cristianmartinez/yexp';
+import type { BytecodeProgram, ExecutionContext, ExprValue } from '@cristianmartinez/yexp';
 import { evaluate } from '@cristianmartinez/yexp';
 
 export interface VMState {

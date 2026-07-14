@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { compile, evaluate } from '@cristianmartinez/yexp';
-import type { ExecutionContext, BytecodeProgram } from '@cristianmartinez/yexp';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Play, Plus, Trash2, ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
-import { YexpEditor } from './yexp-editor';
+import { compile, evaluate } from '@cristianmartinez/yexp';
+import type { BytecodeProgram, ExecutionContext } from '@cristianmartinez/yexp';
+import { AlertCircle, ChevronDown, ChevronRight, Play, Plus, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { JsonViewer } from './json-viewer';
+import { YexpEditor } from './yexp-editor';
 
 interface Cell {
   id: string;
@@ -37,7 +37,7 @@ export function Notebook({ initialContext }: NotebookProps) {
 
   // Execute all cells sequentially, accumulating results
   const executeAllCells = useMemo(() => {
-    let context = { ...initialContext };
+    const context = { ...initialContext };
     const results: any[] = [];
 
     return cells.map((cell, index) => {

@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test';
 import { compileAst } from '../src/compiler.js';
 import { tokenize } from '../src/lexer.js';
 import { parse } from '../src/parser.js';
+import type { ExprError } from '../src/types.js';
 import type { BuiltinFn } from '../src/vm.js';
 import { evaluate } from '../src/vm.js';
-import type { ExprError } from '../src/types.js';
 
 function run(
   source: string,
@@ -33,8 +33,7 @@ describe('custom function registry', () => {
   test('custom function works with pipe operator', () => {
     const result = run('"test.txt" |> getExt', null, {
       functions: {
-        getExt: (path) =>
-          typeof path === 'string' ? path.split('.').pop()! : null,
+        getExt: (path) => (typeof path === 'string' ? path.split('.').pop()! : null),
       },
     });
     expect(result).toBe('txt');
@@ -71,15 +70,11 @@ describe('custom function registry', () => {
   });
 
   test('custom function composes with builtins', () => {
-    const result = run(
-      'words("hello world") |> length',
-      null,
-      {
-        functions: {
-          words: (s) => (typeof s === 'string' ? s.split(' ') : []),
-        },
+    const result = run('words("hello world") |> length', null, {
+      functions: {
+        words: (s) => (typeof s === 'string' ? s.split(' ') : []),
       },
-    );
+    });
     expect(result).toBe(2);
   });
 });

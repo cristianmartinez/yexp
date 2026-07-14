@@ -7,7 +7,7 @@
 - **How**: Native JavaScript execution, JIT compiled by V8
 - **Why fast**: Direct property access, optimized switch statements, no interpretation overhead
 
-### Expr VM: Feature-Rich but Slower
+### Yexp VM: Feature-Rich but Slower
 - **Performance**: ~0.37µs per evaluation (98x slower)
 - **How**: Bytecode interpretation with stack machine
 - **Why slower**: Instruction fetch/decode/dispatch overhead, stack operations, no JIT
@@ -81,7 +81,7 @@ RETURN
 ❌ **No lambdas**: Can't do `filter((x) => x.price > 100)`
 ❌ **Verbose**: Complex conditions become deeply nested JSON
 
-### Expr Advantages
+### Yexp Advantages
 
 ✅ **Full expression language**: All operators, functions, transforms
 ✅ **Readable syntax**: `age >= 18 && verified` vs nested JSON
@@ -97,7 +97,7 @@ RETURN
 - ✅ **No computation needed** (just field comparisons and AND/OR logic)
 - ✅ **Type safety over flexibility**
 
-### Use Expr When:
+### Use Yexp When:
 - ✅ **Any computation required** (arithmetic, string ops, transformations)
 - ✅ **Complex business logic** (nested conditions with calculations)
 - ✅ **Readability matters** (expressions are way more readable than nested JSON)
@@ -113,26 +113,26 @@ RETURN
 // Simple repeated checks → JSON
 const jsonCondition = { field: 'age', op: 'gte', value: 18 };
 
-// Complex logic → Expr
+// Complex logic → Yexp
 const exprCondition = 'items |> filter(.active) |> map(.price * .qty) |> add > 1000';
 ```
 
 ### For Writes (Mutations/Actions):
 ```typescript
-// Use JSON actions with embedded Expr for values
+// Use JSON actions with embedded Yexp for values
 {
   type: 'assign',
   path: 'state.total',
   value: {
     type: 'yexp',
-    expr: 'items |> map(.price * .qty) |> add'  // ← Expr for computation
+    expr: 'items |> map(.price * .qty) |> add'  // ← Yexp for computation
   }
 }
 ```
 
 **This gives you**:
 - Fast evaluation for trivial conditions (JSON)
-- Powerful expressions where needed (Expr)
+- Powerful expressions where needed (Yexp)
 - Controlled mutations with audit trail (JSON actions)
 - Serializability for database storage
 
@@ -164,7 +164,7 @@ const exprCondition = 'items |> filter(.active) |> map(.price * .qty) |> add > 1
 
 **Use the right tool for the job**:
 - JSON for ultra-simple, performance-critical conditions
-- Expr for everything else
+- Yexp for everything else
 
 **The 98x overhead is the price of**:
 - Sandboxed execution
