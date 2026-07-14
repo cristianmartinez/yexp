@@ -53,6 +53,8 @@ Yexp supports:
 
 Equality never coerces operand types: `1 == "1"` is `false`.
 
+Read the [language specification](https://github.com/cristianmartinez/yexp/blob/main/docs/spec.md) for the learning path, exact semantics, built-in registry, grammar, and port conformance contract.
+
 ## Compilation pipeline
 
 ```ts

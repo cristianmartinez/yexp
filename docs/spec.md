@@ -1,1165 +1,658 @@
-# Expr Language Specification
+# Yexp Language Specification
 
-**Version:** 0.1.0 (draft)
+**Language version:** 0.1 (draft)
 
-This document specifies the core expression language: types, syntax, operators, compilation, bytecode, and execution semantics.
+**Reference implementation:** `packages/core`
 
----
+**Status:** The syntax and behavior described here match the current TypeScript runtime. Sections marked as compatibility behavior are not part of the preferred public evaluation model.
 
-## 0. Execution Context
+Yexp is a small expression language for querying, transforming, and validating JSON-like data. It borrows the readable surface of JavaScript, then adds the concise navigation and transformation tools expected from dedicated query languages.
 
-Every expression runs under a **context** — a structured state object that the expression can read from and, in the case of actions, write to. Expressions never execute in isolation; they are always bound to a context at evaluation time.
+```yexp
+$.orders[.status == "paid"]
+  |> groupBy(.customer)
+  |> mapEntries(entry => {
+    key: entry.key,
+    value: {
+      orders: entry.value |> length,
+      total: entry.value |> map(.amount) |> add
+    }
+  })
+```
+
+Yexp is not JavaScript. It has no statements, classes, imports, prototypes, global object, or arbitrary code execution. A Yexp program is one expression compiled to versioned, reusable bytecode and evaluated against an explicit input.
+
+## 1. What makes Yexp distinctive
+
+Yexp deliberately combines ideas that usually live in separate tools:
+
+- **JavaScript-shaped expressions:** property access, arithmetic, ternaries, object and array literals, template strings, and arrow lambdas.
+- **Quick-query selectors:** negative indices, wildcard projection, inline predicate selection, recursive descent, and jq-style dot lambdas.
+- **Composable transformations:** the same operation can be written as a function, a pipe, or familiar method-style syntax.
+- **One language across application and terminal:** the core runtime embeds in TypeScript applications, while the CLI evaluates the same expressions over JSON and NDJSON streams.
+- **Compiled, inspectable execution:** source becomes an AST and versioned bytecode rather than being passed to `eval()` or generated JavaScript.
+
+The distinctive part is the combination. Yexp keeps common expressions familiar while making data queries substantially shorter:
+
+```yexp
+// Explicit JavaScript-style lambda
+$.products.filter(product => product.inStock && product.price < 100)
+
+// Query-language shorthand
+$.products[.inStock && .price < 100]
+
+// Project a field from every match
+$.products[.inStock && .price < 100][*].name
+```
+
+Comments are shown in documentation for explanation; comments are not valid inside a Yexp expression.
+
+## 2. Evaluation model
+
+### 2.1 One expression, one result
+
+A source program contains exactly one expression. Evaluation returns one Yexp value or one structured error.
+
+```yexp
+1 + 2 * 3
+// result: 7
+```
+
+There are no variable declarations or statement blocks. Lambdas introduce parameters only inside their expression body.
+
+### 2.2 Explicit inputs
+
+The public evaluation model has three explicit roots:
+
+| Root | Meaning | Required |
+| --- | --- | --- |
+| `$` | Primary input value | Yes |
+| `$context` | Auxiliary application data | No; absent means `null` |
+| `$env` | Explicit environment data | No; absent means `null` |
+
+```ts
+const program = compile(
+  '$.price * (1 + $context.taxRate) * $env.currencyScale',
+);
+
+evaluate(program, { price: 100 }, {
+  context: { taxRate: 0.21 },
+  env: { currencyScale: 1 },
+}); // 121
+```
+
+`$` always continues to mean the primary input, including inside nested lambdas. Lambda parameters use their declared names.
+
+```yexp
+$.groups.map(group =>
+  group.values.map(value => value * $.multiplier)
+)
+```
+
+### 2.3 Compilation and reuse
+
+An implementation parses and compiles source before evaluation:
+
+```text
+source -> tokens -> AST -> bytecode -> result
+```
+
+Compiled programs contain a bytecode version, constants, slots, and instructions. They are JSON-serializable derived artifacts. Applications may compile once and evaluate the same program against many inputs.
+
+## 3. Value model
+
+Yexp values are JSON-shaped:
+
+| Type | Examples |
+| --- | --- |
+| `null` | `null` |
+| `boolean` | `true`, `false` |
+| `number` | `0`, `-12`, `3.14` |
+| `string` | `"hello"`, `'hello'`, `` `hello` `` |
+| `array` | `[1, 2, 3]` |
+| `object` | `{ name: "Ada", active: true }` |
+
+Lambdas and structured runtime errors are internal runtime values. They are not ordinary JSON output values.
+
+Object iteration follows the 0.1 reference order: integer-index keys in ascending numeric order, followed by other string keys in insertion order. This order is observable through wildcards, `keys`, `values`, `entries`, `mapEntries`, and recursive descent.
+
+### 3.1 Numbers
+
+Numbers follow IEEE 754 double-precision behavior in language version 0.1. Arithmetic requires numeric operands, except that `+` also concatenates two strings.
+
+```yexp
+10 + 2       // 12
+"a" + "b"  // "ab"
+"1" + 2     // TYPE_ERROR
+```
+
+Division or modulo by zero returns `DIVISION_BY_ZERO`.
+
+### 3.2 Strings
+
+Single and double quotes create strings. The escapes `\n`, `\t`, `\r`, and `\\` are recognized. Backticks create template strings:
+
+```yexp
+`Hello, ${$.user.name}. Total: ${$.items |> map(.price) |> add}`
+```
+
+Interpolated values are converted with `toString`. In the 0.1 reference runtime, string length and indexing follow JavaScript UTF-16 code-unit behavior.
+
+### 3.3 Missing values
+
+Yexp has no source literal named `undefined`. A missing property resolves to `null`:
+
+```yexp
+$.user.nickname             // null when absent
+$.user.nickname ?? "Guest" // "Guest"
+```
+
+### 3.4 Equality
+
+Yexp never coerces operand types for equality. In language version 0.1, `==` and `===` have the same behavior; `!=` and `!==` also have the same behavior.
+
+```yexp
+1 == 1       // true
+1 == "1"    // false
+0 == false   // false
+null == null // true
+```
+
+Arrays and objects compare by runtime identity, not by deep structural equality.
+
+### 3.5 Truthiness
+
+Only `null` and `false` are falsy. Every other value is truthy, including `0`, `""`, `[]`, and `{}`.
+
+Like JavaScript, `&&` and `||` return the selected operand and short-circuit. Yexp applies its own truthiness rule when selecting that operand.
+
+```yexp
+0 && true   // true
+null || 0   // 0
+```
+
+Use `??` when selecting a fallback value:
+
+```yexp
+$.count ?? 0
+```
+
+## 4. Learn Yexp from simple to complex
+
+The examples in this section form the recommended learning path.
+
+### 4.1 Calculate a value
+
+```yexp
+($.price * $.quantity) |> round(2)
+```
+
+Property access starts at `$`. Parentheses control grouping.
+
+### 4.2 Read nested data safely
+
+```yexp
+$.user.profile?.displayName ?? "Anonymous"
+```
+
+Optional access returns `null` instead of an access error. Null coalescing supplies a default without treating `0`, `false`, or `""` as missing.
+
+### 4.3 Read from the end of an array
+
+```yexp
+$.events[-1]
+```
+
+Negative indices count from the end: `-1` is the last value and `-2` is the value before it.
+
+### 4.4 Filter a collection
+
+Arrow lambdas are familiar to JavaScript users:
+
+```yexp
+$.products.filter(product => product.inStock && product.price < 100)
+```
+
+Dot shorthand makes common data predicates shorter:
+
+```yexp
+$.products.filter(.inStock && .price < 100)
+```
+
+Predicate selectors make the query more compact again:
+
+```yexp
+$.products[.inStock && .price < 100]
+```
+
+All three expressions have the same filtering intent.
+
+### 4.5 Project values with a wildcard
+
+```yexp
+$.products[.inStock && .price < 100][*].name
+```
+
+`[*]` exposes the selected collection for property projection. The result is an array of names.
+
+### 4.6 Transform records
+
+```yexp
+$.products
+  |> filter(.inStock)
+  |> map(product => {
+    label: `${product.name} - $${product.price}`,
+    category: product.category ?? "other"
+  })
+```
+
+Pipes pass the value on their left as the first argument to the function on their right.
+
+### 4.7 Aggregate data
+
+```yexp
+$.orders
+  |> filter(.status == "paid")
+  |> reduce((total, order) => total + order.amount, 0)
+  |> round(2)
+```
+
+### 4.8 Query an unknown tree
+
+```yexp
+$..email |> unique
+```
+
+Recursive descent searches objects and arrays at any depth and returns every own `email` property it finds.
+
+### 4.9 Build a report
+
+```yexp
+$.orders[.status == "paid"]
+  |> groupBy(.customer)
+  |> mapEntries(entry => {
+    key: entry.key,
+    value: {
+      orders: entry.value |> length,
+      total: entry.value |> map(.amount) |> add
+    }
+  })
+```
+
+Given paid orders for Ada (`25`, `75`) and Linus (`50`), the result is:
 
 ```json
 {
-  "state": { },
-  "data": { },
-  "env": { }
+  "Ada": { "orders": 2, "total": 100 },
+  "Linus": { "orders": 1, "total": 50 }
 }
 ```
 
-| Root    | Purpose                                         | Mutability                       |
-|---------|-------------------------------------------------|----------------------------------|
-| `state` | Application state (UI state, form values, etc.) | Readable and writable            |
-| `data`  | External data (API responses, config, records)  | Read-only                        |
-| `env`   | Environment info (locale, platform, timestamp)  | Read-only                        |
+This example combines a predicate selector, pipe composition, a shorthand lambda, grouping, object transformation, projection, and aggregation.
 
-All path expressions in the language (`state.user.name`, `data.items[0]`, `env.locale`) resolve against this context. There are no global variables, no closures, and no ambient state — the context is the only source of external values.
+## 5. Syntax reference
 
-### Expression Types
+### 5.1 Literals and construction
 
-The system supports two kinds of expressions:
-
-**Value expressions** evaluate to a result without modifying the context:
-
-```
-state.count > 0                        // → boolean
-state.user.name                        // → string
-state.price * state.qty                // → number
-`Hello, ${state.user.name}!`           // → string
-{ ...state.user, active: true }        // → object
+```yexp
+42
+-3.14
+true
+false
+null
+"double quoted"
+'single quoted'
+`template ${$.value}`
+[1, 2, $.value]
+{ name: $.name, active: true }
 ```
 
-**Action expressions** modify the context and return no meaningful value:
+Object keys in literals are unquoted identifiers. Computed keys are not supported. A later property overwrites an earlier property with the same key.
 
-```
-state.count = state.count + 1          // SET: mutate state.count
-state.items << { name: "new" }         // APPEND: push to state.items
-state.user = { ...state.user, age: 31 } // SET: replace state.user
-```
+### 5.2 Spread
 
-The compiler distinguishes between these at compile time. Action expressions may only write to `state` — writing to `data` or `env` is a compile-time error.
+Spread is valid in arrays, objects, and function arguments:
 
-### Context Binding
-
-An expression is compiled once and can be evaluated many times against different contexts:
-
-```
-// compiled expression
-state.count > 0
-
-// evaluated against context A
-{ "state": { "count": 5 } }   → true
-
-// evaluated against context B
-{ "state": { "count": 0 } }   → false
+```yexp
+[...$.items, $.newItem]
+{ ...$.defaults, ...$.overrides, enabled: true }
+max(...$.scores)
 ```
 
-This separation between compilation and evaluation is what enables caching, portability, and determinism.
+Array spread expands arrays. Object spread copies object properties and ignores non-object sources. Function spread expands arrays into positional arguments.
 
-### Custom Context Roots
+### 5.3 Property and index access
 
-The three roots (`state`, `data`, `env`) are the default set. Implementations may extend the context with additional roots for domain-specific needs, but the expression syntax and compilation model remain the same.
-
----
-
-## 1. Type System
-
-The expression language supports four primitive types and one structural type.
-
-### Primitive Types
-
-| Type      | Description                          | Examples              |
-|-----------|--------------------------------------|-----------------------|
-| `number`  | 64‑bit IEEE 754 floating point       | `0`, `3.14`, `-1`    |
-| `string`  | UTF‑8 encoded text                   | `"hello"`, `""`      |
-| `boolean` | Logical true or false                | `true`, `false`       |
-| `null`    | Absence of value                     | `null`                |
-
-### Structural Types
-
-| Type     | Description                     |
-|----------|---------------------------------|
-| `array`  | Ordered list of values          |
-| `object` | Key‑value map (string keys)     |
-
-Arrays and objects can be constructed via literals (see §2) and accessed via member/index operators.
-
-### Type Coercion
-
-There is **no implicit type coercion**. Operands must be of the expected type or the expression produces a runtime error.
-
-Exceptions:
-- `null` equality: `null == null` is `true`; `null == <any non-null>` is `false`
-- Truthiness (for logical operators only): `null` and `false` are falsy; all other values are truthy
-
----
-
-## 2. Expression Syntax
-
-Expressions are written as JS‑like strings and parsed into an AST before compilation.
-
-### Literals
-
-```
-42          // number (integer)
-3.14        // number (float)
--1          // number (negative, unary minus)
-"hello"     // string (double quotes)
-'hello'     // string (single quotes)
-`hello`     // template literal (backticks)
-true        // boolean
-false       // boolean
-null        // null
+```yexp
+$.user.name
+$.items[0]
+$.lookup[$context.key]
+$.items[-1]
+$.text[-1]
+$.items.length
 ```
 
-### Template Literals
+A missing object property returns `null`. A literal non-negative array or string index that is out of bounds also resolves to `null` through path lookup. An out-of-bounds dynamic index or negative index returns `INDEX_OUT_OF_BOUNDS`. Use optional index access when a stable `null` result is required.
 
-Backtick strings support interpolation via `${...}`:
+### 5.4 Optional access
 
-```
-`Hello, ${state.user.name}!`
-`Count: ${state.count}`
-`${state.first} ${state.last}`
-```
-
-The expression inside `${...}` is a full expression — any valid expression can appear:
-
-```
-`Total: ${state.price * state.qty}`
-`Status: ${state.active && "on" || "off"}`
+```yexp
+$.user?.profile?.name
+$.items?.[0]
+$.items?.[-1]
 ```
 
-Template literals compile to a sequence of `CONST` / expression evaluations joined by `TO_STRING` and `ADD` (string concatenation). Each interpolated segment is coerced to a string via `TO_STRING`.
+Optional access returns `null` when the receiver is null, invalid, or out of bounds.
 
-#### Coercion Rules for Interpolation
+### 5.5 Wildcard projection
 
-Inside `${...}`, values are coerced to strings:
-
-| Type      | Result          |
-|-----------|-----------------|
-| `string`  | unchanged       |
-| `number`  | decimal representation (`3.14` → `"3.14"`) |
-| `boolean` | `"true"` or `"false"` |
-| `null`    | `"null"`        |
-
-This is the **only** place implicit coercion occurs.
-
-#### Compilation Example
-
-```
-`Hello, ${state.user.name}!`
+```yexp
+$.users[*].name
+$.users?.[*].name
+$.settings[*]
 ```
 
-Compiles to:
+For arrays, `[*]` preserves the elements. For objects, it returns the values in object enumeration order. For a primitive, it returns a one-element array. The optional form returns `[]` for `null`.
 
-```
-CONST 0        // "Hello, "
-LOAD 0         // state.user.name
-TO_STRING
-ADD
-CONST 1        // "!"
-ADD
-RETURN
-```
+Property access after a wildcard maps that property over the result while preserving nested array structure.
 
-### Identifiers and Paths
+### 5.6 Predicate selection
 
-Identifiers follow JS rules: start with a letter, `_`, or `$`; followed by letters, digits, `_`, or `$`.
-
-Paths use dot notation and bracket notation to access nested values from the execution context:
-
-```
-state.count
-state.user.profile.age
-data.items[0].name
-env.locale
+```yexp
+$.users[.active]
+$.users[.age >= 18 && .country == "NL"]
+$.users?.[.active]
 ```
 
-All paths must begin with a known root: `state`, `data`, or `env`.
+`collection[.predicate]` is shorthand for filtering the collection with an implicit `$it` parameter. The optional form returns `[]` for a null collection.
 
-### Parentheses
+### 5.7 Recursive descent
 
-Parentheses override precedence:
-
-```
-(state.a + state.b) * state.c
-```
-
-### String Concatenation
-
-The `+` operator concatenates when both operands are strings:
-
-```
-"hello" + " " + "world"    // "hello world"
+```yexp
+$..id
+$.payload..name
+$.payload?..name
 ```
 
-Using `+` with mixed types (string + number) is a runtime error.
+`value..property` performs a depth-first search through arrays and objects and collects matching own properties. Dangerous prototype-related keys are not traversed. The optional form returns `[]` for `null` or invalid input.
 
-### Array Literals
+### 5.8 Lambdas
 
-Arrays can be constructed inline:
-
-```
-[1, 2, 3]
-[state.a, state.b, "hello"]
-[]
-```
-
-### Object Literals
-
-Objects can be constructed with string keys:
-
-```
-{ name: "Alice", age: 30 }
-{ key: state.value, active: true }
-{}
+```yexp
+item => item.price
+(item) => item.price
+(total, item) => total + item.price
+() => $.defaultValue
 ```
 
-Keys are unquoted identifiers (like JS shorthand). Values are full expressions.
+A lambda body is one expression. Parameters shadow parameters with the same name in an outer lambda for the duration of the call. `$`, `$context`, and `$env` retain their root meanings.
 
-#### Shorthand Property Names
+Dot shorthand creates a one-parameter lambda named internally as `$it`:
 
-When the key matches a path's last segment, shorthand is supported:
-
-```
-{ name, age }
-// equivalent to: { name: state.name, age: state.age }
-```
-
-Shorthand resolves against the current context roots (`state`, `data`, `env`) using standard path resolution.
-
-### Spread Operator
-
-The spread operator (`...`) expands arrays or objects inside literals.
-
-#### Array Spread
-
-```
-[...data.items, state.newItem]
-[1, ...data.list, 2]
-[...data.a, ...data.b]
+```yexp
+.price             // equivalent to: item => item.price
+.price < 100       // equivalent to: item => item.price < 100
+.profile?.name     // equivalent to: item => item.profile?.name
 ```
 
-Spreads the elements of an array into the surrounding array literal.
+Dot shorthand is a lambda, not root access in the core language. The CLI separately accepts a leading `.` as convenience syntax and rewrites `.name` to `$.name`.
 
-#### Object Spread
+### 5.9 Calls, methods, and pipes
 
-```
-{ ...state.user, name: "Bob" }
-{ ...state.defaults, ...state.overrides }
-```
+These forms are equivalent when `items` is the first argument:
 
-Spreads the key‑value pairs of an object into the surrounding object literal. Later keys override earlier ones (left‑to‑right).
-
-#### Constraints
-
-- Spread is only valid inside array `[]` or object `{}` literals
-- Spreading a non‑array into an array literal is a runtime error
-- Spreading a non‑object into an object literal is a runtime error
-
-### Pipe Operator
-
-The pipe operator (`|>`) passes a value as the first argument to a built‑in function:
-
-```
-state.value |> toString
-state.value |> toString |> length
+```yexp
+filter($.items, .active)
+$.items |> filter(.active)
+$.items.filter(.active)
 ```
 
-This is equivalent to nested function calls:
+Method syntax is syntax sugar for a pipe; Yexp does not perform prototype lookup or dynamic method dispatch.
 
-```
-length(toString(state.value))
-```
+Pipes bind more tightly than arithmetic in language version 0.1. Parenthesize a calculated value before piping it:
 
-Pipes are left‑associative and evaluate left to right. The right‑hand side must be a **registered built‑in function name** — arbitrary expressions are not allowed on the right side of `|>`.
-
-#### With Additional Arguments
-
-If the built‑in accepts more than one argument, pass them in parentheses:
-
-```
-state.value |> round(2)
-state.list |> slice(0, 5) |> length
+```yexp
+($.subtotal + $.tax) |> round(2)
 ```
 
-This desugars to:
+### 5.10 Conditional expressions
 
-```
-length(slice(state.list, 0, 5))
-// pipe inserts the left side as the FIRST argument
-```
-
-### Lambda Functions
-
-Lambda functions are anonymous functions that can be passed as arguments to higher-order built-in functions like `map`, `filter`, and `reduce`.
-
-#### Arrow Syntax
-
-Lambda functions use arrow function syntax:
-
-```
-(x) => x > 5
-(x, y) => x + y
-(item) => item.price * item.qty
+```yexp
+$.age >= 18 ? "adult" : "minor"
+$.nickname ?? $.name ?? "Guest"
 ```
 
-The left side declares parameter names (in parentheses), and the right side is the expression body that gets evaluated.
+Only the selected ternary branch is evaluated. `??` evaluates its right side only when its left side is `null`.
 
-#### Dot Shorthand Syntax
+### 5.11 Operators
 
-For single-parameter lambdas that access members of the parameter, a shorthand syntax is available:
+| Category | Operators | Behavior |
+| --- | --- | --- |
+| Arithmetic | `+ - * / %` | Numbers; `+` also accepts two strings |
+| Comparison | `< <= > >=` | Numbers only |
+| Equality | `== != === !==` | No type coercion |
+| Logical | <code>&amp;&amp; &#124;&#124; !</code> | `&&` and `||` select operands; all short-circuit |
+| Fallback | `??` | Uses right side only for `null` |
+| Conditional | `? :` | Selects one branch |
+| Pipe | <code>&#124;&gt;</code> | Passes left value as first function argument |
+| Spread | `...` | Expands array/object/argument values |
 
-```
-.price > 100
-.name
-.user.active
-```
+From highest to lowest, operator precedence is:
 
-This is syntactic sugar that expands to a full lambda:
+1. member access, indexing, calls, postfix `++` and `--`
+2. unary `!` and `-`
+3. pipe `|>`
+4. `*`, `/`, `%`
+5. `+`, `-`
+6. `<`, `<=`, `>`, `>=`
+7. `==`, `!=`, `===`, `!==`
+8. `&&`
+9. `||`
+10. `??`
+11. `? :`
+12. assignment `=`, append `<<`
+13. lambda `=>`
 
-```
-.price > 100    →    (x) => x.price > 100
-.name           →    (x) => x.name
-.user.active    →    (x) => x.user.active
-```
+Use parentheses whenever precedence would make the intent unclear.
 
-The dot shorthand can only be used in positions where a lambda is expected (as arguments to higher-order functions).
+## 6. Built-in functions
 
-#### Usage with Higher-Order Functions
+`value` below means the first positional argument. Every function can use direct-call syntax. Functions that naturally receive a value first can also use pipe or method syntax.
 
-```
-data.items |> filter((x) => x.price > 100)
-data.items |> filter(.price > 100)              // shorthand equivalent
+### 6.1 Type and conversion
 
-data.items |> map((x) => x.price * x.qty)
-data.items |> map(.price * .qty)                // shorthand (NOT YET SUPPORTED - use arrow for complex expressions)
+| Function | Result |
+| --- | --- |
+| `type(value)` | `"null"`, `"array"`, or the runtime type name |
+| `toString(value)` | String representation |
+| `length(value)` | Length of a string or array |
 
-data.items |> sort((a, b) => a.price - b.price)
-```
+### 6.2 Numbers
 
-#### Compilation
+| Function | Result |
+| --- | --- |
+| `round(value, decimals?)` | Rounded number; zero decimals by default |
+| `floor(value)`, `ceil(value)`, `abs(value)` | Standard numeric operation |
+| `min(...numbers)`, `max(...numbers)` | Smallest or largest argument |
+| `sqrt(value)`, `pow(value, exponent)` | Root and exponentiation |
+| `sin(value)`, `cos(value)`, `tan(value)` | Trigonometric operation |
+| `log(value)`, `log10(value)`, `log2(value)`, `exp(value)` | Logarithmic/exponential operation |
+| `random()` | Pseudorandom number in `[0, 1)` |
 
-Lambdas compile to self-contained bytecode programs embedded in the parent program. At runtime, when a higher-order function is invoked, the lambda's bytecode is evaluated with the lambda parameters bound to the execution context.
+### 6.3 Strings
 
----
+| Function | Result |
+| --- | --- |
+| `includes(value, text)` | Whether a string contains text |
+| `startsWith(value, prefix)`, `endsWith(value, suffix)` | Prefix/suffix test |
+| `trimPrefix(value, prefix)`, `trimSuffix(value, suffix)` | Remove one matching boundary |
+| `toLowerCase(value)`, `toUpperCase(value)` | Case conversion |
+| `index(value, text)`, `rindex(value, text)` | First/last index, or `null` |
+| `split(value, delimiter)` | Array of parts |
+| `replace(value, search, replacement)` | Replace first match |
+| `replaceAll(value, search, replacement)` | Replace all matches |
+| `slice(value, start, end?)`, `substring(value, start, end?)` | Extract text |
+| `trim(value)`, `trimStart(value)`, `trimEnd(value)` | Remove whitespace |
+| `padStart(value, length, fill?)`, `padEnd(value, length, fill?)` | Pad text |
+| `repeat(value, count)` | Repeat text |
 
-## 3. Operators
+### 6.4 Arrays and collections
 
-### Arithmetic Operators
+| Function | Result |
+| --- | --- |
+| `slice(value, start, end?)` | Array slice |
+| `includes(value, item)` | Membership test |
+| `add(value)` | Sum numbers or concatenate strings; `null` for `[]` |
+| `concat(...values)` | Concatenate arrays and append scalar values |
+| `unique(value)` | Remove repeated values |
+| `reverse(value)` | Reversed copy |
+| `flatten(value, depth?)` | Flatten nested arrays; maximum depth is 100 |
+| `first(value)`, `last(value)` | Boundary element or `null` |
+| `limit(value, count)` | First `count` values |
+| `join(value, separator?)` | Join values as text |
+| `filter(value, predicate)` | Values whose predicate is truthy |
+| `map(value, transform)` | Transformed values |
+| `find(value, predicate)` | First match or `null` |
+| `reduce(value, reducer, initial?)` | Accumulated result; initial defaults to `null` |
+| `every(value, predicate)`, `some(value, predicate)` | Universal/existential test |
+| `sort(value, comparator?)` | Sorted copy |
+| `flatMap(value, transform)` | Map and flatten one level |
+| `groupBy(value, keySelector)` | Object of arrays keyed by stringified selector results |
+| `uniqueBy(value, keySelector)` | First value for each stringified key |
+| `minBy(value, selector)`, `maxBy(value, selector)` | Item with smallest/largest numeric selected value |
 
-| Operator | Name           | Operand Types     | Result Type |
-|----------|----------------|-------------------|-------------|
-| `+`      | Add            | number, number    | number      |
-| `+`      | Concatenate    | string, string    | string      |
-| `-`      | Subtract       | number, number    | number      |
-| `*`      | Multiply       | number, number    | number      |
-| `/`      | Divide         | number, number    | number      |
-| `%`      | Modulo         | number, number    | number      |
+### 6.5 Objects
 
-### Comparison Operators
+| Function | Result |
+| --- | --- |
+| `keys(value)`, `values(value)` | Object keys or values |
+| `entries(value)` | Array of `{ key, value }` objects |
+| `fromEntries(value)` | Object built from `{ key, value }` objects |
+| `mapEntries(value, transform)` | Object built from transformed entries |
+| `del(value, key)` | Copy without one key |
+| `pick(value, keys)` | Copy containing selected keys |
+| `has(value, key)` | Whether the key exists |
+| `select(value, predicate)` | Original value when truthy, otherwise `null` |
 
-| Operator | Name                  | Operand Types         | Result Type |
-|----------|-----------------------|-----------------------|-------------|
-| `==`     | Equal                 | any, any              | boolean     |
-| `!=`     | Not equal             | any, any              | boolean     |
-| `<`      | Less than             | number, number        | boolean     |
-| `>`      | Greater than          | number, number        | boolean     |
-| `<=`     | Less than or equal    | number, number        | boolean     |
-| `>=`     | Greater than or equal | number, number        | boolean     |
+### 6.6 Dates and time
 
-Equality (`==`, `!=`) compares by value. Two values of different types are never equal (except `null == null`).
+| Function | Result |
+| --- | --- |
+| `now()` | Current Unix time in milliseconds |
+| `parseDate(value)` | Timestamp parsed from a date string |
+| `toISOString(value)` | ISO 8601 string from a timestamp |
 
-### Logical Operators
+`random()` and `now()` are intentionally nondeterministic. Programs that require repeatable results must avoid them or replace them with host-provided functions/data.
 
-| Operator | Name        | Behavior                    |
-|----------|-------------|-----------------------------|
-| `&&`     | Logical AND | Short‑circuit; returns last evaluated operand |
-| `\|\|`   | Logical OR  | Short‑circuit; returns last evaluated operand |
-| `!`      | Logical NOT | Unary; returns boolean                        |
+### 6.7 Host functions
 
-Logical operators use **truthiness** (see §1 Type Coercion).
+Applications may extend or override the function registry through evaluation options. Host functions expand Yexp's authority and portability contract; the host is responsible for their safety and for providing equivalent behavior on every target.
 
-`&&` returns the left operand if falsy, otherwise the right operand.
-`||` returns the left operand if truthy, otherwise the right operand.
+The CLI adds filesystem-oriented functions such as `glob`, `read`, `lines`, and `grep`. They are host functions, not portable core-language built-ins.
 
-### Ternary Operator
+## 7. Errors
 
-| Operator | Name     | Syntax              | Description                                    |
-|----------|----------|---------------------|------------------------------------------------|
-| `? :`    | Ternary  | `condition ? a : b` | Returns `a` if condition is truthy, else `b`   |
+Lexing, parsing, and compilation failures throw phase-specific errors. Evaluation failures return a structured value:
 
-The ternary operator evaluates a condition and returns one of two values based on truthiness:
-
-```
-state.count > 0 ? "positive" : "zero or negative"
-state.user ? state.user.name : "Guest"
-state.value ? state.value : "default"
-```
-
-The ternary operator short-circuits: only the selected branch is evaluated.
-
-### Null Coalescing Operator
-
-| Operator | Name            | Syntax    | Description                              |
-|----------|-----------------|-----------|------------------------------------------|
-| `??`     | Null coalescing | `a ?? b`  | Returns `b` if `a` is `null`, else `a`   |
-
-The null coalescing operator provides a default value when the left operand is `null`:
-
-```
-state.user.name ?? "Anonymous"
-data.config.timeout ?? 5000
-env.locale ?? "en-US"
-```
-
-Unlike `||`, the `??` operator only checks for `null`, not general falsiness. `false`, `0`, and `""` are not considered null.
-
-The operator short-circuits: if the left side is not `null`, the right side is not evaluated.
-
-### Optional Chaining Operator
-
-| Operator | Name              | Syntax     | Description                                        |
-|----------|-------------------|------------|----------------------------------------------------|
-| `?.`     | Optional chaining | `a?.b`     | Access `b` if `a` is not `null`, otherwise `null`  |
-
-The optional chaining operator safely accesses nested properties without explicit null checks:
-
-```
-state.user?.profile?.avatar
-data.response?.data?.items
-```
-
-If any part of the chain is `null`, the entire expression evaluates to `null` without error:
-
-```
-// If state.user is null:
-state.user?.name              →  null (not an error)
-
-// If state.user.profile is null:
-state.user.profile?.avatar    →  null (not an error)
-
-// Equivalent explicit null checks:
-state.user && state.user.name
-state.user && state.user.profile && state.user.profile.avatar
-```
-
-Optional chaining can be combined with bracket access and function calls (future feature):
-
-```
-state.users?.[0]?.name
-state.handler?.()              // (not yet supported)
-```
-
-### Recursive Descent Operator
-
-| Operator | Name              | Syntax     | Description                                        |
-|----------|-------------------|------------|----------------------------------------------------|
-| `..`     | Recursive descent | `a..prop`  | Find all occurrences of `prop` at any depth in `a` |
-
-The recursive descent operator searches for a property at all levels of a nested structure, recursively traversing objects and arrays:
-
-```
-data..name
-data.users..email
-data..items[*].price
-```
-
-If the object is:
-
-```json
+```ts
 {
-  "users": [
-    { "name": "Alice", "profile": { "name": "Alice Admin" } },
-    { "name": "Bob", "posts": [{ "name": "Post 1" }] }
-  ],
-  "config": { "settings": { "name": "App Settings" } }
+  error: 'TYPE_ERROR',
+  message: 'Cannot add string and number'
 }
 ```
 
-Then `data..name` returns an array of all `name` values found at any depth:
+The 0.1 runtime error categories are:
 
-```
-["Alice", "Alice Admin", "Bob", "Post 1", "App Settings"]
-```
+- `TYPE_ERROR`
+- `DIVISION_BY_ZERO`
+- `STACK_UNDERFLOW`
+- `INVALID_SLOT`
+- `INDEX_OUT_OF_BOUNDS`
+- `INVALID_INSTRUCTION`
+- `PARSE_ERROR`
+- `COMPILE_ERROR`
 
-#### Search Semantics
+Errors propagate out of the current evaluation. They are not truthy data values for normal language operations.
 
-The recursive descent operator performs a **depth-first traversal**:
+## 8. Safety and portability
 
-1. If the current value has the property, collect it
-2. Recursively traverse all child values (object properties and array elements)
-3. Return all collected values as an array
+The core runtime exposes no JavaScript globals, filesystem, network, `eval()`, or `Function()`. Object construction and traversal block `__proto__`, `constructor`, and `prototype` where they could cross the prototype boundary.
 
-The search:
-- Returns an empty array if no matches are found (not an error)
-- Works on both objects and arrays
-- Skips dangerous keys (`__proto__`, `constructor`, `prototype`) for security
-- Limits recursion depth to 100 levels to prevent infinite loops
-- Detects circular references using a visited set
+Yexp is an expression evaluator, not a complete resource sandbox. Large collections, nested transformations, host functions, and some built-ins can consume substantial CPU or memory. Hosts evaluating untrusted expressions must apply input limits, execution limits, and isolation appropriate to their environment.
 
-#### Optional Variant (`?..`)
+Portable programs should:
 
-The optional recursive descent operator returns an empty array if the left side is `null`:
+- use only this value model and the portable built-in registry;
+- pass changing values through `$context` or `$env` rather than ambient globals;
+- avoid `random()` and `now()` when deterministic results matter;
+- avoid depending on host functions unless every target implements the same contract;
+- treat compiled bytecode as versioned derived output, not hand-authored source.
 
-```
-data.users?..email         // returns [] if data.users is null
-data.missing?..property    // returns [] if data.missing is undefined
-```
+## 9. Compatibility action expressions
 
-This is useful for safe traversal when the starting point might not exist.
+The parser and VM currently retain a legacy context model with `state`, `data`, and `env` roots. In that model only `state` paths may be mutated:
 
-#### Chaining with Other Operators
-
-Recursive descent integrates with wildcards, predicates, and property access:
-
-```
-// Recursive descent + wildcard
-data..users[*].email
-// Finds all "users" arrays, then extracts email from each user
-
-// Recursive descent + property access
-data..user.name
-// Finds all "user" objects, then accesses their name property
-
-// Multiple recursive descents
-data..groups..name
-// Finds all "groups" arrays, then finds all "name" properties within them
-```
-
-When chained, the recursive descent returns an array, and subsequent operators automatically map over the results.
-
-### Unary Operators
-
-| Operator | Name        | Operand Type | Result Type |
-|----------|-------------|--------------|-------------|
-| `-`      | Negate      | number       | number      |
-| `!`      | Logical NOT | any          | boolean     |
-
-### Member Access Operators
-
-| Operator | Name              | Example           |
-|----------|-------------------|-------------------|
-| `.`      | Dot access        | `state.user.name` |
-| `[]`     | Bracket access    | `data.items[0]`   |
-| `..`     | Recursive descent | `data..name`      |
-
-Bracket access supports number literals only (for array indexing). Dynamic bracket access (`items[state.i]`) is not supported in this version.
-
-The recursive descent operator (`..`) searches for a property at all depths in a nested structure, returning an array of all matches. See §2 Recursive Descent Operator for full syntax and semantics.
-
-### Pipe
-
-| Operator | Name | Associativity | Description                                          |
-|----------|------|---------------|------------------------------------------------------|
-| `\|>`    | Pipe | Left          | Pass left value as first arg to right‑hand built‑in  |
-
-See §2 Pipe Operator for full syntax and semantics.
-
-### Spread
-
-| Operator | Name   | Context                   | Description                                    |
-|----------|--------|---------------------------|------------------------------------------------|
-| `...`    | Spread | Array and object literals | Expand iterable into surrounding literal       |
-
-Spread is not a general-purpose operator — it is only valid inside `[]` and `{}` literals. See §2 Spread Operator.
-
----
-
-## 4. Operator Precedence
-
-From highest to lowest:
-
-| Precedence | Operator(s)                  | Associativity |
-|------------|------------------------------|---------------|
-| 1          | `.` `[]` `?.` `..` `?..`     | Left          |
-| 2          | `!` `-` (unary) `...`        | Right         |
-| 3          | `\|>`                  | Left          |
-| 4          | `*` `/` `%`            | Left          |
-| 5          | `+` `-`                | Left          |
-| 6          | `<` `>` `<=` `>=`      | Left          |
-| 7          | `==` `!=`              | Left          |
-| 8          | `&&`                   | Left          |
-| 9          | `\|\|`                 | Left          |
-| 10         | `??`                   | Left          |
-| 11         | `? :`                  | Right         |
-
----
-
-## 5. Built-in Functions
-
-The expression language provides a rich set of **built-in functions** that can be called directly or via the pipe operator. All built-in functions are **pure** (no side effects, except `now` and `random`) and **deterministic** (same inputs produce same outputs).
-
-Built-in functions are invoked using call syntax or pipe syntax:
-
-```
-toString(state.value)           // call syntax
-state.value |> toString         // pipe syntax
-```
-
-### Type Conversion and Inspection
-
-| Function   | Signature              | Description                                    |
-|------------|------------------------|------------------------------------------------|
-| `toString` | `(any) → string`       | Convert any value to string representation     |
-| `type`     | `(any) → string`       | Return type name: "number", "string", "boolean", "null", "array", "object" |
-| `length`   | `(string\|array) → number` | Return length of string or array           |
-
-### Math Functions
-
-| Function | Signature                  | Description                        |
-|----------|----------------------------|------------------------------------|
-| `round`  | `(number, decimals?) → number` | Round to N decimal places (default: 0) |
-| `floor`  | `(number) → number`        | Round down to integer              |
-| `ceil`   | `(number) → number`        | Round up to integer                |
-| `abs`    | `(number) → number`        | Absolute value                     |
-| `min`    | `(...numbers) → number`    | Minimum of arguments               |
-| `max`    | `(...numbers) → number`    | Maximum of arguments               |
-| `sqrt`   | `(number) → number`        | Square root                        |
-| `pow`    | `(number, exponent) → number` | Exponentiation                  |
-| `sin`    | `(number) → number`        | Sine (radians)                     |
-| `cos`    | `(number) → number`        | Cosine (radians)                   |
-| `tan`    | `(number) → number`        | Tangent (radians)                  |
-| `log`    | `(number) → number`        | Natural logarithm                  |
-| `log10`  | `(number) → number`        | Base-10 logarithm                  |
-| `log2`   | `(number) → number`        | Base-2 logarithm                   |
-| `exp`    | `(number) → number`        | e raised to the power              |
-| `random` | `() → number`              | Random number between 0 and 1 (non-deterministic) |
-
-### String Functions
-
-| Function      | Signature                              | Description                            |
-|---------------|----------------------------------------|----------------------------------------|
-| `toLowerCase` | `(string) → string`                    | Convert to lowercase                   |
-| `toUpperCase` | `(string) → string`                    | Convert to uppercase                   |
-| `trim`        | `(string) → string`                    | Remove whitespace from both ends       |
-| `trimStart`   | `(string) → string`                    | Remove whitespace from start           |
-| `trimEnd`     | `(string) → string`                    | Remove whitespace from end             |
-| `startsWith`  | `(string, prefix) → boolean`           | Check if string starts with prefix     |
-| `endsWith`    | `(string, suffix) → boolean`           | Check if string ends with suffix       |
-| `trimPrefix`  | `(string, prefix) → string`            | Remove prefix if present               |
-| `trimSuffix`  | `(string, suffix) → string`            | Remove suffix if present               |
-| `index`       | `(string, substring) → number\|null`   | Find first occurrence index (null if not found) |
-| `rindex`      | `(string, substring) → number\|null`   | Find last occurrence index (null if not found) |
-| `split`       | `(string, delimiter) → array`          | Split string by delimiter              |
-| `replace`     | `(string, search, replacement) → string` | Replace first occurrence             |
-| `replaceAll`  | `(string, search, replacement) → string` | Replace all occurrences              |
-| `substring`   | `(string, start, end?) → string`       | Extract substring                      |
-| `slice`       | `(string\|array, start, end?) → string\|array` | Extract slice (works on strings and arrays) |
-| `padStart`    | `(string, length, fill?) → string`     | Pad start to length (default fill: " ") |
-| `padEnd`      | `(string, length, fill?) → string`     | Pad end to length (default fill: " ")  |
-| `repeat`      | `(string, count) → string`             | Repeat string N times                  |
-| `includes`    | `(string\|array, item) → boolean`      | Check if string/array contains item    |
-
-### Array Functions
-
-| Function  | Signature                          | Description                           |
-|-----------|------------------------------------|---------------------------------------|
-| `first`   | `(array) → any`                    | First element (null if empty)         |
-| `last`    | `(array) → any`                    | Last element (null if empty)          |
-| `limit`   | `(array, n) → array`               | Take first N elements                 |
-| `slice`   | `(array, start, end?) → array`     | Extract slice                         |
-| `includes`| `(array, item) → boolean`          | Check if array contains item          |
-| `join`    | `(array, separator?) → string`     | Join elements to string (default: "") |
-| `add`     | `(array) → number\|string`         | Sum numbers or concatenate strings    |
-| `unique`  | `(array) → array`                  | Remove duplicates                     |
-| `reverse` | `(array) → array`                  | Reverse order (returns new array)     |
-| `flatten` | `(array, depth?) → array`          | Flatten nested arrays (default: infinite) |
-
-### Object Functions
-
-| Function      | Signature                          | Description                            |
-|---------------|------------------------------------|----------------------------------------|
-| `keys`        | `(object) → array`                 | Get object keys                        |
-| `values`      | `(object) → array`                 | Get object values                      |
-| `entries`     | `(object) → array`                 | Get array of `{key, value}` objects    |
-| `fromEntries` | `(array) → object`                 | Create object from `{key, value}` array |
-| `has`         | `(object, key) → boolean`          | Check if object has key                |
-| `pick`        | `(object, keys) → object`          | Extract specified keys                 |
-| `del`         | `(object, key) → object`           | Return object with key removed         |
-
-### Date Functions
-
-| Function      | Signature                  | Description                                |
-|---------------|----------------------------|--------------------------------------------|
-| `now`         | `() → number`              | Current Unix timestamp in milliseconds (non-deterministic) |
-| `parseDate`   | `(string) → number`        | Parse ISO 8601 date string to timestamp    |
-| `toISOString` | `(number) → string`        | Convert timestamp to ISO 8601 string       |
-
-### Higher-Order Functions
-
-Higher-order functions accept **lambda functions** as arguments and operate on collections.
-
-| Function     | Signature                                  | Description                                |
-|--------------|--------------------------------------------|--------------------------------------------|
-| `map`        | `(array, lambda) → array`                  | Transform each element                     |
-| `filter`     | `(array, lambda) → array`                  | Keep elements where lambda returns truthy  |
-| `find`       | `(array, lambda) → any`                    | Find first element where lambda returns truthy |
-| `reduce`     | `(array, lambda, initial?) → any`          | Reduce array to single value               |
-| `every`      | `(array, lambda) → boolean`                | Test if all elements match                 |
-| `some`       | `(array, lambda) → boolean`                | Test if any element matches                |
-| `sort`       | `(array, comparator?) → array`             | Sort array (default: natural order)        |
-| `flatMap`    | `(array, lambda) → array`                  | Map and flatten results                    |
-| `groupBy`    | `(array, lambda) → object`                 | Group elements by key                      |
-| `uniqueBy`   | `(array, lambda) → array`                  | Remove duplicates by key                   |
-| `minBy`      | `(array, lambda) → any`                    | Find element with minimum value            |
-| `maxBy`      | `(array, lambda) → any`                    | Find element with maximum value            |
-| `mapEntries` | `(object, lambda) → object`                | Transform object entries                   |
-| `select`     | `(any, lambda) → any\|null`                | Return value if lambda returns truthy, else null |
-
-#### Higher-Order Function Examples
-
-```
-// map: transform elements
-data.items |> map((x) => x.price * x.qty)
-data.items |> map(.price)                    // dot shorthand
-
-// filter: keep matching elements
-data.items |> filter((x) => x.price > 100)
-data.items |> filter(.active)
-
-// reduce: accumulate values
-data.numbers |> reduce((acc, x) => acc + x, 0)
-
-// sort: order elements
-data.items |> sort((a, b) => a.price - b.price)
-
-// groupBy: group by key
-data.items |> groupBy((x) => x.category)
-data.items |> groupBy(.category)
-
-// uniqueBy: deduplicate by key
-data.items |> uniqueBy((x) => x.id)
-data.items |> uniqueBy(.id)
-
-// minBy/maxBy: find extremes
-data.items |> minBy((x) => x.price)
-data.items |> maxBy(.priority)
-
-// mapEntries: transform object
-state.settings |> mapEntries((e) => { key: e.key, value: e.value * 2 })
-```
-
----
-
-## 6. Path Resolution and Slots
-
-At compile time, all path expressions are extracted and assigned numeric **slot indices**.
-
-### Compilation
-
-Given:
-
-```
-state.value > 1 && state.active
-```
-
-The compiler extracts:
-
-```
-slots: ["state.value", "state.active"]
-```
-
-At runtime, the evaluator resolves each slot once from the execution context and stores the values in an indexed array. Bytecode references slots by index, not by path string.
-
-### Slot Resolution
-
-Given a context:
-
-```json
-{
-  "state": { "value": 5, "active": true },
-  "data": {},
-  "env": {}
-}
-```
-
-Slot `0` (`state.value`) resolves to `5`.
-Slot `1` (`state.active`) resolves to `true`.
-
-If a path does not exist in the context, the slot resolves to `null`.
-
----
-
-## 7. Opcode Set
-
-All opcodes operate on an implicit **value stack**. Each opcode documents its stack effect as `(before -- after)`.
-
-### Constants and Loading
-
-| Opcode       | Operands       | Stack Effect     | Description                          |
-|--------------|----------------|------------------|--------------------------------------|
-| `CONST`      | value: any     | ( -- value)      | Push a constant onto the stack       |
-| `LOAD`       | slot: number   | ( -- value)      | Push the value of a slot onto the stack |
-
-### Arithmetic
-
-| Opcode | Operands | Stack Effect       | Description     |
-|--------|----------|--------------------|-----------------|
-| `ADD`  | —        | (a b -- a+b)       | Add or concatenate |
-| `SUB`  | —        | (a b -- a-b)       | Subtract        |
-| `MUL`  | —        | (a b -- a*b)       | Multiply        |
-| `DIV`  | —        | (a b -- a/b)       | Divide          |
-| `MOD`  | —        | (a b -- a%b)       | Modulo          |
-| `NEG`  | —        | (a -- -a)          | Negate          |
-
-### String
-
-| Opcode      | Operands | Stack Effect | Description                                       |
-|-------------|----------|--------------|---------------------------------------------------|
-| `TO_STRING` | —        | (a -- str)   | Coerce value to string (see §2 Template Literals) |
-
-### Comparison
-
-| Opcode | Operands | Stack Effect       | Description            |
-|--------|----------|--------------------|------------------------|
-| `EQ`   | —        | (a b -- a==b)      | Equal                  |
-| `NEQ`  | —        | (a b -- a!=b)      | Not equal              |
-| `LT`   | —        | (a b -- a<b)       | Less than              |
-| `GT`   | —        | (a b -- a>b)       | Greater than           |
-| `LTE`  | —        | (a b -- a<=b)      | Less than or equal     |
-| `GTE`  | —        | (a b -- a>=b)      | Greater than or equal  |
-
-### Logical
-
-| Opcode          | Operands       | Stack Effect  | Description                                |
-|-----------------|----------------|---------------|--------------------------------------------|
-| `NOT`           | —              | (a -- !a)     | Logical not (result is always boolean)     |
-| `JUMP_IF_FALSE` | offset: number | (a -- )       | Pop; jump to offset if falsy               |
-| `JUMP_IF_TRUE`  | offset: number | (a -- )       | Pop; jump to offset if truthy              |
-| `JUMP`          | offset: number | ( -- )        | Unconditional jump to offset               |
-
-### Array and Object Construction
-
-| Opcode       | Operands      | Stack Effect                  | Description                          |
-|--------------|---------------|-------------------------------|--------------------------------------|
-| `MAKE_ARRAY` | count: number | (v0 v1 ... vN -- array)       | Pop N values, create array           |
-| `MAKE_OBJ`   | count: number | (k0 v0 k1 v1 ... -- object)   | Pop N key-value pairs, make object   |
-| `SPREAD`     | -             | (collection -- ...elements)   | Expand onto stack (see below)        |
-
-`SPREAD` is only emitted inside `MAKE_ARRAY` or `MAKE_OBJ` sequences. The evaluator tracks spread boundaries to correctly construct the final collection.
-
-#### Compilation Example: Array Spread
-
-```
-[1, ...data.items, 2]
-```
-
-Compiles to:
-
-```
-CONST 0        // 1
-LOAD 0         // data.items
-SPREAD
-CONST 1        // 2
-MAKE_ARRAY 3   // 3 segments (1, spread, 2) — actual length resolved at runtime
-```
-
-#### Compilation Example: Object Spread
-
-```
-{ ...state.user, name: "Bob" }
-```
-
-Compiles to:
-
-```
-LOAD 0         // state.user
-SPREAD
-CONST 0        // "name"
-CONST 1        // "Bob"
-MAKE_OBJ 2     // 2 segments (spread, key-value) — resolved at runtime
-```
-
-### Array Access
-
-| Opcode  | Operands      | Stack Effect     | Description                            |
-|---------|---------------|------------------|----------------------------------------|
-| `INDEX` | index: number | (array -- value) | Access array element at constant index |
-
-### Recursive Descent
-
-| Opcode                       | Operands | Stack Effect            | Description                                              |
-|------------------------------|----------|-------------------------|----------------------------------------------------------|
-| `RECURSIVE_DESCENT`          | —        | (obj property -- array) | Find all occurrences of property at any depth            |
-| `OPTIONAL_RECURSIVE_DESCENT` | —        | (obj property -- array) | Same as RECURSIVE_DESCENT but returns [] on null/error   |
-
-The `RECURSIVE_DESCENT` opcode performs a depth-first traversal of the object structure:
-
-1. Pop property name (string) and object from stack
-2. Recursively search for the property at all depths
-3. Collect all matching values into an array
-4. Push the result array onto the stack
-
-The opcode includes these security protections:
-- Maximum recursion depth of 100 levels
-- Circular reference detection using a visited set
-- Skips dangerous keys (`__proto__`, `constructor`, `prototype`)
-
-#### Compilation Example
-
-```
-data..name
-```
-
-Compiles to:
-
-```
-LOAD 0                    // data
-CONST 0                   // "name"
-RECURSIVE_DESCENT
-RETURN
-```
-
-Optional variant:
-
-```
-data.users?..email
-```
-
-Compiles to:
-
-```
-LOAD 0                    // data.users
-CONST 0                   // "email"
-OPTIONAL_RECURSIVE_DESCENT
-RETURN
-```
-
-### Function Calls (Pipe)
-
-| Opcode | Operands                  | Stack Effect             | Description                            |
-|--------|---------------------------|--------------------------|----------------------------------------|
-| `CALL` | name: string, argc: number | (a0 a1 ... aN -- result) | Call built‑in function with N arguments |
-
-The pipe operator compiles to `CALL`. For example:
-
-```
-state.value |> toString |> length
-```
-
-Compiles to:
-
-```
-LOAD 0         // state.value
-CALL toString 1
-CALL length 1
-RETURN
-```
-
-With extra arguments:
-
-```
-state.value |> round(2)
-```
-
-Compiles to:
-
-```
-LOAD 0         // state.value
-CONST 0        // 2
-CALL round 2
-RETURN
-```
-
-### Mutation (Action Expressions)
-
-These opcodes modify the execution context. They are only emitted for action expressions and may only target paths under `state`.
-
-| Opcode        | Operands     | Stack Effect | Description                                       |
-|---------------|--------------|--------------|---------------------------------------------------|
-| `SET_PATH`    | slot: number | (value -- )  | Set the value at the slot path                    |
-| `DELETE_PATH` | slot: number | ( -- )       | Remove the value at the slot path                 |
-| `INC_PATH`    | slot: number | ( -- )       | Increment the number at the slot path by 1        |
-| `DEC_PATH`    | slot: number | ( -- )       | Decrement the number at the slot path by 1        |
-| `APPEND_PATH` | slot: number | (value -- )  | Append a value to the array at the slot path      |
-
-#### Compilation Examples
-
-Assignment:
-
-```
+```yexp
 state.count = state.count + 1
-```
-
-Compiles to:
-
-```
-LOAD 0         // state.count
-CONST 0        // 1
-ADD
-SET_PATH 0     // write back to state.count
-```
-
-Increment shorthand:
-
-```
 state.count++
-```
-
-Compiles to:
-
-```
-INC_PATH 0     // state.count
-```
-
-Append:
-
-```
+state.count--
 state.items << { name: "new" }
 ```
 
-Compiles to:
+These action expressions return `null`. Assignment to other roots is a compile error. They exist for compatibility with `run(source, executionContext)` and are not part of the preferred `$`-rooted query model. New portable programs should return transformed values instead of mutating input.
 
-```
-CONST 0        // "name"
-CONST 1        // "new"
-MAKE_OBJ 1
-APPEND_PATH 0  // state.items
-```
+The TypeScript reference runtime currently detects the legacy overload by looking for a top-level `state`, `data`, or `env` key. Consequently, passing an ordinary primary input object with one of those keys directly to `evaluate` is ambiguous in version 0.1. This is a host API compatibility limitation, not a language rule, and should not be reproduced by new platform ports.
 
-#### Mutation Constraints
+## 10. Grammar sketch
 
-- Only `state` paths can be mutated. Writing to `data` or `env` is a compile-time error.
-- Mutation opcodes do not push a result onto the stack.
-- A single action expression can contain multiple mutations (executed sequentially).
-- Mutations are applied immediately to the context — there is no transaction or rollback.
+This grammar is descriptive. The parser and the conformance tests are the executable reference while version 0.1 remains a draft.
 
-### Control
-
-| Opcode   | Operands | Stack Effect  | Description                              |
-|----------|----------|---------------|------------------------------------------|
-| `RETURN` | —        | (value -- )   | End execution; top of stack is the result|
-
----
-
-## 8. Execution Model
-
-### Evaluation Loop
-
-1. The evaluator receives a compiled bytecode program and an execution context.
-2. Slots are resolved from the context into an indexed array.
-3. The instruction pointer (`ip`) starts at `0`.
-4. For each instruction at `ip`:
-   - Execute the opcode (push/pop values, perform operations).
-   - Advance `ip` (by 1 for most ops, or to the jump target for jump ops).
-5. `RETURN` halts execution. The top of the stack is the result.
-
-### Stack
-
-- The stack starts empty.
-- After `RETURN`, exactly one value must remain (the result). An empty stack at `RETURN` is a runtime error.
-- Stack underflow (popping from empty stack) is a runtime error.
-
-### Short‑Circuit Semantics
-
-`&&` and `||` compile to conditional jumps, not function calls.
-
-`a && b` compiles to:
-
-```
-<eval a>
-JUMP_IF_FALSE end
-<eval b>
-JUMP done
-end:
-CONST false
-done:
-RETURN
+```ebnf
+expression       = lambda | assignment | conditional ;
+lambda           = identifier "=>" expression
+                 | "(" [ identifier { "," identifier } ] ")" "=>" expression ;
+assignment       = conditional [ ( "=" | "<<" ) assignment ] ;
+conditional      = coalesce [ "?" expression ":" expression ] ;
+coalesce         = logical_or { "??" logical_or } ;
+logical_or       = logical_and { "||" logical_and } ;
+logical_and      = equality { "&&" equality } ;
+equality         = comparison { ( "==" | "!=" | "===" | "!==" ) comparison } ;
+comparison       = additive { ( "<" | "<=" | ">" | ">=" ) additive } ;
+additive         = multiplicative { ( "+" | "-" ) multiplicative } ;
+multiplicative   = pipe { ( "*" | "/" | "%" ) pipe } ;
+pipe             = unary { "|>" identifier [ arguments ] } ;
+unary            = ( "!" | "-" ) unary | postfix ;
+postfix          = primary { member | index | wildcard | predicate | descent | arguments }
+                   [ "++" | "--" ] ;
+member           = ( "." | "?." ) identifier ;
+index            = "[" expression "]" | "?.[" expression "]" ;
+wildcard         = "[*]" | "?.[*]" ;
+predicate        = "[" dot_lambda "]" | "?.[" dot_lambda "]" ;
+descent          = ".." identifier | "?.." identifier ;
+arguments        = "(" [ expression { "," expression } ] ")" ;
+primary          = number | string | template | "true" | "false" | "null"
+                 | identifier | array | object | "(" expression ")" ;
+array            = "[" [ expression { "," expression } ] "]" ;
+object           = "{" [ object_entry { "," object_entry } ] "}" ;
+object_entry     = identifier [ ":" expression ] | "..." expression ;
+dot_lambda       = dot_expression ;
 ```
 
-`a || b` compiles to:
+Within a `dot_expression`, a leading member such as `.price` is parsed as `$it.price`; subsequent leading-dot members in that expression use the same implicit parameter. Otherwise a dot expression follows the normal expression grammar.
 
-```
-<eval a>
-JUMP_IF_TRUE end
-<eval b>
-JUMP done
-end:
-CONST true
-done:
-RETURN
-```
+Identifiers begin with an ASCII letter, `_`, or `$`, followed by ASCII letters, digits, `_`, or `$`. Whitespace may appear between tokens. Number, string, and template lexical forms are defined in Sections 3.1 and 3.2. Comments are not part of the grammar.
 
-### Execution Context
+## 11. Conformance requirements
 
-See §0 for the full context specification. Value expressions only read from the context. Action expressions can mutate `state` via mutation opcodes (see §7 Mutation).
+A conforming Yexp 0.1 implementation must agree on:
 
----
+1. tokenization and parse acceptance;
+2. operator precedence and short-circuit behavior;
+3. the value, missing-value, equality, and truthiness rules;
+4. selector ordering and nested projection shape;
+5. built-in names, arity behavior, return values, and errors;
+6. the explicit `$`, `$context`, and `$env` roots;
+7. structured runtime error categories;
+8. bytecode version rejection or migration behavior.
 
-## 9. Bytecode Format
-
-Compiled expressions are serialized as JSON:
-
-```json
-{
-  "version": 1,
-  "slots": ["state.value", "state.active"],
-  "constants": [1, true, false],
-  "code": [
-    ["LOAD", 0],
-    ["CONST", 0],
-    ["GT"],
-    ["JUMP_IF_FALSE", 7],
-    ["LOAD", 1],
-    ["JUMP", 8],
-    ["CONST", 2],
-    ["RETURN"]
-  ]
-}
-```
-
-### Fields
-
-| Field       | Type                  | Description                             |
-|-------------|-----------------------|-----------------------------------------|
-| `version`   | number                | Bytecode format version                 |
-| `slots`     | string[]              | Ordered list of context paths           |
-| `constants` | any[]                 | Constant pool; referenced by index      |
-| `code`      | instruction[]         | Array of instructions                   |
-
-### Instruction Encoding
-
-Each instruction is an array: `[opcode, ...operands]`.
-
-- Opcodes are strings (for readability in JSON). A binary format may be introduced later.
-- Operands for `CONST` and `LOAD` are **indices** into the `constants` and `slots` arrays, respectively.
-- Jump targets are **absolute instruction indices** within the `code` array.
-
----
-
-## 10. Error Model
-
-The expression engine does not throw exceptions. All errors produce an **error result value**.
-
-### Error Result
-
-```json
-{ "error": "DIVISION_BY_ZERO", "message": "Division by zero" }
-```
-
-### Error Types
-
-| Error               | Trigger                                         |
-|---------------------|-------------------------------------------------|
-| `TYPE_ERROR`        | Operator applied to wrong type (e.g. `"a" - 1`) |
-| `DIVISION_BY_ZERO`  | Division or modulo by zero                       |
-| `STACK_UNDERFLOW`   | Pop from empty stack (indicates compiler bug)    |
-| `INVALID_SLOT`      | Slot index out of bounds (indicates compiler bug)|
-| `INDEX_OUT_OF_BOUNDS` | Array index out of range                       |
-| `INVALID_INSTRUCTION`| Unknown opcode (indicates version mismatch)     |
-
-### Error Propagation
-
-If any operation produces an error, the entire expression evaluates to that error. Errors do not propagate through short‑circuit operators — if the short‑circuit branch avoids the error, the expression succeeds.
+Platform ports should be built from this contract and a shared conformance corpus. A port may use a different internal VM or native representation, but observable language behavior must match.

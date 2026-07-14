@@ -1,7 +1,7 @@
 export default {
   index: 'Introduction',
   'getting-started': 'Getting Started',
-  syntax: 'Syntax Reference',
+  syntax: 'Language Guide',
   architecture: 'Architecture',
   'vm-execution': 'VM Execution Visualizer',
 };

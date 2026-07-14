@@ -1,133 +1,319 @@
-# Syntax Reference
+# Language Guide
 
-Yexp uses JavaScript-like syntax with functional programming features.
-
-## JavaScript-Inspired, Not JavaScript
-
-Yexp is inspired by JavaScript, so it feels natural and familiar when you look at it. However, it extends JS with superpowers and syntax that isn't JavaScript:
-
-- **Pipe operator** (`|>`) for functional composition
-- **Short lambda expressions** (`.price > 100` instead of `x => x.price > 100`)
-- **Predicate filtering** (`items[.active]`)
-- **Wildcard mapping** (`items[*].name`)
-- **Negative indexing** (`items[-1]`)
-
-If you know JavaScript, you already know most of Yexp. The rest is just syntactic sugar that makes data manipulation more concise and expressive.
-
-## Property Access
+Yexp is a small language for querying and transforming JSON-like data. It feels familiar if you know JavaScript, but it adds the concise selectors and pipelines of dedicated query languages.
 
 ```javascript
+$.orders[.status == "paid"]
+  |> groupBy(.customer)
+  |> mapEntries(entry => {
+    key: entry.key,
+    value: entry.value |> map(.amount) |> add
+  })
+```
+
+Yexp is inspired by JavaScript; it is not JavaScript. A program is one expression. There are no statements, imports, classes, prototypes, global object, or arbitrary code execution.
+
+## The Yexp combination
+
+Yexp brings four ideas together:
+
+- JavaScript-shaped expressions, literals, ternaries, templates, and arrow lambdas
+- Query-language selectors for filtering, projection, negative indexing, and recursive search
+- Pipes and dot lambdas for short, readable transformations
+- Bytecode compilation for reusable, inspectable execution without `eval()`
+
+The same filter can be written at different levels of concision:
+
+```javascript
+$.products.filter(product => product.inStock && product.price < 100)
+$.products.filter(.inStock && .price < 100)
+$.products[.inStock && .price < 100]
+```
+
+That gradual path from familiar to compact is central to the language: start with normal-looking expressions, then use query shorthand where it improves clarity.
+
+## 1. Start with values
+
+Yexp supports null, booleans, numbers, strings, arrays, and objects:
+
+```javascript
+null
+true
+42
+"hello"
+[1, 2, 3]
+{ name: "Ada", active: true }
+```
+
+Use the normal arithmetic and comparison operators:
+
+```javascript
+1 + 2 * 3
+$.price * $.quantity
+$.age >= 18
+$.score >= 0 && $.score <= 100
+```
+
+Equality never coerces types. Both `==` and `===` are non-coercing in Yexp:
+
+```javascript
+1 == 1       // true
+1 == "1"    // false
+0 == false   // false
+```
+
+Comments in this guide explain results; comments are not valid inside an expression.
+
+## 2. Read the input
+
+The primary input is `$`:
+
+```javascript
+$
 $.user.name
-$.user?.profile?.avatar  // Optional chaining
+$.orders[0].total
 ```
 
-## Array Indexing
+Two optional roots keep non-input data explicit:
 
 ```javascript
-$.items[0]
-$.items[-1]              // Negative indexing
-$.items[.price > 100]    // Predicate filtering
-$.items[*].name          // Wildcard (map all)
+$context.userId
+$env.region
+
+$.ownerId == $context.userId && $env.region == "eu"
 ```
 
-## Operators
+Missing properties resolve to `null`. Optional access and null coalescing make fallback intent clear:
 
-### Arithmetic
 ```javascript
-a + b
-a - b
-a * b
-a / b
-a % b    // Modulo
+$.user.profile?.displayName ?? "Anonymous"
+$.items?.[0]
 ```
 
-### Comparison
+Only `null` and `false` are falsy in Yexp. Values such as `0`, `""`, and `[]` are truthy. Like JavaScript, `&&` and `||` return the selected operand and short-circuit. The difference is the smaller Yexp falsy set. `??` falls back only for `null`.
+
+## 3. Navigate like a query language
+
+### Negative indexing
+
+Read from the end of an array or string:
+
 ```javascript
-a == b   // Loose equality
-a === b  // Strict equality
-a != b
-a !== b
-a < b
-a <= b
-a > b
-a >= b
+$.events[-1]
+$.events[-2]
+$.name[-1]
 ```
 
-### Logical
+### Predicate selection
+
+Filter an array directly inside its path:
+
 ```javascript
-a && b
-a || b
-!a
-a ?? b   // Null coalescing
+$.products[.price < 100]
+$.users[.active && .role == "admin"]
 ```
 
-## Lambdas
+The expression after `[` is evaluated once per item. The leading dot refers to that item.
 
-### Arrow Functions
+### Wildcard projection
+
+Project a property from every value:
+
 ```javascript
-(x) => x * 2
-(a, b) => a + b
-x => x > 5              // Single param (no parens)
+$.users[*].name
+$.products[.inStock][*].price
+$.settings[*]
 ```
 
-### Dot Shorthand
+`[*]` preserves array elements and returns object values. Its optional form returns an empty array for null:
+
 ```javascript
-.price > 100            // Same as: (x) => x.price > 100
-.active                 // Same as: (x) => x.active
-.user.name              // Same as: (x) => x.user.name
+$.users?.[*].name
 ```
 
-## Array Methods
+### Recursive descent
 
-### Method Call Syntax
+Search an unknown tree for every occurrence of a property:
+
 ```javascript
-$.items.filter(x => x > 5)
-$.items.map(x => x * 2)
-$.users.filter(.active).map(.name)
+$..email
+$.payload..id
+$.payload?..id
 ```
 
-### Pipe Operator
+Recursive descent returns an array in depth-first discovery order.
+
+## 4. Transform collections
+
+### Arrow lambdas
+
 ```javascript
-$.items |> filter(x => x > 5)
-$.items |> map(x => x * 2) |> reduce((a, b) => a + b, 0)
+$.items.filter(item => item.price < 100)
+$.items.map(item => item.price * item.quantity)
+$.values.reduce((total, value) => total + value, 0)
 ```
 
-### Mixed Syntax
+### Dot lambdas
+
+For the common case of reading from one item, use dot shorthand:
+
 ```javascript
-$.items.filter(x => x > 5) |> map(x => x * 2)
+.price < 100       // item => item.price < 100
+.active            // item => item.active
+.profile?.name     // item => item.profile?.name
 ```
 
-## Template Literals
+Dot shorthand is a lambda in the core language. In the CLI only, a leading dot at the start of the whole expression is also accepted as shorthand for the input root: `.name` becomes `$.name`.
+
+### Pipes
+
+Pipes pass the left value as the first argument of the next function:
+
+```javascript
+$.items
+  |> filter(.inStock)
+  |> map(.price)
+  |> add
+```
+
+Method and pipe syntax are equivalent:
+
+```javascript
+$.items.filter(.active)
+$.items |> filter(.active)
+filter($.items, .active)
+```
+
+Methods are syntax sugar, not JavaScript prototype calls.
+
+Pipes bind tightly. Parenthesize arithmetic before piping:
+
+```javascript
+($.subtotal + $.tax) |> round(2)
+```
+
+## 5. Shape new results
+
+Build arrays and objects from expressions:
+
+```javascript
+[$.first, $.last]
+
+{
+  name: $.user.name,
+  total: $.items |> map(.price) |> add,
+  active: true
+}
+```
+
+Spread existing values into new ones:
+
+```javascript
+[...$.items, $.newItem]
+{ ...$.defaults, ...$context.overrides, enabled: true }
+max(...$.scores)
+```
+
+Template strings interpolate any expression:
 
 ```javascript
 `Hello, ${$.user.name}!`
-`Total: $${$.cart |> reduce((sum, item) => sum + item.price, 0)}`
+`Total: $${$.items |> map(.price) |> add}`
 ```
 
-## Object Literals
+Use ternaries for conditional output:
 
 ```javascript
-{ name: "Alice", age: 25 }
-{ ...$.defaults, ...$context.overrides }
-{ count: $.items |> length, total: $.items |> add }
+$.age >= 18 ? "adult" : "minor"
 ```
 
-## Spread Operator
+## 6. Build a complete query
+
+This report filters paid orders, groups them by customer, and calculates a count and total for each group:
 
 ```javascript
-[...$.items, newItem]
-{ ...obj1, ...obj2, extra: "value" }
-max(...$.values)
-concat(...arrays)
+$.orders[.status == "paid"]
+  |> groupBy(.customer)
+  |> mapEntries(entry => {
+    key: entry.key,
+    value: {
+      orders: entry.value |> length,
+      total: entry.value |> map(.amount) |> add
+    }
+  })
 ```
 
-## Ternary Operator
+It demonstrates the intended progression of the language:
 
-```javascript
-age >= 18 ? "adult" : "minor"
-user ? user.name : "Guest"
+1. navigate from `$`;
+2. select values with query syntax;
+3. compose transformations with pipes;
+4. use lambdas only where a local name improves clarity;
+5. return a new JSON-shaped result.
+
+## Operator reference
+
+| Category | Operators | Notes |
+| --- | --- | --- |
+| Arithmetic | `+ - * / %` | Numbers; `+` also joins two strings |
+| Comparison | `< <= > >=` | Numbers only |
+| Equality | `== != === !==` | Never coerces types |
+| Logical | <code>&amp;&amp; &#124;&#124; !</code> | Selects operands and short-circuits |
+| Fallback | `??` | Falls back only for `null` |
+| Conditional | `? :` | Evaluates one branch |
+| Pipe | <code>&#124;&gt;</code> | Passes the left value first |
+| Spread | `...` | Arrays, objects, and arguments |
+
+From highest to lowest, precedence is: access/call, unary, pipe, multiplication, addition, comparison, equality, `&&`, `||`, `??`, ternary, assignment, lambda. Use parentheses when the intended grouping is not obvious.
+
+## Built-in families
+
+### Collections
+
+```text
+filter  map  find  reduce  every  some  sort  flatMap
+groupBy  uniqueBy  minBy  maxBy  first  last  limit
+add  concat  unique  reverse  flatten  slice  includes  join
 ```
 
-## Comments
+### Objects
 
-Yexp doesn't support comments in expressions (they're meant to be data, not code).
+```text
+keys  values  entries  fromEntries  mapEntries  del  pick  has  select
+```
+
+### Strings
+
+```text
+startsWith  endsWith  trimPrefix  trimSuffix
+toLowerCase  toUpperCase  index  rindex  split
+replace  replaceAll  slice  substring
+trim  trimStart  trimEnd  padStart  padEnd  repeat
+```
+
+### Numbers, dates, and types
+
+```text
+round  floor  ceil  abs  min  max  sqrt  pow
+sin  cos  tan  log  log10  log2  exp  random
+now  parseDate  toISOString
+type  toString  length
+```
+
+`random()` and `now()` are nondeterministic. Avoid them when repeatable results matter.
+
+Applications can add host functions. The CLI, for example, adds filesystem functions; those are not portable core-language built-ins.
+
+## Language boundaries
+
+Yexp intentionally does not provide:
+
+- statements, loops, declarations, or user-defined named functions;
+- imports, modules, classes, prototypes, or a global object;
+- JavaScript coercion for equality or arithmetic;
+- comments inside expressions;
+- implicit filesystem, network, or process access.
+
+The default runtime has no `eval()` or generated JavaScript. It is still the host's responsibility to apply CPU, memory, and input limits when expressions are untrusted.
+
+For exact semantics, the complete built-in registry, compatibility behavior, grammar, and port conformance rules, read the [Yexp language specification](https://github.com/cristianmartinez/yexp/blob/main/docs/spec.md).
