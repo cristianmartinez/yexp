@@ -1,7 +1,7 @@
 /**
  * Load test dataset from JSON
  */
-import { readFileSync } from 'fs';
+import { readFileSync } from "fs";
 
 export interface TestCase {
   id: string;
@@ -18,6 +18,6 @@ export interface TestCase {
  * Load dataset with pre-computed expected results
  */
 export function loadDataset(): TestCase[] {
-  const data = JSON.parse(readFileSync('./dataset-with-results.json', 'utf-8'));
+  const data = JSON.parse(readFileSync("./dataset-with-results.json", "utf-8"));
   return data;
 }

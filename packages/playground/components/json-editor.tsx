@@ -1,6 +1,7 @@
 'use client';
 
 import Editor from '@monaco-editor/react';
+import type { Monaco } from '@monaco-editor/react';
 
 interface JsonEditorProps {
   value: string;

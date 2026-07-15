@@ -36,7 +36,7 @@ describe('CLI functions', () => {
     test('reads file contents', () => {
       const result = read!(packageJson);
       expect(typeof result).toBe('string');
-      expect(result as string).toContain('"name": "@cristianmartinez/yexp-cli"');
+      expect(result as string).toContain('"name": "yexp"');
     });
 
     test('errors on non-existent file', () => {
@@ -73,13 +73,13 @@ describe('CLI functions', () => {
 
   describe('grep', () => {
     test('finds literal string matches', () => {
-      const result = grep!('"name": "@cristianmartinez/yexp-cli"', packageJson) as any[];
+      const result = grep!('"name": "yexp"', packageJson) as any[];
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBeGreaterThan(0);
       expect(result[0]).toHaveProperty('path');
       expect(result[0]).toHaveProperty('line');
       expect(result[0]).toHaveProperty('num');
-      expect(result[0].match).toBe('"name": "@cristianmartinez/yexp-cli"');
+      expect(result[0].match).toBe('"name": "yexp"');
     });
 
     test('supports regex patterns', () => {

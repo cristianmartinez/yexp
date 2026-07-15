@@ -3,8 +3,8 @@
  * This transforms dataset.json into dataset-with-results.json
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { compile, run } from '@cristianmartinez/yexp';
+import { readFileSync, writeFileSync } from "fs";
+import { compile, run } from "@cristianmartinez/yexp";
 
 interface TestCase {
   id: string;
@@ -21,10 +21,10 @@ interface TestCaseWithResult extends TestCase {
 }
 
 function generateExpectedResults() {
-  console.log('📊 Generating expected results from dataset.json...\n');
+  console.log("📊 Generating expected results from dataset.json...\n");
 
   // Load dataset
-  const dataset: TestCase[] = JSON.parse(readFileSync('./dataset.json', 'utf-8'));
+  const dataset: TestCase[] = JSON.parse(readFileSync("./dataset.json", "utf-8"));
 
   const results: TestCaseWithResult[] = [];
   let compiled = 0;
@@ -57,7 +57,7 @@ function generateExpectedResults() {
           console.log(`✓ (result: ${JSON.stringify(output).substring(0, 50)}...)`);
           compiled++;
         } catch (runError) {
-          result.expectedError = runError instanceof Error ? runError.message : 'Runtime error';
+          result.expectedError = runError instanceof Error ? runError.message : "Runtime error";
           console.log(`✗ RUNTIME ERROR: ${result.expectedError}`);
           failed++;
         }
@@ -67,8 +67,7 @@ function generateExpectedResults() {
       }
     } catch (compileError) {
       result.expectedCompiles = false;
-      result.expectedError =
-        compileError instanceof Error ? compileError.message : 'Compilation error';
+      result.expectedError = compileError instanceof Error ? compileError.message : "Compilation error";
       console.log(`✗ COMPILE ERROR: ${result.expectedError}`);
       failed++;
     }
@@ -77,7 +76,7 @@ function generateExpectedResults() {
   }
 
   // Save enhanced dataset
-  writeFileSync('./dataset-with-results.json', JSON.stringify(results, null, 2), 'utf-8');
+  writeFileSync("./dataset-with-results.json", JSON.stringify(results, null, 2), "utf-8");
 
   console.log(`\n✅ Generated expected results for ${results.length} test cases`);
   console.log(`   Compiled: ${compiled}`);

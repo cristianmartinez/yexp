@@ -1,10 +1,10 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { type ExprValue, Opcode, compile, evaluate } from '@cristianmartinez/yexp';
-import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
+import { compile, evaluate, Opcode, type ExprValue } from '@cristianmartinez/yexp';
 import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 
 // Sample input shared by every preset. Expressions reference it via `$`.
 const SAMPLE_INPUT = {
@@ -54,8 +54,7 @@ function formatInstruction(program: { slots: string[]; constants: ExprValue[] },
   const op = ins[0] as number;
   const name = Opcode[op] ?? `OP_${op}`;
   const args = ins.slice(1);
-  if (op === Opcode.CONST)
-    return { name, detail: formatValue(program.constants[args[0] as number]) };
+  if (op === Opcode.CONST) return { name, detail: formatValue(program.constants[args[0] as number]) };
   if (op === Opcode.LOAD) return { name, detail: program.slots[args[0] as number] ?? '?' };
   if (op === Opcode.CALL) return { name, detail: String(args[0]) };
   if (args.length) return { name, detail: args.map((a) => formatValue(a as ExprValue)).join(', ') };
@@ -309,12 +308,7 @@ export function HomePlayground() {
                       </span>
                       <span className="font-medium">{name}</span>
                       {detail && (
-                        <span
-                          className={cn(
-                            'truncate',
-                            active ? 'opacity-80' : 'text-muted-foreground',
-                          )}
-                        >
+                        <span className={cn('truncate', active ? 'opacity-80' : 'text-muted-foreground')}>
                           {detail}
                         </span>
                       )}
@@ -340,9 +334,7 @@ export function HomePlayground() {
                   {step.pushed.length > 0 && (
                     <div className="text-muted-foreground">
                       <span className="text-foreground">push</span>{' '}
-                      <span className="text-foreground">
-                        {step.pushed.map(formatValue).join(', ')}
-                      </span>
+                      <span className="text-foreground">{step.pushed.map(formatValue).join(', ')}</span>
                     </div>
                   )}
                 </div>
@@ -354,7 +346,8 @@ export function HomePlayground() {
                   {[...step.stack].reverse().map((value, ri) => {
                     const depth = step.stack.length - 1 - ri;
                     const isTop = ri === 0;
-                    const justPushed = isTop && step.pushed.length > 0 && !step.done;
+                    const justPushed =
+                      isTop && step.pushed.length > 0 && !step.done;
                     return (
                       <div
                         key={depth}

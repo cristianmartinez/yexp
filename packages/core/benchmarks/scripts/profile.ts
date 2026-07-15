@@ -61,9 +61,7 @@ const expressions = [
 ];
 
 // Phase 1: Profile full pipeline (tokenize → parse → compile → evaluate)
-console.log(
-  `Profiling full pipeline: ${ITERATIONS} iterations x ${expressions.length} expressions\n`,
-);
+console.log(`Profiling full pipeline: ${ITERATIONS} iterations x ${expressions.length} expressions\n`);
 
 console.time('full-pipeline');
 for (let i = 0; i < ITERATIONS; i++) {
@@ -116,6 +114,4 @@ for (const expr of expressions) {
   console.timeEnd('    evaluate');
 }
 
-console.log(
-  '\nDone. If run with --cpu-prof, open the .cpuprofile in Chrome DevTools or speedscope.',
-);
+console.log('\nDone. If run with --cpu-prof, open the .cpuprofile in Chrome DevTools or speedscope.');

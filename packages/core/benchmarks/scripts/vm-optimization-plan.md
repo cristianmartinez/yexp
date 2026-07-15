@@ -246,5 +246,5 @@ The reality: Even with all optimizations, we'll still be 40-50x slower than JSON
 
 **Focus instead on**:
 - Documentation of performance characteristics
-- Guidance on when to use JSON vs Yexp
-- Highlighting Yexp's unique features that justify the overhead
+- Guidance on when to use JSON vs Expr
+- Highlighting Expr's unique features that justify the overhead

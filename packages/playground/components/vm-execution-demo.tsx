@@ -1,13 +1,13 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { compile } from '@cristianmartinez/yexp';
 import type { ExecutionContext } from '@cristianmartinez/yexp';
-import { useMemo, useState } from 'react';
+import { VMExecutionPlayer } from './vm-execution-player';
+import { YexpEditor } from './yexp-editor';
 import { JsonEditor } from './json-editor';
 import { Card } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { VMExecutionPlayer } from './vm-execution-player';
-import { YexpEditor } from './yexp-editor';
 
 interface VMExecutionDemoProps {
   initialExpression?: string;
@@ -55,7 +55,7 @@ export function VMExecutionDemo({
           </TabsList>
           <TabsContent value="expression" className="mt-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">Enter any Yexp expression:</p>
+              <label className="text-sm font-medium">Enter any Yexp expression:</label>
               <YexpEditor
                 value={expression}
                 onChange={setExpression}
@@ -66,7 +66,7 @@ export function VMExecutionDemo({
           </TabsContent>
           <TabsContent value="context" className="mt-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">Execution Context (JSON):</p>
+              <label className="text-sm font-medium">Execution Context (JSON):</label>
               <JsonEditor value={contextJSON} onChange={setContextJSON} height="200px" />
             </div>
           </TabsContent>

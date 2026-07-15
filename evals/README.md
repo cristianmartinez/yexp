@@ -1,33 +1,62 @@
-# Yexp LLM evaluation experiments
+# Yexp LLM Evaluation Framework
 
-This directory contains optional research tooling for measuring how reliably language models generate valid Yexp expressions. It is not part of the root workspace, published packages, release pipeline, or required contributor setup.
+Comprehensive evaluation and optimization framework for testing LLM generation of yexp expressions.
 
 ## Setup
 
 ```bash
-cd evals
-bun install --frozen-lockfile
-cp .envrc.example .envrc
+# Set your API key
+export ANTHROPIC_API_KEY="your-key-here"
+
+# Install dependencies
+bun install
+
+# Run basic evaluation
+bun run yexp-eval.ts
+
+# Run prompt optimization
+bun run prompt-optimizer.ts
 ```
 
-Set only the provider credentials required by the experiment you intend to run. Never commit `.envrc` or other credential files.
+## Frameworks Compared
 
-## Commands
+### 1. **Braintrust** ⭐ (Our Choice)
+- **Best for:** Production evals with UI
+- **Pros:** TypeScript-native, great visualization, tracks history
+- **Cons:** Requires account (free tier available)
+- **Use case:** Standard evaluation with metrics tracking
 
-```bash
-bun run eval
-bun run optimize
-bun run report
-bun run dataset:generate
-bun run test:validation
-```
+### 2. **DSPy** (Stanford)
+- **Best for:** Automatic prompt optimization
+- **Pros:** Research-backed, powerful optimization
+- **Cons:** Python-only, steeper learning curve
 
-The experiments consume the published `@cristianmartinez/yexp` package so their dependency graph stays isolated from the product workspace.
+### 3. **Custom Loop** (Our Implementation)
+- **Best for:** Full control over optimization strategy
+- **Pros:** No dependencies, cost-aware, strategy-flexible
 
-## Artifacts
+## Evaluation Metrics
 
-`dataset-with-results.json` is the checked-in evaluation corpus. Model responses, progress snapshots, reports, and optimized prompts are generated artifacts and are ignored under `results/`. Publish a reproducible summary in a pull request instead of committing raw provider output.
+| Metric | Description | Target |
+|--------|-------------|--------|
+| **syntax_valid** | Expression parses without errors | 100% |
+| **semantic_correct** | Output matches expected behavior | >95% |
+| **token_efficient** | Concise generation (low token count) | <200 tokens |
+| **exact_match** | Perfect match with expected output | >80% |
+| **cost_per_query** | Total cost including input/output | <$0.001 |
 
-## Scope
+## RLHF-Style Optimization Loop
 
-Evaluation scores are research signals, not compatibility guarantees. The canonical language contract remains [`../docs/spec.md`](../docs/spec.md) and the executable conformance coverage remains under `packages/core/tests`.
+The `prompt-optimizer.ts` implements an automatic improvement cycle:
+
+1. **Evaluate** → measure score, cost, tokens
+2. **Generate feedback** → identify issues
+3. **Meta-optimize** → LLM improves its own prompt
+4. **Select best** → by quality, cost, or balanced
+5. **Repeat** → until target achieved
+
+## Resources
+
+- [Braintrust Docs](https://www.braintrust.dev/docs)
+- [DSPy Paper](https://arxiv.org/abs/2310.03714)
+- [RALPH Framework](https://github.com/snarktank/ralph)

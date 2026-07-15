@@ -1,10 +1,10 @@
 'use client';
 
-import { JsonEditor } from '@/components/json-editor';
-import { Notebook } from '@/components/notebook';
-import { PageHeader } from '@/components/page-header';
+import { useState, useMemo } from 'react';
 import { Database } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Notebook } from '@/components/notebook';
+import { JsonEditor } from '@/components/json-editor';
+import { PageHeader } from '@/components/page-header';
 
 export default function NotebookPage() {
   const [contextJSON, setContextJSON] = useState(`{

@@ -1,7 +1,7 @@
 'use client';
 
-import { type Example, categories, examples } from '@/lib/examples';
-import { ChevronRight, Lightbulb } from 'lucide-react';
+import { Lightbulb, ChevronRight } from 'lucide-react';
+import { examples, categories, type Example } from '@/lib/examples';
 
 interface ExamplesPanelProps {
   selectedId?: string;
@@ -31,7 +31,6 @@ export function ExamplesPanel({ selectedId, onSelectExample }: ExamplesPanelProp
                 const isSelected = selectedId === example.id;
                 return (
                   <button
-                    type="button"
                     key={example.id}
                     onClick={() => onSelectExample(example)}
                     className={`

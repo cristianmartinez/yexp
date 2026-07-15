@@ -167,7 +167,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["Widget", "Gadget", "Doohickey"]
+    "expectedResult": [
+      "Widget",
+      "Gadget",
+      "Doohickey"
+    ]
   },
   {
     "id": "filter-multiple-conditions",
@@ -238,7 +242,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": [80, 40, 160]
+    "expectedResult": [
+      80,
+      40,
+      160
+    ]
   },
   {
     "id": "filter-comparison",
@@ -322,7 +330,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["Electronics", "Books", "Toys"]
+    "expectedResult": [
+      "Electronics",
+      "Books",
+      "Toys"
+    ]
   },
   {
     "id": "first-last",
@@ -999,7 +1011,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["user@example.com", "profile@example.com", "admin@example.com"]
+    "expectedResult": [
+      "user@example.com",
+      "profile@example.com",
+      "admin@example.com"
+    ]
   },
   {
     "id": "recursive-descent-filter",
@@ -1028,7 +1044,13 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": [1, 2, 3, 4, 5]
+    "expectedResult": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
   },
   {
     "id": "recursive-descent-unique",
@@ -1040,20 +1062,34 @@
     "sampleData": {
       "data": {
         "post1": {
-          "tags": ["tech", "ai"]
+          "tags": [
+            "tech",
+            "ai"
+          ]
         },
         "post2": {
-          "tags": ["tech", "code"]
+          "tags": [
+            "tech",
+            "code"
+          ]
         },
         "nested": {
           "post3": {
-            "tags": ["ai", "ml"]
+            "tags": [
+              "ai",
+              "ml"
+            ]
           }
         }
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["tech", "ai", "code", "ml"]
+    "expectedResult": [
+      "tech",
+      "ai",
+      "code",
+      "ml"
+    ]
   },
   {
     "id": "string-concat",
@@ -1106,7 +1142,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["javascript", "typescript", "react"]
+    "expectedResult": [
+      "javascript",
+      "typescript",
+      "react"
+    ]
   },
   {
     "id": "string-trim",
@@ -1161,7 +1201,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["theme", "notifications", "language"]
+    "expectedResult": [
+      "theme",
+      "notifications",
+      "language"
+    ]
   },
   {
     "id": "object-values",
@@ -1182,7 +1226,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["https://api.example.com", 5000, 3]
+    "expectedResult": [
+      "https://api.example.com",
+      5000,
+      3
+    ]
   },
   {
     "id": "object-pick",
@@ -1462,25 +1510,42 @@
         "posts": [
           {
             "published": true,
-            "tags": ["javascript", "web"]
+            "tags": [
+              "javascript",
+              "web"
+            ]
           },
           {
             "published": false,
-            "tags": ["python", "data"]
+            "tags": [
+              "python",
+              "data"
+            ]
           },
           {
             "published": true,
-            "tags": ["web", "react"]
+            "tags": [
+              "web",
+              "react"
+            ]
           },
           {
             "published": true,
-            "tags": ["javascript", "node"]
+            "tags": [
+              "javascript",
+              "node"
+            ]
           }
         ]
       }
     },
     "expectedCompiles": true,
-    "expectedResult": ["javascript", "web", "react", "node"]
+    "expectedResult": [
+      "javascript",
+      "web",
+      "react",
+      "node"
+    ]
   },
   {
     "id": "complex-reduce",
@@ -1544,6 +1609,11 @@
       }
     },
     "expectedCompiles": true,
-    "expectedResult": [80, 90, 100, 40]
+    "expectedResult": [
+      80,
+      90,
+      100,
+      40
+    ]
   }
 ]
