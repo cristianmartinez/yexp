@@ -1,8 +1,8 @@
 'use client';
 
-import Editor, { type Monaco } from '@monaco-editor/react';
-import type { IPosition, editor, languages } from 'monaco-editor';
 import { useRef } from 'react';
+import Editor, { Monaco } from '@monaco-editor/react';
+import type { editor, languages, IPosition } from 'monaco-editor';
 
 interface YexpEditorProps {
   value: string;

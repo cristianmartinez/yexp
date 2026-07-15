@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { BookOpen, FileText, Home, Zap } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { BookOpen, Zap, FileText, Home } from 'lucide-react';
 
 interface PageHeaderProps {
   currentPage: 'home' | 'playground' | 'notebook' | 'docs';

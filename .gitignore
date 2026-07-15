@@ -4,6 +4,3 @@ dist/
 *.tsbuildinfo
 .vercel
 .env*
-.DS_Store
-.claude/
-.codex/

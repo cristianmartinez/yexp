@@ -3,8 +3,8 @@
  * Tests LLM ability to generate valid yexp expressions from natural language
  */
 
-import { Eval } from 'braintrust';
-import Anthropic from '@anthropic-ai/sdk';
+import { Eval } from "braintrust";
+import Anthropic from "@anthropic-ai/sdk";
 
 // Import yexp parser/compiler when available
 // import { compile, evaluate } from "@cristianmartinez/yexp";
@@ -16,44 +16,44 @@ const anthropic = new Anthropic({
 // Dataset: Natural language prompts → Expected yexp expressions
 const dataset = [
   {
-    input: 'Get all active users',
-    expected: 'data.users |> filter(.active)',
-    context: { data: { users: 'array<{active: boolean, name: string}>' } },
+    input: "Get all active users",
+    expected: "data.users |> filter(.active)",
+    context: { data: { users: "array<{active: boolean, name: string}>" } },
   },
   {
-    input: 'Calculate total price for items over $100',
-    expected: 'data.items |> filter(.price > 100) |> map(.price) |> add',
-    context: { data: { items: 'array<{price: number, name: string}>' } },
+    input: "Calculate total price for items over $100",
+    expected: "data.items |> filter(.price > 100) |> map(.price) |> add",
+    context: { data: { items: "array<{price: number, name: string}>" } },
   },
   {
-    input: 'Get the first 5 premium users',
-    expected: 'data.users |> filter(.premium) |> limit(5)',
-    context: { data: { users: 'array<{premium: boolean, name: string}>' } },
+    input: "Get the first 5 premium users",
+    expected: "data.users |> filter(.premium) |> limit(5)",
+    context: { data: { users: "array<{premium: boolean, name: string}>" } },
   },
   {
-    input: 'Increment the counter',
-    expected: 'state.count = state.count + 1',
-    context: { state: { count: 'number' } },
+    input: "Increment the counter",
+    expected: "state.count = state.count + 1",
+    context: { state: { count: "number" } },
   },
   {
     input: "Get user name or 'Guest' if not available",
     expected: "state.user?.name ?? 'Guest'",
-    context: { state: { user: 'object | null' } },
+    context: { state: { user: "object | null" } },
   },
   {
-    input: 'Find all email addresses at any depth in the data',
-    expected: 'data..email',
-    context: { data: { users: 'array<object>' } },
+    input: "Find all email addresses at any depth in the data",
+    expected: "data..email",
+    context: { data: { users: "array<object>" } },
   },
   {
-    input: 'Group items by category',
-    expected: 'data.items |> groupBy(.category)',
-    context: { data: { items: 'array<{category: string}>' } },
+    input: "Group items by category",
+    expected: "data.items |> groupBy(.category)",
+    context: { data: { items: "array<{category: string}>" } },
   },
   {
-    input: 'Sort users by age descending',
-    expected: 'data.users |> sort((a, b) => b.age - a.age)',
-    context: { data: { users: 'array<{age: number}>' } },
+    input: "Sort users by age descending",
+    expected: "data.users |> sort((a, b) => b.age - a.age)",
+    context: { data: { users: "array<{age: number}>" } },
   },
 ];
 
@@ -79,7 +79,10 @@ Rules:
 
 Output ONLY the yexp expression, no explanation.`;
 
-async function generateYexpExpression(task: string, context: Record<string, any>): Promise<string> {
+async function generateYexpExpression(
+  task: string,
+  context: Record<string, any>
+): Promise<string> {
   const userPrompt = `Context schema:
 ${JSON.stringify(context, null, 2)}
 
@@ -88,15 +91,15 @@ Task: ${task}
 Generate the yexp expression:`;
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
+    model: "claude-sonnet-4-5-20250929",
     max_tokens: 1024,
     system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userPrompt }],
+    messages: [{ role: "user", content: userPrompt }],
   });
 
   const response = message.content[0];
-  if (response.type !== 'text') {
-    throw new Error('Expected text response');
+  if (response.type !== "text") {
+    throw new Error("Expected text response");
   }
 
   return response.text.trim();
@@ -128,26 +131,31 @@ function semanticCorrectnessScore(output: string, expected: string): number {
   if (output === expected) return 1;
 
   // Normalized comparison (whitespace, semicolons)
-  const normalize = (s: string) => s.replace(/\s+/g, ' ').replace(/;$/, '').trim();
+  const normalize = (s: string) =>
+    s.replace(/\s+/g, " ").replace(/;$/, "").trim();
   if (normalize(output) === normalize(expected)) return 0.95;
 
   // Partial credit for similar structure
   const outputTokens = new Set(output.split(/[\s|>().,]/));
   const expectedTokens = new Set(expected.split(/[\s|>().,]/));
-  const intersection = new Set([...outputTokens].filter((t) => expectedTokens.has(t)));
-  const similarity = intersection.size / Math.max(outputTokens.size, expectedTokens.size);
+  const intersection = new Set(
+    [...outputTokens].filter((t) => expectedTokens.has(t))
+  );
+  const similarity =
+    intersection.size / Math.max(outputTokens.size, expectedTokens.size);
 
   return similarity > 0.5 ? similarity * 0.5 : 0;
 }
 
 function tokenEfficiencyScore(output: string, expected: string): number {
   // Prefer shorter expressions if they're correct
-  const ratio = Math.min(output.length, expected.length) / Math.max(output.length, expected.length);
+  const ratio = Math.min(output.length, expected.length) /
+                Math.max(output.length, expected.length);
   return ratio;
 }
 
 // Run evaluation
-Eval('yexp-generation-eval', {
+Eval("yexp-generation-eval", {
   data: () => dataset,
   task: async (input) => {
     const output = await generateYexpExpression(input.input, input.context);
@@ -155,24 +163,24 @@ Eval('yexp-generation-eval', {
   },
   scores: [
     {
-      name: 'syntax_valid',
+      name: "syntax_valid",
       scorer: (args) => syntaxValidityScore(args.output, args.expected),
     },
     {
-      name: 'semantic_correct',
+      name: "semantic_correct",
       scorer: (args) => semanticCorrectnessScore(args.output, args.expected),
     },
     {
-      name: 'token_efficient',
+      name: "token_efficient",
       scorer: (args) => tokenEfficiencyScore(args.output, args.expected),
     },
     {
-      name: 'exact_match',
+      name: "exact_match",
       scorer: (args) => (args.output === args.expected ? 1 : 0),
     },
   ],
   metadata: {
-    model: 'claude-sonnet-4-5-20250929',
-    framework: 'braintrust',
+    model: "claude-sonnet-4-5-20250929",
+    framework: "braintrust",
   },
 });

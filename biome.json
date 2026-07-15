@@ -20,7 +20,6 @@
     "rules": {
       "recommended": true,
       "complexity": {
-        "noForEach": "warn",
         "noUselessFragments": "error",
         "noUselessTypeConstraint": "error"
       },
@@ -35,12 +34,11 @@
         "useImportType": "error"
       },
       "suspicious": {
-        "noArrayIndexKey": "warn",
         "noExplicitAny": "warn"
       }
     }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "bun.lock", ".turbo", ".next", "out", "coverage", "results"]
+    "ignore": ["node_modules", "dist", "bun.lock"]
   }
 }

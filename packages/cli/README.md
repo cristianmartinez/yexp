@@ -7,18 +7,18 @@ Query and transform JSON from the terminal with familiar JavaScript-like express
 Use it once without installing:
 
 ```bash
-printf '{"name":"Ada","active":true}\n' | npx @cristianmartinez/yexp-cli '.name'
+printf '{"name":"Ada","active":true}\n' | npx yexp '.name'
 # "Ada"
 ```
 
 Or install the `yexp` binary globally:
 
 ```bash
-npm install --global @cristianmartinez/yexp-cli
+npm install --global yexp
 yexp --version
 ```
 
-The npm package is `@cristianmartinez/yexp-cli`; it installs the shorter `yexp` executable.
+The npm package and executable intentionally share the same name: `yexp`.
 
 ## Shell pipelines
 

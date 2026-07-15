@@ -195,12 +195,12 @@ console.log('\n📊 Example 1: Increment Counter\n');
 console.log('JSON Action:');
 console.log(JSON.stringify(actionExamples.increment.action, null, 2));
 
-console.log('\nHypothetical Expression (if Yexp supported mutations):');
+console.log('\nHypothetical Expression (if Expr supported mutations):');
 console.log('  state.count = state.count + 1');
 
 console.log('\nCurrent Reality:');
 console.log('  ✅ JSON actions work today');
-console.log('  ❌ Yexp is pure (read-only) - no mutations');
+console.log('  ❌ Expr is pure (read-only) - no mutations');
 
 // Execute JSON action
 const ctx1 = structuredClone(actionExamples.increment.initialContext);
@@ -312,7 +312,7 @@ console.log('  ✅ Readability matters');
 console.log('  ✅ Compile once, execute many pattern\n');
 
 console.log('**JSON Actions (WRITE operations)**');
-console.log('  ✅ Yexp stays functional/safe (no side effects)');
+console.log('  ✅ Expr stays functional/safe (no side effects)');
 console.log('  ✅ Actions are explicit and auditable');
 console.log('  ✅ Easy to serialize/store in database');
 console.log('  ✅ Can version and migrate actions');
@@ -331,9 +331,9 @@ console.log('  ❌ Security implications');
 console.log('  ❌ Serialization becomes harder\n');
 
 console.log('**🌟 RECOMMENDED HYBRID APPROACH 🌟**\n');
-console.log('  1. Use Yexp for READ operations (conditions, computations)');
+console.log('  1. Use Expr for READ operations (conditions, computations)');
 console.log('  2. Use JSON actions for WRITE operations (mutations)');
-console.log('  3. Embed Yexp expressions within JSON actions for values');
+console.log('  3. Embed Expr expressions within JSON actions for values');
 console.log('\n  Example:');
 console.log('    {');
 console.log('      "type": "assign",');
@@ -344,16 +344,16 @@ console.log('        "yexp": "items |> map(.price * .qty) |> add"');
 console.log('      }');
 console.log('    }');
 console.log('\n  This gives you:');
-console.log('    ✅ Power of Yexp for complex calculations');
+console.log('    ✅ Power of Expr for complex calculations');
 console.log('    ✅ Safety of JSON for controlled mutations');
 console.log('    ✅ Serializability for database storage');
 console.log('    ✅ Audit trail and versioning');
 console.log('    ✅ Best of both worlds!\n');
 
 console.log('💡 Implementation Strategy:\n');
-console.log('  1. Store conditions as Yexp strings in database');
+console.log('  1. Store conditions as Expr strings in database');
 console.log('  2. Store actions as JSON structures in database');
-console.log('  3. Compile Yexp strings once on load, cache bytecode');
+console.log('  3. Compile Expr strings once on load, cache bytecode');
 console.log('  4. Execute actions with JSON executor');
-console.log('  5. Yexp handles all reads, JSON actions handle all writes');
-console.log('\nThis keeps Yexp pure while giving you powerful imperative actions!');
+console.log('  5. Expr handles all reads, JSON actions handle all writes');
+console.log('\nThis keeps Expr pure while giving you powerful imperative actions!');

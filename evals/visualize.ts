@@ -2,7 +2,7 @@
  * Generate visualization report from RALPH progress
  */
 
-import { readFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from "fs";
 
 interface ProgressData {
   iteration: number;
@@ -27,7 +27,7 @@ function loadProgress(modelSlug: string): ProgressData[] {
     console.error(`Progress file not found: ${progressFile}`);
     return [];
   }
-  return JSON.parse(readFileSync(progressFile, 'utf-8'));
+  return JSON.parse(readFileSync(progressFile, "utf-8"));
 }
 
 function generateASCIIChart(data: number[], label: string, width = 60) {
@@ -36,74 +36,58 @@ function generateASCIIChart(data: number[], label: string, width = 60) {
   const range = max - min || 1;
 
   console.log(`\n${label}:`);
-  console.log('─'.repeat(width + 10));
+  console.log("─".repeat(width + 10));
 
   data.forEach((value, i) => {
     const normalized = (value - min) / range;
     const barLength = Math.round(normalized * width);
-    const bar = '█'.repeat(barLength) + '░'.repeat(width - barLength);
+    const bar = "█".repeat(barLength) + "░".repeat(width - barLength);
     console.log(`${i + 1}: ${bar} ${value.toFixed(3)}`);
   });
 
-  console.log('─'.repeat(width + 10));
-  console.log(
-    `Min: ${min.toFixed(3)} | Max: ${max.toFixed(3)} | Avg: ${(data.reduce((a, b) => a + b, 0) / data.length).toFixed(3)}`,
-  );
+  console.log("─".repeat(width + 10));
+  console.log(`Min: ${min.toFixed(3)} | Max: ${max.toFixed(3)} | Avg: ${(data.reduce((a, b) => a + b, 0) / data.length).toFixed(3)}`);
 }
 
 function extractCategory(testId: string): string {
   // Extract category from test ID prefix (e.g., "filter-active" → "filter")
   const prefixes = [
-    'filter',
-    'map',
-    'limit',
-    'unique',
-    'first',
-    'last',
-    'reverse',
-    'sort',
-    'groupby',
-    'uniqueby',
-    'sum',
-    'average',
-    'min',
-    'max',
-    'count',
-    'percentage',
-    'optional',
-    'chained',
-    'mutation',
-    'recursive',
-    'string',
-    'object',
-    'complex',
+    "filter", "map", "limit", "unique", "first", "last", "reverse",
+    "sort", "groupby", "uniqueby",
+    "sum", "average", "min", "max", "count", "percentage",
+    "optional", "chained",
+    "mutation",
+    "recursive",
+    "string",
+    "object",
+    "complex"
   ];
 
   for (const prefix of prefixes) {
     if (testId.startsWith(prefix)) return prefix;
   }
 
-  return 'other';
+  return "other";
 }
 
 function generateCategoryBreakdown(progress: ProgressData[]) {
   if (progress.length === 0) return;
 
-  console.log('\n\n📊 Category Performance (Across All Iterations):');
-  console.log('─'.repeat(80));
+  console.log("\n\n📊 Category Performance (Across All Iterations):");
+  console.log("─".repeat(80));
 
   const categoryFailures = new Map<string, number>();
 
   // Collect all failures across all iterations by category
   progress.forEach((iter) => {
     iter.failures?.forEach((f: any) => {
-      const category = extractCategory(f.testCase?.id || '');
+      const category = extractCategory(f.testCase?.id || "");
       categoryFailures.set(category, (categoryFailures.get(category) || 0) + 1);
     });
   });
 
   if (categoryFailures.size === 0) {
-    console.log('✅ No failures in any category!');
+    console.log("✅ No failures in any category!");
     return;
   }
 
@@ -115,27 +99,23 @@ function generateCategoryBreakdown(progress: ProgressData[]) {
   const maxFailures = sortedCategories[0]?.failures || 1;
 
   // Display category stats
-  console.log(`${'Category'.padEnd(20)} ${'Failures'.padEnd(12)} Bar`);
-  console.log('─'.repeat(80));
+  console.log(`${"Category".padEnd(20)} ${"Failures".padEnd(12)} Bar`);
+  console.log("─".repeat(80));
 
   sortedCategories.forEach(({ category, failures }) => {
     const barLength = Math.round((failures / maxFailures) * 40);
-    const bar = '█'.repeat(barLength);
+    const bar = "█".repeat(barLength);
     const failuresStr = `${failures}`.padEnd(12);
     console.log(`${category.padEnd(20)} ${failuresStr} ${bar}`);
   });
 
-  console.log('─'.repeat(80));
-  console.log(
-    `Total failure instances: ${Array.from(categoryFailures.values()).reduce((a, b) => a + b, 0)}`,
-  );
+  console.log("─".repeat(80));
+  console.log(`Total failure instances: ${Array.from(categoryFailures.values()).reduce((a, b) => a + b, 0)}`);
 
   // Highlight most problematic categories
   const topIssues = sortedCategories.slice(0, 3);
   if (topIssues.length > 0) {
-    console.log(
-      `⚠️  Most problematic: ${topIssues.map((c) => `${c.category} (${c.failures})`).join(', ')}`,
-    );
+    console.log(`⚠️  Most problematic: ${topIssues.map(c => `${c.category} (${c.failures})`).join(", ")}`);
   }
 }
 
@@ -151,17 +131,17 @@ function generateFailureHeatmap(progress: ProgressData[]) {
   });
 
   if (allTestIds.size === 0) {
-    console.log('\n✅ No failures recorded across any iteration!');
+    console.log("\n✅ No failures recorded across any iteration!");
     return;
   }
 
-  console.log('\n\n🗺️  Test Failure Heatmap:');
-  console.log('─'.repeat(80));
+  console.log("\n\n🗺️  Test Failure Heatmap:");
+  console.log("─".repeat(80));
 
   // Header row
-  const iterHeaders = progress.map((_, i) => `It${i + 1}`).join('  ');
-  console.log(`${'Test'.padEnd(40)} ${iterHeaders}`);
-  console.log('─'.repeat(80));
+  const iterHeaders = progress.map((_, i) => `It${i + 1}`).join("  ");
+  console.log(`${"Test".padEnd(40)} ${iterHeaders}`);
+  console.log("─".repeat(80));
 
   // Build failure map
   const failureMap = new Map<string, boolean[]>();
@@ -174,31 +154,33 @@ function generateFailureHeatmap(progress: ProgressData[]) {
   });
 
   // Sort by number of failures (most failures first)
-  const sortedTests = Array.from(failureMap.entries()).sort((a, b) => {
-    const aFails = a[1].filter((passed) => !passed).length;
-    const bFails = b[1].filter((passed) => !passed).length;
-    return bFails - aFails;
-  });
+  const sortedTests = Array.from(failureMap.entries()).sort(
+    (a, b) => {
+      const aFails = a[1].filter((passed) => !passed).length;
+      const bFails = b[1].filter((passed) => !passed).length;
+      return bFails - aFails;
+    }
+  );
 
   // Display heatmap
   sortedTests.forEach(([testId, results]) => {
-    const statusIcons = results.map((passed) => (passed ? '✓' : '✗')).join('   ');
+    const statusIcons = results.map((passed) => passed ? "✓" : "✗").join("   ");
     const failCount = results.filter((passed) => !passed).length;
     console.log(`${testId.padEnd(40)} ${statusIcons}  (${failCount} fails)`);
   });
 
-  console.log('─'.repeat(80));
-  console.log('Legend: ✓ = passed, ✗ = failed');
+  console.log("─".repeat(80));
+  console.log("Legend: ✓ = passed, ✗ = failed");
 }
 
 function generateReport() {
-  console.log('📊 RALPH Optimization Report\n');
-  console.log('='.repeat(80));
+  console.log("📊 RALPH Optimization Report\n");
+  console.log("=".repeat(80));
 
   // Find all model directories
-  const resultsDir = './results';
+  const resultsDir = "./results";
   if (!existsSync(resultsDir)) {
-    console.error('No results directory found');
+    console.error("No results directory found");
     return;
   }
 
@@ -207,7 +189,7 @@ function generateReport() {
     .map((d) => d.name);
 
   if (models.length === 0) {
-    console.error('No model results found');
+    console.error("No model results found");
     return;
   }
 
@@ -217,15 +199,15 @@ function generateReport() {
     if (progress.length === 0) return;
 
     console.log(`\n\n🤖 Model: ${model}`);
-    console.log('='.repeat(80));
+    console.log("=".repeat(80));
 
     const scores = progress.map((p) => p.avgScore);
     const costs = progress.map((p) => p.cost);
     const passRates = progress.map((p) => p.passed / p.totalTests);
 
-    generateASCIIChart(scores, 'Score Progression');
-    generateASCIIChart(passRates, 'Pass Rate Progression');
-    generateASCIIChart(costs, 'Cost per Iteration ($)');
+    generateASCIIChart(scores, "Score Progression");
+    generateASCIIChart(passRates, "Pass Rate Progression");
+    generateASCIIChart(costs, "Cost per Iteration ($)");
 
     // Show category breakdown
     generateCategoryBreakdown(progress);
@@ -243,9 +225,7 @@ function generateReport() {
     console.log(`   Iterations: ${progress.length}`);
     console.log(`   Initial Score: ${scores[0].toFixed(3)}`);
     console.log(`   Final Score: ${finalScore.toFixed(3)}`);
-    console.log(
-      `   Improvement: ${improvement > 0 ? '+' : ''}${improvement.toFixed(3)} (${((improvement / scores[0]) * 100).toFixed(1)}%)`,
-    );
+    console.log(`   Improvement: ${improvement > 0 ? "+" : ""}${improvement.toFixed(3)} (${((improvement / scores[0]) * 100).toFixed(1)}%)`);
     console.log(`   Total Cost: $${totalCost.toFixed(6)}`);
     if (totalTokens > 0) {
       console.log(`   Total Tokens: ${totalTokens.toLocaleString()}`);
@@ -255,12 +235,8 @@ function generateReport() {
       const totalInput = progress.reduce((sum, p) => sum + (p.tokens?.input || 0), 0);
       const totalOutput = progress.reduce((sum, p) => sum + (p.tokens?.output || 0), 0);
       console.log(`\n🎯 Token Breakdown:`);
-      console.log(
-        `   Input: ${totalInput.toLocaleString()} (${((totalInput / totalTokens) * 100).toFixed(1)}%)`,
-      );
-      console.log(
-        `   Output: ${totalOutput.toLocaleString()} (${((totalOutput / totalTokens) * 100).toFixed(1)}%)`,
-      );
+      console.log(`   Input: ${totalInput.toLocaleString()} (${((totalInput / totalTokens) * 100).toFixed(1)}%)`);
+      console.log(`   Output: ${totalOutput.toLocaleString()} (${((totalOutput / totalTokens) * 100).toFixed(1)}%)`);
     } else {
       console.log(`   (Token tracking not available for this run)`);
       console.log(`   Avg Cost/Iteration: $${(totalCost / progress.length).toFixed(6)}`);
@@ -269,21 +245,19 @@ function generateReport() {
 
   // Model comparison
   if (models.length > 1) {
-    console.log('\n\n🔄 Model Comparison');
-    console.log('='.repeat(80));
+    console.log("\n\n🔄 Model Comparison");
+    console.log("=".repeat(80));
 
-    const comparison = models
-      .map((model) => {
-        const progress = loadProgress(model);
-        if (progress.length === 0) return null;
+    const comparison = models.map((model) => {
+      const progress = loadProgress(model);
+      if (progress.length === 0) return null;
 
-        const finalScore = progress[progress.length - 1].avgScore;
-        const totalCost = progress.reduce((sum, p) => sum + p.cost, 0);
-        const totalTokens = progress.reduce((sum, p) => sum + (p.tokens?.total || 0), 0);
+      const finalScore = progress[progress.length - 1].avgScore;
+      const totalCost = progress.reduce((sum, p) => sum + p.cost, 0);
+      const totalTokens = progress.reduce((sum, p) => sum + (p.tokens?.total || 0), 0);
 
-        return { model, finalScore, totalCost, totalTokens, iterations: progress.length };
-      })
-      .filter(Boolean);
+      return { model, finalScore, totalCost, totalTokens, iterations: progress.length };
+    }).filter(Boolean);
 
     comparison.forEach((c) => {
       if (!c) return;
@@ -295,7 +269,7 @@ function generateReport() {
     });
   }
 
-  console.log('\n\n' + '='.repeat(80));
+  console.log("\n\n" + "=".repeat(80));
 }
 
 // Run if executed directly

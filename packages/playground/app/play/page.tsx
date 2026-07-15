@@ -1,9 +1,15 @@
 'use client';
 
-import { ExamplesPanel } from '@/components/examples-panel';
+import { Suspense, useState, useMemo, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { tokenize, parse, compile, evaluate } from '@cristianmartinez/yexp';
+import { Code2, PlayCircle, Database, AlertCircle, FileCode } from 'lucide-react';
+import { YexpEditor } from '@/components/yexp-editor';
 import { JsonEditor } from '@/components/json-editor';
 import { JsonViewer } from '@/components/json-viewer';
 import { PageHeader } from '@/components/page-header';
+import { ExamplesPanel } from '@/components/examples-panel';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -13,13 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { YexpEditor } from '@/components/yexp-editor';
-import { type Example, examples } from '@/lib/examples';
-import { compile, evaluate, parse, tokenize } from '@cristianmartinez/yexp';
-import { AlertCircle, Code2, Database, FileCode, PlayCircle } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { examples, type Example } from '@/lib/examples';
 import Split from 'react-split';
 
 function PlaygroundContent() {

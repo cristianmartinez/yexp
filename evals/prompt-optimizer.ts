@@ -5,7 +5,7 @@
  * Inspired by DSPy and prompt optimization research
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -13,9 +13,9 @@ const anthropic = new Anthropic({
 
 // Cost per model (as of 2026)
 const MODEL_COSTS = {
-  'claude-sonnet-4-5-20250929': { input: 3.0, output: 15.0 }, // per 1M tokens
-  'claude-haiku-4-5-20251001': { input: 0.8, output: 4.0 },
-  'claude-opus-4-6': { input: 15.0, output: 75.0 },
+  "claude-sonnet-4-5-20250929": { input: 3.0, output: 15.0 }, // per 1M tokens
+  "claude-haiku-4-5-20251001": { input: 0.8, output: 4.0 },
+  "claude-opus-4-6": { input: 15.0, output: 75.0 },
 };
 
 interface EvalResult {
@@ -33,7 +33,7 @@ interface OptimizationConfig {
   targetScore: number;
   maxCostPerQuery: number; // in dollars
   model: keyof typeof MODEL_COSTS;
-  optimizationStrategy: 'quality' | 'cost' | 'balanced';
+  optimizationStrategy: "quality" | "cost" | "balanced";
 }
 
 class PromptOptimizer {
@@ -49,7 +49,10 @@ class PromptOptimizer {
    */
   private calculateCost(inputTokens: number, outputTokens: number): number {
     const costs = MODEL_COSTS[this.config.model];
-    return (inputTokens / 1_000_000) * costs.input + (outputTokens / 1_000_000) * costs.output;
+    return (
+      (inputTokens / 1_000_000) * costs.input +
+      (outputTokens / 1_000_000) * costs.output
+    );
   }
 
   /**
@@ -57,7 +60,7 @@ class PromptOptimizer {
    */
   async evaluatePrompt(
     systemPrompt: string,
-    testCases: Array<{ input: string; expected: string; context: any }>,
+    testCases: Array<{ input: string; expected: string; context: any }>
   ): Promise<EvalResult> {
     const results: Array<{
       score: number;
@@ -74,7 +77,7 @@ class PromptOptimizer {
         system: systemPrompt,
         messages: [
           {
-            role: 'user',
+            role: "user",
             content: `Context: ${JSON.stringify(testCase.context)}\n\nTask: ${testCase.input}\n\nGenerate yexp expression:`,
           },
         ],
@@ -82,7 +85,7 @@ class PromptOptimizer {
 
       const latency = Date.now() - startTime;
       const response = message.content[0];
-      const output = response.type === 'text' ? response.text.trim() : '';
+      const output = response.type === "text" ? response.text.trim() : "";
 
       // Score the output (0-1)
       const score = this.scoreOutput(output, testCase.expected);
@@ -105,7 +108,7 @@ class PromptOptimizer {
 
     return {
       prompt: systemPrompt,
-      output: '', // Not applicable for batch eval
+      output: "", // Not applicable for batch eval
       score: avgScore,
       inputTokens: totalInputTokens,
       outputTokens: totalOutputTokens,
@@ -120,20 +123,26 @@ class PromptOptimizer {
   private scoreOutput(output: string, expected: string): number {
     if (output === expected) return 1.0;
 
-    const normalize = (s: string) => s.replace(/\s+/g, ' ').replace(/;$/, '').trim();
+    const normalize = (s: string) =>
+      s.replace(/\s+/g, " ").replace(/;$/, "").trim();
     if (normalize(output) === normalize(expected)) return 0.9;
 
     // Token overlap
     const outputTokens = new Set(output.split(/[\s|>().,]/));
     const expectedTokens = new Set(expected.split(/[\s|>().,]/));
-    const intersection = new Set([...outputTokens].filter((t) => expectedTokens.has(t)));
+    const intersection = new Set(
+      [...outputTokens].filter((t) => expectedTokens.has(t))
+    );
     return intersection.size / expectedTokens.size;
   }
 
   /**
    * Generate prompt variations using LLM meta-optimization
    */
-  async generatePromptVariations(basePrompt: string, feedback: string): Promise<string[]> {
+  async generatePromptVariations(
+    basePrompt: string,
+    feedback: string
+  ): Promise<string[]> {
     const metaPrompt = `You are a prompt optimization expert. Given a system prompt and performance feedback, generate 3 improved variations.
 
 Current prompt:
@@ -157,13 +166,13 @@ VARIANT 3:
 [full prompt text]`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
+      model: "claude-sonnet-4-5-20250929",
       max_tokens: 4096,
-      messages: [{ role: 'user', content: metaPrompt }],
+      messages: [{ role: "user", content: metaPrompt }],
     });
 
     const response = message.content[0];
-    if (response.type !== 'text') return [];
+    if (response.type !== "text") return [];
 
     // Parse variations
     const variants = response.text
@@ -179,7 +188,7 @@ VARIANT 3:
    */
   async optimize(
     initialPrompt: string,
-    testCases: Array<{ input: string; expected: string; context: any }>,
+    testCases: Array<{ input: string; expected: string; context: any }>
   ): Promise<{ bestPrompt: string; results: EvalResult[] }> {
     let currentPrompt = initialPrompt;
     let bestResult = await this.evaluatePrompt(currentPrompt, testCases);
@@ -204,11 +213,14 @@ VARIANT 3:
 
       // Generate variations
       console.log(`\n📝 Iteration ${iteration}: Generating variations...`);
-      const variations = await this.generatePromptVariations(currentPrompt, feedback);
+      const variations = await this.generatePromptVariations(
+        currentPrompt,
+        feedback
+      );
 
       // Evaluate each variation
       const variationResults = await Promise.all(
-        variations.map((v) => this.evaluatePrompt(v, testCases)),
+        variations.map((v) => this.evaluatePrompt(v, testCases))
       );
 
       // Select best based on strategy
@@ -217,7 +229,7 @@ VARIANT 3:
 
       if (this.isBetter(bestVariation, bestResult)) {
         console.log(
-          `✨ Improvement found! Score: ${bestVariation.score.toFixed(3)} → Cost: $${bestVariation.cost.toFixed(6)}`,
+          `✨ Improvement found! Score: ${bestVariation.score.toFixed(3)} → Cost: $${bestVariation.cost.toFixed(6)}`
         );
         bestResult = bestVariation;
         currentPrompt = bestVariation.prompt;
@@ -244,18 +256,22 @@ VARIANT 3:
     const issues: string[] = [];
 
     if (result.score < this.config.targetScore) {
-      issues.push(`Quality below target (${result.score.toFixed(3)} < ${this.config.targetScore})`);
+      issues.push(
+        `Quality below target (${result.score.toFixed(3)} < ${this.config.targetScore})`
+      );
     }
 
     if (result.cost > this.config.maxCostPerQuery) {
-      issues.push(`Cost too high ($${result.cost.toFixed(6)} > $${this.config.maxCostPerQuery})`);
+      issues.push(
+        `Cost too high ($${result.cost.toFixed(6)} > $${this.config.maxCostPerQuery})`
+      );
     }
 
     if (result.outputTokens > 200) {
       issues.push(`Output too verbose (${result.outputTokens} tokens)`);
     }
 
-    return issues.join('\n') || 'Performance acceptable';
+    return issues.join("\n") || "Performance acceptable";
   }
 
   /**
@@ -264,11 +280,11 @@ VARIANT 3:
   private selectBest(results: EvalResult[]): EvalResult {
     const { optimizationStrategy } = this.config;
 
-    if (optimizationStrategy === 'quality') {
+    if (optimizationStrategy === "quality") {
       return results.reduce((best, r) => (r.score > best.score ? r : best));
     }
 
-    if (optimizationStrategy === 'cost') {
+    if (optimizationStrategy === "cost") {
       return results.reduce((best, r) => (r.cost < best.cost ? r : best));
     }
 
@@ -286,11 +302,11 @@ VARIANT 3:
   private isBetter(a: EvalResult, b: EvalResult): boolean {
     const { optimizationStrategy } = this.config;
 
-    if (optimizationStrategy === 'quality') {
+    if (optimizationStrategy === "quality") {
       return a.score > b.score;
     }
 
-    if (optimizationStrategy === 'cost') {
+    if (optimizationStrategy === "cost") {
       return a.cost < b.cost && a.score >= b.score * 0.95; // Allow 5% quality drop
     }
 
@@ -309,14 +325,14 @@ Output ONLY the expression, no explanation.`;
 
   const testCases = [
     {
-      input: 'Get all active users',
-      expected: 'data.users |> filter(.active)',
-      context: { data: { users: 'array' } },
+      input: "Get all active users",
+      expected: "data.users |> filter(.active)",
+      context: { data: { users: "array" } },
     },
     {
-      input: 'Increment counter',
-      expected: 'state.count = state.count + 1',
-      context: { state: { count: 'number' } },
+      input: "Increment counter",
+      expected: "state.count = state.count + 1",
+      context: { state: { count: "number" } },
     },
   ];
 
@@ -324,11 +340,14 @@ Output ONLY the expression, no explanation.`;
     maxIterations: 5,
     targetScore: 0.95,
     maxCostPerQuery: 0.001, // $0.001 per query
-    model: 'claude-haiku-4-5-20251001', // Start with cheaper model
-    optimizationStrategy: 'balanced',
+    model: "claude-haiku-4-5-20251001", // Start with cheaper model
+    optimizationStrategy: "balanced",
   });
 
-  const { bestPrompt, results } = await optimizer.optimize(initialPrompt, testCases);
+  const { bestPrompt, results } = await optimizer.optimize(
+    initialPrompt,
+    testCases
+  );
 
   console.log(`\n📋 Best prompt:\n${bestPrompt}`);
 }
