@@ -17,7 +17,7 @@ type JsonAction =
 
 type JsonValue =
   | { type: 'literal'; value: any }
-  | { type: 'yexp'; expr: string }  // Expr expression for reading
+  | { type: 'yexp'; expr: string }  // Yexp expression for reading
   | { type: 'path'; path: string };
 ```
 
@@ -124,9 +124,9 @@ console.log(context.state.count); // 1
   - ✅ Version control for actions
   - ✅ Safe sandboxing
 
-## Hybrid Approach: Expr + JSON Actions ⭐
+## Hybrid Approach: Yexp + JSON Actions ⭐
 
-**Best practice**: Use Expr for computations, JSON actions for mutations
+**Best practice**: Use Yexp for computations, JSON actions for mutations
 
 ```json
 {
@@ -134,13 +134,13 @@ console.log(context.state.count); // 1
   "path": "state.total",
   "value": {
     "type": "yexp",
-    "yexp": "items |> map(.price * .qty) |> add"  // ← Expr handles computation
+    "yexp": "items |> map(.price * .qty) |> add"  // ← Yexp handles computation
   }
 }
 ```
 
 This gives you:
-- **Power** of Expr for complex calculations
+- **Power** of Yexp for complex calculations
 - **Safety** of JSON for controlled mutations
 - **Serializability** for database storage
 

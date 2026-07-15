@@ -2301,7 +2301,7 @@ function deletePath(context: ExecutionContext, path: string): void {
 const parsePathCache = new Map<string, string[]>();
 
 function parsePath(path: string): string[] {
-  let cached = parsePathCache.get(path);
+  const cached = parsePathCache.get(path);
   if (cached) return cached;
 
   const parts: string[] = [];

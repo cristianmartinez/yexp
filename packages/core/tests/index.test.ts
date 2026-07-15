@@ -190,7 +190,7 @@ describe('integration', () => {
       expect(run('1 === 1', ctx())).toBe(true);
       expect(run('1 === "1"', ctx())).toBe(false); // No type coercion
       expect(run('0 === false', ctx())).toBe(false); // No type coercion
-      // Note: Expr treats null and undefined as the same value (both are null)
+      // Note: Yexp treats null and undefined as the same value (both are null)
       expect(run('null === undefined', ctx())).toBe(true);
       expect(run('null === null', ctx())).toBe(true);
       expect(run('"hello" === "hello"', ctx())).toBe(true);
@@ -201,7 +201,7 @@ describe('integration', () => {
       expect(run('1 !== 2', ctx())).toBe(true);
       expect(run('1 !== "1"', ctx())).toBe(true); // No type coercion
       expect(run('0 !== false', ctx())).toBe(true); // No type coercion
-      // Note: Expr treats null and undefined as the same value (both are null)
+      // Note: Yexp treats null and undefined as the same value (both are null)
       expect(run('null !== undefined', ctx())).toBe(false);
       expect(run('1 !== 1', ctx())).toBe(false);
       expect(run('"hello" !== "hello"', ctx())).toBe(false);

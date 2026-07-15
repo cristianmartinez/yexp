@@ -88,7 +88,7 @@ The default runtime does not expose JavaScript globals, Node.js APIs, the filesy
 
 Yexp is not yet a complete untrusted-code resource sandbox. Some operations can consume significant CPU or memory, and time-dependent or random built-ins are not deterministic. Apply application-level input limits and execution isolation when evaluating expressions supplied by untrusted users. Host functions extend the runtime's authority and must be reviewed as part of the host application's security model.
 
-See the repository's [security documentation](https://github.com/cristianmartinez/yexp/blob/main/docs/security.md) for the current threat model.
+See the repository's [security policy](https://github.com/cristianmartinez/yexp/blob/main/SECURITY.md) for the current threat model and private reporting process.
 
 ## API
 
@@ -100,7 +100,7 @@ See the repository's [security documentation](https://github.com/cristianmartine
 
 ## CLI
 
-Install [`yexp`](https://www.npmjs.com/package/yexp) globally or run it directly with `npx yexp` for the `yexp` command.
+Install [`@cristianmartinez/yexp-cli`](https://www.npmjs.com/package/@cristianmartinez/yexp-cli) globally or run it with `npx @cristianmartinez/yexp-cli`. The installed executable is named `yexp`.
 
 ## License
 

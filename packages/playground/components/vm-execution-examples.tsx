@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { VMExecutionDemo } from './vm-execution-demo';
 import { Button } from './ui/button';
+import { VMExecutionDemo } from './vm-execution-demo';
 
 interface Example {
   id: string;
@@ -18,7 +18,7 @@ const EXAMPLES: Example[] = [
     name: 'Simple Arithmetic',
     description: 'See operator precedence and basic math operations',
     expression: '1 + 2 * 3',
-    context: `{}`,
+    context: '{}',
   },
   {
     id: 'conditional',
