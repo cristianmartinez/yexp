@@ -2,8 +2,8 @@
  * Test the new validation approach with pre-computed expected results
  */
 
-import { loadDataset } from "./dataset-loader";
-import { compile, run } from "@cristianmartinez/yexp";
+import { loadDataset } from './dataset-loader';
+import { compile, run } from '@cristianmartinez/yexp';
 
 function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;
@@ -15,7 +15,7 @@ function deepEqual(a: any, b: any): boolean {
     return a.every((val, i) => deepEqual(val, b[i]));
   }
 
-  if (typeof a === "object" && typeof b === "object") {
+  if (typeof a === 'object' && typeof b === 'object') {
     const keysA = Object.keys(a).sort();
     const keysB = Object.keys(b).sort();
     if (keysA.length !== keysB.length) return false;
@@ -26,22 +26,24 @@ function deepEqual(a: any, b: any): boolean {
   return false;
 }
 
-console.log("🧪 Testing new validation approach\n");
-console.log("This demonstrates how we validate generated expressions against pre-computed results.\n");
+console.log('🧪 Testing new validation approach\n');
+console.log(
+  'This demonstrates how we validate generated expressions against pre-computed results.\n',
+);
 
 const dataset = loadDataset();
 
 // Pick a few test cases to demonstrate
 const testCases = [
-  dataset.find((t) => t.id === "filter-active"),
-  dataset.find((t) => t.id === "complex-nested-filter"),
-  dataset.find((t) => t.id === "string-uppercase"),
+  dataset.find((t) => t.id === 'filter-active'),
+  dataset.find((t) => t.id === 'complex-nested-filter'),
+  dataset.find((t) => t.id === 'string-uppercase'),
 ];
 
 testCases.forEach((testCase) => {
   if (!testCase) return;
 
-  console.log(`\n${"=".repeat(60)}`);
+  console.log(`\n${'='.repeat(60)}`);
   console.log(`Test: ${testCase.id}`);
   console.log(`Input: "${testCase.input}"`);
   console.log(`Expected Expression: ${testCase.expected}`);
@@ -72,16 +74,16 @@ testCases.forEach((testCase) => {
 
       const matches = deepEqual(result, testCase.expectedResult);
       console.log(`   Result matches: ${matches}`);
-      console.log(`   Score: ${matches ? "1.0 (PASS)" : "0.0 (FAIL)"}`);
+      console.log(`   Score: ${matches ? '1.0 (PASS)' : '0.0 (FAIL)'}`);
     } catch (error) {
-      console.log(`   Runtime error: ${error instanceof Error ? error.message : "unknown"}`);
+      console.log(`   Runtime error: ${error instanceof Error ? error.message : 'unknown'}`);
     }
   }
 
   // Simulate testing with a semantically equivalent expression with different variable names
   // (This demonstrates the key improvement - it now passes even with different variable names)
-  if (testCase.id === "complex-nested-filter") {
-    const alternativeExpr = "data.users |> filter((user) => user.tasks |> some(.completed))";
+  if (testCase.id === 'complex-nested-filter') {
+    const alternativeExpr = 'data.users |> filter((user) => user.tasks |> some(.completed))';
     console.log(`\n✅ Testing with alternative (semantic equivalent): ${alternativeExpr}`);
 
     const altCompiles = (() => {
@@ -106,18 +108,20 @@ testCases.forEach((testCase) => {
 
         const matches = deepEqual(result, testCase.expectedResult);
         console.log(`   Result matches: ${matches}`);
-        console.log(`   Score: ${matches ? "1.0 (PASS) ← This would have been FALSE NEGATIVE before!" : "0.0 (FAIL)"}`);
+        console.log(
+          `   Score: ${matches ? '1.0 (PASS) ← This would have been FALSE NEGATIVE before!' : '0.0 (FAIL)'}`,
+        );
       } catch (error) {
-        console.log(`   Runtime error: ${error instanceof Error ? error.message : "unknown"}`);
+        console.log(`   Runtime error: ${error instanceof Error ? error.message : 'unknown'}`);
       }
     }
   }
 });
 
-console.log(`\n${"=".repeat(60)}`);
-console.log("\n✅ Validation system records for each test:");
-console.log("   1. Does the expression compile? (true/false)");
-console.log("   2. Does the result match expected? (true/false)");
-console.log("   3. Compilation error (if any)");
-console.log("   4. Runtime error (if any)");
-console.log("\n💡 This eliminates false negatives from semantically equivalent expressions!");
+console.log(`\n${'='.repeat(60)}`);
+console.log('\n✅ Validation system records for each test:');
+console.log('   1. Does the expression compile? (true/false)');
+console.log('   2. Does the result match expected? (true/false)');
+console.log('   3. Compilation error (if any)');
+console.log('   4. Runtime error (if any)');
+console.log('\n💡 This eliminates false negatives from semantically equivalent expressions!');
