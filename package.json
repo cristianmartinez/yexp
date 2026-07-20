@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "portless": "^0.15.3",
+    "portless": "^0.15.4",
     "turbo": "^2.10.5",
     "typescript": "^5.9.3"
   },
