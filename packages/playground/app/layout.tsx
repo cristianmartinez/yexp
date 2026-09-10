@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './site.css';
 
 export const metadata: Metadata = {
-  title: 'Yexp Playground',
-  description: 'Interactive playground for the Yexp expression language',
+  title: { default: 'Yexp — An expression language for JSON', template: '%s | Yexp' },
+  description:
+    'Query, transform, and make decisions with JSON. A compact, embeddable expression language with JavaScript-shaped syntax and a bytecode runtime.',
 };
 
 export default function RootLayout({

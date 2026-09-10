@@ -1,58 +1,66 @@
-import { VMExecutionDemo } from '../components/vm-execution-demo'
+import { ArrowUpRight, Braces, BookOpen, Terminal, Workflow } from 'lucide-react'
+import Link from 'next/link'
 
-# Yexp Documentation
+# Meet Yexp
 
-Welcome to **Yexp** — a fast expression language with JavaScript-like syntax and query-language superpowers.
+<div className="docs-lead">A small expression language for querying data, transforming JSON, and putting your application’s rules into words.</div>
 
-## VM Execution Visualizer
+Yexp combines familiar JavaScript-shaped syntax with selectors and pipelines built for data. Embed it in your application or use it from the terminal.
 
-Watch how expressions execute step-by-step in the bytecode virtual machine:
+<div className="docs-start-grid">
+  <Link href="/docs/getting-started"><Terminal size={22} /><strong>Start building <ArrowUpRight size={16} /></strong><span>Install Yexp and run your first expression in an app or the terminal.</span></Link>
+  <Link href="/docs/syntax"><Braces size={22} /><strong>Learn the language <ArrowUpRight size={16} /></strong><span>Start with property access. Add filters, projections, and pipelines.</span></Link>
+</div>
 
-<VMExecutionDemo
-  initialExpression="$.items |> filter(.price < 100) |> map(.name) |> join(', ')"
-  initialContext={`{
-  "items": [
-    { "name": "Laptop", "price": 999 },
-    { "name": "Mouse", "price": 25 },
+## Your first expression
+
+Suppose you have a list of products and want the names of those under $100:
+
+```json filename="products.json"
+{
+  "products": [
     { "name": "Keyboard", "price": 75 },
     { "name": "Monitor", "price": 350 },
-    { "name": "USB Cable", "price": 12 }
+    { "name": "Mouse", "price": 25 }
   ]
-}`}
-/>
-
-## What is Yexp?
-
-Yexp is an expression engine designed for:
-- **Safe evaluation** - No arbitrary code execution
-- **Predictable semantics** - Explicit input, context, and environment
-- **High performance** - Compiles to bytecode for fast execution
-- **Familiar syntax** - JavaScript-inspired expressions with quick-query selectors
-
-## Quick Example
-
-```javascript
-// Filter and transform data
-$.products
-  .filter(p => p.price < 100)
-  .map(p => p.name)
-  .join(", ")
+}
 ```
 
-## Key Features
+Start at the input with `$`, select matching products, then project their names:
 
-- ✓ Property access & optional chaining
-- ✓ Array methods (filter, map, reduce, etc.)
-- ✓ Higher-order functions & lambdas
-- ✓ Template literals
-- ✓ Pipe operator for composition
-- ✓ Method chaining syntax
-- ✓ Spread operators
-- ✓ Predicate selectors, wildcards, negative indices, and recursive descent
+```javascript filename="query.yexp"
+$.products[.price < 100][*].name
+// → ["Keyboard", "Mouse"]
+```
 
-## Learn More
+Prefer JavaScript-style methods? The same query can be written as:
 
-- [Getting Started](/docs/getting-started) - Install and use Yexp
-- [Language Guide](/docs/syntax) - Learn Yexp from simple expressions to advanced queries
-- [Language Specification](/docs/spec) - Exact semantics, built-ins, grammar, and conformance
-- [Architecture](/docs/architecture) - How the VM works
+```javascript
+$.products.filter(p => p.price < 100).map(p => p.name)
+```
+
+[Try an expression in the playground →](/play)
+
+## From expression to application
+
+Compile your expression once and evaluate it against different inputs. Yexp executes bytecode instead of using `eval()` or generating JavaScript.
+
+```typescript filename="app.ts"
+import { compile, evaluate } from '@cristianmartinez/yexp'
+
+const eligible = compile('$.total >= 100 && $.member')
+
+evaluate(eligible, { total: 150, member: true }) // true
+evaluate(eligible, { total: 50, member: true })  // false
+```
+
+The input lives at `$`. Pass auxiliary data explicitly through `$context` and `$env`. See [Getting started](/docs/getting-started) for installation, runtime usage, and CLI examples.
+
+## Choose your next step
+
+<div className="docs-start-grid docs-reference-grid">
+  <Link href="/docs/spec"><BookOpen size={21} /><strong>Language specification <ArrowUpRight size={16} /></strong><span>Exact semantics, built-ins, precedence, and error behavior.</span></Link>
+  <Link href="/docs/architecture"><Workflow size={21} /><strong>Under the hood <ArrowUpRight size={16} /></strong><span>Follow the path from source text to the bytecode virtual machine.</span></Link>
+</div>
+
+Want to see execution in motion? [Step through the VM visualizer →](/docs/vm-execution)
