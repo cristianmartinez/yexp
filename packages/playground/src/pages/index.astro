@@ -1,0 +1,86 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../layouts/Header.astro';
+import { formatInstruction } from '../../lib/format-instruction';
+import { compile, evaluate } from '@cristianmartinez/yexp';
+const expression = '$.price * $.quantity';
+const program = compile(expression);
+const integration = `import { compile, evaluate } from '@cristianmartinez/yexp';
+
+// An expression becomes a reusable program.
+const total = compile('$.price * $.quantity');
+
+// Same bytecode. Different input.
+evaluate(total, { price: 50, quantity: 3 }); // 150
+evaluate(total, { price: 25, quantity: 2 }); // 50`;
+const patterns = [
+  [
+    '01',
+    'Find your way through JSON.',
+    'Nested properties, optional chaining, and a fallback when data is missing.',
+    '$.user.profile.name ?? "Anonymous"',
+  ],
+  [
+    '02',
+    'Keep only what matters.',
+    'Filter a collection in place. Project exactly the fields you need.',
+    '$.products[.price < 100][*].name',
+  ],
+  [
+    '03',
+    'Let one step feed the next.',
+    'Compose a transformation with pipes and familiar arrow functions.',
+    '$.users |> filter(.active) |> map(.name)',
+  ],
+];
+---
+<Base>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <Header />
+  <main id="main">
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <canvas id="hero-shader" aria-hidden="true"></canvas>
+      <div class="hero-content wrap">
+      <h1 id="hero-title" class="sr-only">Yexp — an expression language for JSON</h1>
+      <div class="hero-intro">
+        <p class="hero-detail">An expression language for JSON.<br />Compile once. Evaluate against any input.</p>
+        <a class="text-link" href="/docs/getting-started">Read the documentation ↗</a>
+      </div>
+      <div class="hero-display">
+        <div class="featured-expression">
+          <div class="display-caption"><span class="display-label" id="display-phase">expression.yexp</span><span class="display-label" id="result-type">source → number</span></div>
+          <code id="source-code" aria-hidden="true">{expression}</code>
+          <span class="sr-only" id="expression-description" role="status">{expression} evaluates to {JSON.stringify(evaluate(program, { price: 50, quantity: 3 }))}.</span>
+          <div class="presets" role="group" aria-label="Compilation examples"><button type="button" data-preset="total" aria-pressed="true">Arithmetic</button><button type="button" data-preset="rule" aria-pressed="false">Condition</button><button type="button" data-preset="query" aria-pressed="false">Projection</button></div>
+        </div>
+      </div>
+      <div class="hero-toolbar"><a class="button-primary" href="/play">Run your own expression ↗</a><button class="install" id="copy-install" type="button" aria-label="Copy npm install command"><span>$</span><code>npm i @cristianmartinez/yexp</code><span id="copy-label">⧉</span></button></div>
+      <div class="compilation" id="compilation">
+        <div class="bench-heading"><span><i></i> INSIDE THE ENGINE</span><span class="bench-caption">Source → bytecode → result</span><button id="motion-toggle" type="button" aria-pressed="false" aria-label="Pause animation">Ⅱ</button></div>
+        <div class="pipeline-scene">
+          <div class="pipeline-grid">
+            <div class="pipeline-stage source-stage"><div class="stage-label"><span>01 / INPUT</span><span>JSON</span></div><div class="input-data" id="input-data">{'{ price: 50, quantity: 3 }'}</div><span class="stage-foot">Data enters at $.</span></div>
+            <div class="pipeline-stage ast-stage"><div class="stage-label"><span>02 / PARSE</span><span>AST</span></div><div class="ast-tree" id="ast-tree"><span class="tree-root">Binary · *</span><div class="tree-branches"><span>$.price</span><span>$.quantity</span></div></div><span class="stage-foot">Parsed expression tree.</span></div>
+            <div class="pipeline-stage bytecode-stage"><div class="stage-label"><span>03 / COMPILE</span><span>BYTECODE</span></div><div id="bytecode-list" class="bytecode-list">{program.code.map((instruction, i) => <div class="instruction"><span>{String(i).padStart(2,'0')}</span><code>{formatInstruction(instruction, program)}</code></div>)}</div><span class="stage-foot">Reusable instructions.</span></div>
+
+          </div>
+        </div>
+        <div class="bench-bottom"><span>Inspectable bytecode · Explicit data roots · No eval()</span><a href="/docs/vm-execution">Step through the VM ↗</a></div>
+      </div>
+      <div class="hero-notes"><span>TypeScript & JavaScript</span><span>Zero runtime dependencies</span><span>MIT licensed</span><span>Application + CLI</span></div>
+      </div>
+    </section>
+    <section class="language wrap" id="language" aria-labelledby="language-title">
+      <div class="section-intro"><span class="eyebrow">01 / THE LANGUAGE</span><h2 id="language-title">Less ceremony.<br />More <em>meaning.</em></h2><p>JavaScript-shaped expressions, with a few thoughtful additions for the way you actually work with data.</p><a class="text-link" href="/docs/syntax">Explore the language <span>↗</span></a></div>
+      <div class="patterns">{patterns.map(([number, title, description, code]) => <div class="pattern"><span class="pattern-number">{number}</span><div><h3>{title}</h3><p>{description}</p><code>{code}</code></div></div>)}</div>
+    </section>
+    <section class="runtime" aria-labelledby="runtime-title"><div class="wrap runtime-grid">
+      <div class="section-intro"><span class="eyebrow">02 / THE RUNTIME</span><h2 id="runtime-title">Write it once.<br />Run it <em>again.</em></h2><p>Compile an expression into a portable program. Cache it, serialize it, or evaluate it against the next input.</p><p>The VM runs bytecode with explicit data roots: <code>$</code>, <code>$context</code>, and <code>$env</code>. Your application decides what else it can access.</p><a class="text-link" href="/docs/architecture">Meet the virtual machine <span>↗</span></a></div>
+      <div class="integration-code"><div class="code-heading"><span><i></i> app.ts</span><span>TYPESCRIPT</span></div><pre><code>{integration}</code></pre><div class="code-note"><span>↳</span> No generated JavaScript. No ambient globals.</div></div>
+    </div></section>
+    <section class="terminal wrap"><div><span class="eyebrow">03 / THE TERMINAL</span><h2>A small tool.<br />In your <em>toolchain.</em></h2><p>JSON in. An expression. A result out.<br />The same language, right in your shell.</p><a class="text-link" href="/docs/getting-started#use-yexp-in-the-terminal">Get the CLI <span>↗</span></a></div><div class="shell"><div class="shell-title">~/your-project <span>— zsh</span></div><pre><code><span class="shell-prompt">$ </span>{`echo '{"name":"Ada"}' | \\\n  npx @cristianmartinez/yexp-cli '.name'`}</code></pre><div class="shell-output">"Ada"<span>↳ stdout</span></div></div></section>
+    <section class="closing wrap"><span class="eyebrow">OPEN SOURCE. READY TO EMBED.</span><h2>Put your data<br />into <em>words.</em></h2><a class="button-primary" href="/play">Open the playground <span>↗</span></a></section>
+  </main>
+  <footer class="wrap site-footer"><a class="wordmark" href="/">yexp<span class="brand-dot">.</span></a><span>Made by Cristian Martinez · MIT</span><nav aria-label="Further reading"><a href="/docs/spec">Specification</a><a href="/notebook">Notebook</a><a href="https://github.com/cristianmartinez/yexp">Source ↗</a></nav></footer>
+  <script>import '../scripts/hero';</script>
+</Base>

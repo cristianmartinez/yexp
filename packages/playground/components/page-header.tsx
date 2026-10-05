@@ -1,7 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { BookOpen, FileText, Home, Zap } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
 
 interface PageHeaderProps {
   currentPage: 'home' | 'playground' | 'notebook' | 'docs';
@@ -10,8 +8,8 @@ interface PageHeaderProps {
 export function PageHeader({ currentPage }: PageHeaderProps) {
   return (
     <div className="flex items-center justify-between">
-      <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <Image
+      <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <img
           src="/yexp-logo.svg"
           alt="Yexp"
           width={40}
@@ -19,7 +17,7 @@ export function PageHeader({ currentPage }: PageHeaderProps) {
           className="h-10 w-10 dark:invert"
         />
         <h1 className="text-sm font-bold text-primary">YEXP</h1>
-      </Link>
+      </a>
       <div className="flex gap-2">
         <Button
           variant={currentPage === 'home' ? 'default' : 'outline'}
@@ -32,10 +30,10 @@ export function PageHeader({ currentPage }: PageHeaderProps) {
               Home
             </>
           ) : (
-            <Link href="/">
+            <a href="/">
               <Home className="w-4 h-4" />
               Home
-            </Link>
+            </a>
           )}
         </Button>
         <Button
@@ -49,10 +47,10 @@ export function PageHeader({ currentPage }: PageHeaderProps) {
               Playground
             </>
           ) : (
-            <Link href="/play">
+            <a href="/play">
               <Zap className="w-4 h-4" />
               Playground
-            </Link>
+            </a>
           )}
         </Button>
         <Button
@@ -66,10 +64,10 @@ export function PageHeader({ currentPage }: PageHeaderProps) {
               Notebook
             </>
           ) : (
-            <Link href="/notebook">
+            <a href="/notebook">
               <BookOpen className="w-4 h-4" />
               Notebook
-            </Link>
+            </a>
           )}
         </Button>
         <Button
@@ -83,10 +81,10 @@ export function PageHeader({ currentPage }: PageHeaderProps) {
               Docs
             </>
           ) : (
-            <Link href="/docs">
+            <a href="/docs">
               <FileText className="w-4 h-4" />
               Docs
-            </Link>
+            </a>
           )}
         </Button>
       </div>

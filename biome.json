@@ -41,6 +41,16 @@
     }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "bun.lock", ".turbo", ".next", "out", "coverage", "results"]
+    "ignore": [
+      "node_modules",
+      "dist",
+      "bun.lock",
+      ".turbo",
+      ".next",
+      ".astro",
+      "out",
+      "coverage",
+      "results"
+    ]
   }
 }

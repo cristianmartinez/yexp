@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "biome check app/ components/ lib/ mdx-components.tsx next.config.js --diagnostic-level=error",
-    "check": "tsc --noEmit"
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "start": "astro preview --host 127.0.0.1",
+    "lint": "biome check components/ lib/ src/scripts/ astro.config.mjs --diagnostic-level=error",
+    "check": "astro check"
   },
   "dependencies": {
     "@cristianmartinez/yexp": "workspace:*",
@@ -20,16 +20,18 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.469.0",
-    "next": "^15.5.20",
-    "nextra": "^4.6.1",
-    "nextra-theme-docs": "^4.6.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-json-tree": "^0.18.0",
     "react-split": "^2.0.14",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.14",
+    "astro": "^6.0.0",
+    "@astrojs/react": "^5.0.0",
+    "@astrojs/mdx": "^5.0.0",
+    "gsap": "^3.14.0",
+    "@tailwindcss/vite": "^4.3.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.2",
@@ -38,6 +40,7 @@
     "@types/react-dom": "^19.2.3",
     "monaco-editor": "^0.55.1",
     "tailwindcss": "^4.3.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@astrojs/check": "^0.9.0"
   }
 }

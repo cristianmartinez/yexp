@@ -14,6 +14,7 @@
     "playground": "turbo dev --filter=@yexp/playground",
     "playground:portless": "portless yexp bun run --cwd packages/playground dev",
     "playground:build": "turbo build --filter=@yexp/playground",
+    "deploy": "bun run playground:build && wrangler deploy",
     "release:check": "node scripts/verify-release.mjs",
     "release:pack": "node scripts/verify-packages.mjs",
     "ci": "bun run format:check && bun run lint && bun run check && bun run test"
@@ -22,7 +23,8 @@
     "@biomejs/biome": "^1.9.4",
     "portless": "^0.15.3",
     "turbo": "^2.10.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.147.0"
   },
   "overrides": {
     "@xmldom/xmldom": "0.9.10",

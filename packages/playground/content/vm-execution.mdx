@@ -1,84 +1,40 @@
 import { VMExecutionExamples } from '../components/vm-execution-examples'
 
-export const metadata = {
-  title: 'VM Execution Visualizer',
-  description: 'Watch how the stack-based VM executes bytecode step-by-step'
-}
+# VM visualizer
 
-# VM Execution Visualizer
+Follow an expression through the stack-based virtual machine. Run an example, step through its bytecode, or change the expression and input yourself.
 
-An interactive visualization showing how Yexp's stack-based virtual machine executes bytecode instructions in real-time.
+<VMExecutionExamples client:only="react" />
 
-## How It Works
+## Reading the execution
 
-The Yexp VM is a **stack-based virtual machine** that:
-1. **Reads bytecode** instructions sequentially
-2. **Instruction Pointer (IP)** tracks current position
-3. **Stack** holds intermediate values (LIFO - Last In, First Out)
-4. **Jumps** enable control flow (conditionals, loops, lambdas)
+The arrow marks the next instruction. **Step** executes it and moves the instruction pointer; **Run** advances automatically every half second. Step backward to inspect an earlier state, or reset to start again.
 
-## Interactive Examples
+The stack holds intermediate values. Its top value appears first. When execution completes, the final result appears below the stack.
 
-Select an example below to see how different expressions execute step-by-step:
+## From bytecode to a result
 
-<VMExecutionExamples />
+For `1 + 2 * 3`, the compiler emits six instructions:
 
-## What to Watch For
+| Instruction | Effect |
+| --- | --- |
+| `CONST 1` | Push `1` onto the stack |
+| `CONST 2` | Push `2` |
+| `CONST 3` | Push `3` |
+| `MUL` | Pop `2` and `3`, then push `6` |
+| `ADD` | Pop `1` and `6`, then push `7` |
+| `RETURN` | Return the top value |
 
-### Jump Instructions
-Watch the IP jump around when:
-- **Conditionals** (`? :`) - Jump based on condition
-- **Logical operators** (`&&`, `||`) - Short-circuit evaluation
-- **Lambdas** - Jump into function, execute, jump back
+The visualizer uses the actual Yexp VM and its debug callbacks. The displayed instructions and values come from the same runtime used in your application.
 
-### Stack Operations
-See how the stack changes:
-- **Binary operations** - Pop 2 values, push 1 result
-- **Array/object construction** - Pop multiple values, push collection
-- **Function calls** - Pop arguments, push return value
-- **Spread operators** - Flatten and merge collections
+## Control flow
 
-### Complex Patterns
-- **Pipelines** - Chain operations left-to-right
-- **Template literals** - Evaluate expressions within strings
-- **Optional chaining** - Safe navigation with null checks
+Choose a conditional or logical expression to see the instruction pointer jump. A ternary evaluates one branch; `&&` and `||` short-circuit when the left operand determines the result.
 
-## Controls
+Pipelines, selectors, and lambdas can produce more involved programs. Choose a collection example and step through it to inspect how the stack changes.
 
-**Playback:**
-- **Play/Pause** ▶️ - Auto-step through execution (500ms per step)
-- **Step Forward** ⏭️ - Execute next instruction
-- **Step Backward** ⏮️ - Go back one step
-- **Reset** 🔄 - Start from beginning
+## Try your own expression
 
-**Customization:**
-- Switch to **Expression** tab to modify code
-- Switch to **Context** tab to change data/state/env
-- Changes instantly compile and restart execution
+Edit the expression or its JSON input above. Changes compile a new program and reset execution. Invalid syntax or input shows an error beside the editors.
 
-## Understanding the Panels
-
-### Left: Bytecode Instructions
-- **Blue highlight** = current instruction executing
-- **Gray text** = already executed
-- **Format**: `[index] OPCODE arguments`
-- **Jump targets** show `-> index` for control flow
-
-### Right: Stack
-- **Bottom-up display** (top of stack at bottom)
-- **Animations** when values pushed/popped
-- **Index labels** `[0]`, `[1]`, etc. from bottom
-- **Result** appears when execution completes
-
-## Try Your Own!
-
-Type any Yexp expression and see how it executes. The visualizer supports:
-- ✅ All arithmetic, comparison, and logical operators
-- ✅ Arrays, objects, and spread operators
-- ✅ Template literals and string operations
-- ✅ Conditionals and control flow
-- ✅ Lambdas and higher-order functions
-- ✅ Property access and optional chaining
-- ✅ Pipes and method chaining
-
-**Stack-based architecture** = No registers, just push and pop!
+For a larger editor with AST inspection, use the [playground](/play). Read the [architecture guide](/docs/architecture) for the compiler and runtime design, or the [language guide](/docs/syntax) for supported syntax.

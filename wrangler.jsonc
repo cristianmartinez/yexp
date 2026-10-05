@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "yexp",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    "directory": "./packages/playground/dist",
+    "html_handling": "auto-trailing-slash"
+  },
+  "routes": [{ "pattern": "yexp.cristianmartinez.co", "custom_domain": true }]
+}

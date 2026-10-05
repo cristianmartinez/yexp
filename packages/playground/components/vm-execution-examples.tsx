@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from './ui/button';
 import { VMExecutionDemo } from './vm-execution-demo';
 
 interface Example {
@@ -117,28 +116,22 @@ export function VMExecutionExamples() {
   const selected = EXAMPLES.find((ex) => ex.id === selectedId) || EXAMPLES[0];
 
   return (
-    <div className="space-y-4">
-      {/* Example Selector */}
-      <div className="flex flex-wrap gap-2">
-        {EXAMPLES.map((example) => (
-          <Button
-            key={example.id}
-            variant={selectedId === example.id ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedId(example.id)}
-            className="text-xs"
-          >
-            {example.name}
-          </Button>
-        ))}
+    <div className="vm-lab">
+      <div className="vm-example-select">
+        <label htmlFor="vm-example">Example</label>
+        <select
+          id="vm-example"
+          value={selectedId}
+          onChange={(event) => setSelectedId(event.target.value)}
+        >
+          {EXAMPLES.map((example) => (
+            <option key={example.id} value={example.id}>
+              {example.name}
+            </option>
+          ))}
+        </select>
+        <span className="vm-example-description">{selected.description}</span>
       </div>
-
-      {/* Description */}
-      <div className="text-sm text-muted-foreground italic border-l-2 border-primary pl-3">
-        {selected.description}
-      </div>
-
-      {/* Demo */}
       <VMExecutionDemo
         key={selected.id}
         initialExpression={selected.expression}

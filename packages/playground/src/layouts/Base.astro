@@ -1,0 +1,25 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  tools?: boolean;
+}
+const {
+  title = 'Yexp — Small expressions. Real execution.',
+  description = 'A compact expression language for JSON. Compile familiar syntax into inspectable bytecode and run it in a portable virtual machine.',
+  tools = false,
+} = Astro.props;
+import '../styles/site.css';
+---
+<!doctype html>
+<html lang="en" class:list={{ dark: tools }}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f5f3ed" />
+    <link rel="icon" type="image/svg+xml" href="/yexp-logo.svg" />
+    <title>{title}</title>
+  </head>
+  <body><slot /></body>
+</html>

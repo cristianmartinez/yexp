@@ -1,5 +1,4 @@
 import { ArrowUpRight, Braces, BookOpen, Terminal, Workflow } from 'lucide-react'
-import Link from 'next/link'
 
 # Meet Yexp
 
@@ -8,8 +7,8 @@ import Link from 'next/link'
 Yexp combines familiar JavaScript-shaped syntax with selectors and pipelines built for data. Embed it in your application or use it from the terminal.
 
 <div className="docs-start-grid">
-  <Link href="/docs/getting-started"><Terminal size={22} /><strong>Start building <ArrowUpRight size={16} /></strong><span>Install Yexp and run your first expression in an app or the terminal.</span></Link>
-  <Link href="/docs/syntax"><Braces size={22} /><strong>Learn the language <ArrowUpRight size={16} /></strong><span>Start with property access. Add filters, projections, and pipelines.</span></Link>
+  <a href="/docs/getting-started"><Terminal size={22} /><strong>Start building <ArrowUpRight size={16} /></strong><span>Install Yexp and run your first expression in an app or the terminal.</span></a>
+  <a href="/docs/syntax"><Braces size={22} /><strong>Learn the language <ArrowUpRight size={16} /></strong><span>Start with property access. Add filters, projections, and pipelines.</span></a>
 </div>
 
 ## Your first expression
@@ -59,8 +58,8 @@ The input lives at `$`. Pass auxiliary data explicitly through `$context` and `$
 ## Choose your next step
 
 <div className="docs-start-grid docs-reference-grid">
-  <Link href="/docs/spec"><BookOpen size={21} /><strong>Language specification <ArrowUpRight size={16} /></strong><span>Exact semantics, built-ins, precedence, and error behavior.</span></Link>
-  <Link href="/docs/architecture"><Workflow size={21} /><strong>Under the hood <ArrowUpRight size={16} /></strong><span>Follow the path from source text to the bytecode virtual machine.</span></Link>
+  <a href="/docs/spec"><BookOpen size={21} /><strong>Language specification <ArrowUpRight size={16} /></strong><span>Exact semantics, built-ins, precedence, and error behavior.</span></a>
+  <a href="/docs/architecture"><Workflow size={21} /><strong>Under the hood <ArrowUpRight size={16} /></strong><span>Follow the path from source text to the bytecode virtual machine.</span></a>
 </div>
 
 Want to see execution in motion? [Step through the VM visualizer →](/docs/vm-execution)

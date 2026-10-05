@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../layouts/Header.astro';
+import '../../styles/docs.css';
+import type { MDXInstance } from 'astro';
+import { getHeadings as getSpecHeadings } from '../../../../../docs/spec.md';
+export async function getStaticPaths() {
+  const pages = import.meta.glob<MDXInstance<Record<string, unknown>>>('../../../content/*.mdx', {
+    eager: true,
+  });
+  return Object.entries(pages).map(([path, page]) => {
+    const slug = path.split('/').pop()!.replace('.mdx', '');
+    return { params: { slug: slug === 'index' ? undefined : slug }, props: { page, slug } };
+  });
+}
+const { page, slug } = Astro.props;
+const { Content } = page;
+const links = [
+  ['index', 'Introduction'],
+  ['getting-started', 'Getting started'],
+  ['syntax', 'Language guide'],
+  ['spec', 'Language specification'],
+  ['architecture', 'Architecture'],
+  ['vm-execution', 'VM visualizer'],
+];
+const title = links.find(([id]) => id === slug)?.[1] ?? 'Documentation';
+const headings = slug === 'spec' ? getSpecHeadings() : page.getHeadings();
+const groups = [
+  { title: 'Learn', items: links.slice(0, 3) },
+  { title: 'Reference', items: links.slice(3, 4) },
+  { title: 'Runtime', items: links.slice(4) },
+];
+const index = links.findIndex(([id]) => id === slug);
+const previous = links[index - 1];
+const next = links[index + 1];
+const href = (id: string) => (id === 'index' ? '/docs' : `/docs/${id}`);
+---
+<Base title={`${title} | Yexp`}>
+  <div class="docs-page">
+    <a class="skip-link" href="#doc-content">Skip to content</a>
+    <Header />
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <details class="docs-navigation" open>
+          <summary>Browse documentation <span>⌄</span></summary>
+          <nav aria-label="Documentation">
+            {groups.map(group => <div class="docs-nav-group"><span class="docs-group-label">{group.title}</span>{group.items.map(([id, label]) => <a href={href(id)} aria-current={slug === id ? 'page' : undefined}>{label}</a>)}</div>)}
+          </nav>
+        </details>
+        <a class="docs-sidebar-tool" href="/play">Open playground <span>↗</span></a>
+      </aside>
+      <main id="doc-content" class="docs-content">
+        <div class="docs-breadcrumb">Documentation <span>/</span> {title}</div>
+        <Content />
+        <nav class="docs-pagination" aria-label="Adjacent pages">
+          {previous ? <a href={href(previous[0])}><span>← Previous</span>{previous[1]}</a> : <span />}
+          {next ? <a href={href(next[0])}><span>Next →</span>{next[1]}</a> : <span />}
+        </nav>
+        <div class="docs-bottom"><span>Yexp documentation</span><a href={`https://github.com/cristianmartinez/yexp/blob/main/packages/playground/content/${slug}.mdx`}>Edit this page ↗</a></div>
+      </main>
+      <aside class="docs-toc"><span class="docs-group-label">On this page</span>{headings.filter(h => h.depth === 2).map(h => <a href={`#${h.slug}`}>{h.text}</a>)}</aside>
+    </div>
+  </div>
+  <script>
+    const navigation = document.querySelector<HTMLDetailsElement>('.docs-navigation');
+    const small = window.matchMedia('(max-width: 760px)');
+    const adapt = () => { if (navigation) navigation.open = !small.matches; };
+    adapt();
+    small.addEventListener('change', adapt);
+  </script>
+</Base>

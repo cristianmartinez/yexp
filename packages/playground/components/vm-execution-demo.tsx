@@ -1,13 +1,8 @@
 'use client';
 
-import { compile } from '@cristianmartinez/yexp';
-import type { ExecutionContext } from '@cristianmartinez/yexp';
+import { type ExecutionContext, compile } from '@cristianmartinez/yexp';
 import { useMemo, useState } from 'react';
-import { JsonEditor } from './json-editor';
-import { Card } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { VMExecutionPlayer } from './vm-execution-player';
-import { YexpEditor } from './yexp-editor';
 
 interface VMExecutionDemoProps {
   initialExpression?: string;
@@ -16,78 +11,60 @@ interface VMExecutionDemoProps {
 
 export function VMExecutionDemo({
   initialExpression = '1 + 2 * 3',
-  initialContext = `{
-  "data": {},
-  "state": {},
-  "env": {}
-}`,
+  initialContext = '{}',
 }: VMExecutionDemoProps) {
   const [expression, setExpression] = useState(initialExpression);
   const [contextJSON, setContextJSON] = useState(initialContext);
-
   const { program, context, error } = useMemo(() => {
     try {
-      const ctx = JSON.parse(contextJSON) as ExecutionContext;
-      const prog = compile(expression);
-
-      return {
-        program: prog,
-        context: ctx,
-        error: null,
-      };
-    } catch (err) {
+      const context = JSON.parse(contextJSON) as ExecutionContext;
+      if (context === null || typeof context !== 'object' || Array.isArray(context))
+        throw new Error('Input must be a JSON object.');
+      return { program: compile(expression), context, error: null };
+    } catch (error) {
       return {
         program: null,
         context: null,
-        error: err instanceof Error ? err.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unable to compile expression.',
       };
     }
   }, [expression, contextJSON]);
 
   return (
-    <div className="space-y-4">
-      {/* Input Section */}
-      <Card className="p-4">
-        <Tabs defaultValue="expression">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="expression">Expression</TabsTrigger>
-            <TabsTrigger value="context">Context</TabsTrigger>
-          </TabsList>
-          <TabsContent value="expression" className="mt-4">
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Enter any Yexp expression:</p>
-              <YexpEditor
-                value={expression}
-                onChange={setExpression}
-                context={context || {}}
-                height="80px"
-              />
-            </div>
-          </TabsContent>
-          <TabsContent value="context" className="mt-4">
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Execution Context (JSON):</p>
-              <JsonEditor value={contextJSON} onChange={setContextJSON} height="200px" />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </Card>
-
-      {/* Error Display */}
-      {error && (
-        <Card className="p-4 border-red-500 bg-red-500/10">
-          <div className="text-sm text-red-500">
-            <strong>Error:</strong> {error}
-          </div>
-        </Card>
-      )}
-
-      {/* VM Execution Player */}
-      {!error && program && context && (
-        <div style={{ height: '600px' }}>
-          <VMExecutionPlayer program={program} context={context} />
+    <>
+      <div className="vm-editors">
+        <div className="vm-editor">
+          <label htmlFor="vm-expression">
+            Expression <span>YEXP</span>
+          </label>
+          <textarea
+            id="vm-expression"
+            value={expression}
+            onChange={(event) => setExpression(event.target.value)}
+            spellCheck={false}
+            rows={3}
+          />
         </div>
+        <div className="vm-editor">
+          <label htmlFor="vm-context">
+            Input <span>JSON</span>
+          </label>
+          <textarea
+            id="vm-context"
+            value={contextJSON}
+            onChange={(event) => setContextJSON(event.target.value)}
+            spellCheck={false}
+            rows={3}
+          />
+        </div>
+      </div>
+      {error ? (
+        <div className="vm-error" role="alert">
+          {error}
+        </div>
+      ) : (
+        program && context && <VMExecutionPlayer program={program} context={context} />
       )}
-    </div>
+    </>
   );
 }

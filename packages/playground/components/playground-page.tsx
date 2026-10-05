@@ -18,14 +18,11 @@ import { YexpEditor } from '@/components/yexp-editor';
 import { type Example, examples } from '@/lib/examples';
 import { compile, evaluate, parse, tokenize } from '@cristianmartinez/yexp';
 import { AlertCircle, Code2, Database, FileCode, PlayCircle } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import Split from 'react-split';
 
 function PlaygroundContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const exampleId = searchParams?.get('example');
+  const exampleId = new URLSearchParams(window.location.search).get('example');
 
   const [selectedExampleId, setSelectedExampleId] = useState<string | undefined>(
     exampleId || undefined,
@@ -58,7 +55,7 @@ function PlaygroundContent() {
     // Update URL
     const params = new URLSearchParams();
     params.set('example', example.id);
-    router.push(`?${params.toString()}`);
+    window.history.replaceState(null, '', `?${params.toString()}`);
   };
 
   const parsedContext = useMemo(() => {

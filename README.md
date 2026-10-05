@@ -57,7 +57,7 @@ console.log(result); // ["Mouse"]
 | --- | --- |
 | [`packages/core`](packages/core) | Lexer, parser, compiler, VM, public API, and conformance tests |
 | [`packages/cli`](packages/cli) | Streaming JSON/NDJSON terminal interface and filesystem host functions |
-| [`packages/playground`](packages/playground) | Landing page, language documentation, and interactive playground |
+| [`packages/playground`](packages/playground) | Astro website, language documentation, and interactive React playground |
 | [`docs/spec.md`](docs/spec.md) | Canonical Yexp 0.1 language specification |
 | [`evals`](evals) | Independent, experimental LLM evaluation tooling |
 
@@ -81,6 +81,17 @@ bun run playground
 ```
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Language changes must update the canonical specification and add observable-behavior tests.
+
+## Website deployment
+
+The Astro website deploys to Cloudflare Workers with static assets at https://yexp.cristianmartinez.co.
+
+```bash
+bunx wrangler login
+bun run deploy
+```
+
+The deployment builds the playground and uploads its output using `wrangler.jsonc`. The custom domain is managed by Cloudflare in the account that owns the `cristianmartinez.co` zone.
 
 ## Security
 
